@@ -1,16 +1,16 @@
+---
+os: linux
+dist: bionic
 language: ruby
 cache: bundler
-
-addons:
-  postgresql: '10'
 
 services:
   - mysql
   - postgresql
 
 rvm:
-  - 2.7.2
-  - 2.6.6
+  - 2.7
+  - 2.6
 
 env:
   - DB=sqlite3
@@ -23,7 +23,7 @@ gemfile:
 bundler_args: '--without local_development --jobs 3 --retry 3'
 
 before_install:
-    - gem install bundler
+  - gem install bundler
 
 script: bundle exec rake
 
