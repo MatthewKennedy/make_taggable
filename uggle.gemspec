@@ -8,15 +8,15 @@ Gem::Specification.new do |gem|
   gem.version       = ActsAsTaggableOn::VERSION
   gem.authors       = ['Matthew Kennedy', 'Michael Bleigh', 'Joost Baaij']
   gem.email         = %w(m.kennedy@me.com michael@intridea.com joost@spacebabies.nl)
-  gem.description   = %q{With ActsAsTaggableOn, you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality.}
-  gem.summary       = 'Advanced tagging for Rails.'
+  gem.description   = %q{Uggle is a clone of ActsAsTaggableOn v6.5 with updates. you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality.}
+  gem.summary       = 'Advanced tagging for Rails 6'
   gem.homepage      = 'https://github.com/MatthewKennedy/uggle'
   gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split($/)
   gem.test_files    = gem.files.grep(%r{^spec/})
   gem.require_paths = ['lib']
-  gem.required_ruby_version     = '>= 2.3.7'
+  gem.required_ruby_version     = '>= 2.5.0'
 
   if File.exist?('UPGRADING.md')
     gem.post_install_message = File.read('UPGRADING.md')
