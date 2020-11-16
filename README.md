@@ -448,14 +448,6 @@ MakeTaggable.delimiter = ','
 
 *NOTE 1: SQLite by default can't upcase or downcase multibyte characters, resulting in unwanted behavior. Load the SQLite ICU extension for proper handle of such characters. [See docs](http://www.sqlite.org/src/artifact?ci=trunk&filename=ext/icu/README.txt)*
 
-*NOTE 2: the option `force_binary_collation` is strongest than `strict_case_match` and when
-set to true, the `strict_case_match` is ignored.
-To roughly apply the `force_binary_collation` behaviour with a version of the gem <= 3.4.4, execute the following commands in the MySql console:*
-
-```shell
-USE my_wonderful_app_db;
-ALTER TABLE tags MODIFY name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin;
-```
 
 #### Upgrading
 
@@ -467,7 +459,7 @@ We have a long list of valued contributors. [Check them all](https://github.com/
 
 ## Compatibility
 
-Versions 0.6.0 are compatible with Ruby 2.6 + and Rails 6.
+Versions 0.6.0 is compatible with Ruby 2.5 + and Rails 6.
 
 
 ## TODO

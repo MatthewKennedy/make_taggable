@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version       = MakeTaggable::VERSION
   gem.authors       = ['Matthew Kennedy', 'Michael Bleigh', 'Joost Baaij']
   gem.email         = %w(m.kennedy@me.com michael@intridea.com joost@spacebabies.nl)
-  gem.description   = %q{MakeTaggable is a clone of ActsAsTaggableOn v6.5 with updates. you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality.}
+  gem.description   = %q{MakeTaggable is a clone of ActsAsTaggableOn v6.5 with fresh migrations to fix the MySQL issues: With MakeTaggable you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality.}
   gem.summary       = 'Advanced tagging for Rails 6'
   gem.homepage      = 'https://github.com/MatthewKennedy/make_taggable'
   gem.license       = 'MIT'
