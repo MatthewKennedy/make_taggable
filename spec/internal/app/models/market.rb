@@ -1,2 +1,2 @@
-class Market < Uggle::Tag
+class Market < MakeTaggable::Tag
 end

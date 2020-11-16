@@ -1,5 +1,5 @@
 def using_sqlite?
-  Uggle::Utils.connection && Uggle::Utils.connection.adapter_name == 'SQLite'
+  MakeTaggable::Utils.connection && MakeTaggable::Utils.connection.adapter_name == 'SQLite'
 end
 
 def supports_concurrency?
@@ -7,12 +7,12 @@ def supports_concurrency?
 end
 
 def using_postgresql?
-  Uggle::Utils.using_postgresql?
+  MakeTaggable::Utils.using_postgresql?
 end
 
 def postgresql_version
   if using_postgresql?
-    Uggle::Utils.connection.execute('SHOW SERVER_VERSION').first['server_version'].to_f
+    MakeTaggable::Utils.connection.execute('SHOW SERVER_VERSION').first['server_version'].to_f
   else
     0.0
   end
@@ -24,9 +24,9 @@ end
 
 
 def using_mysql?
-  Uggle::Utils.using_mysql?
+  MakeTaggable::Utils.using_mysql?
 end
 
 def using_case_insensitive_collation?
-  using_mysql? && Uggle::Utils.connection.collation =~ /_ci\Z/
+  using_mysql? && MakeTaggable::Utils.connection.collation =~ /_ci\Z/
 end

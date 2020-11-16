@@ -1,3 +1,3 @@
 class OtherCachedModel < ActiveRecord::Base
-  uggle :languages, :statuses, :glasses
+  make_taggable :languages, :statuses, :glasses
 end

@@ -1,8 +1,8 @@
 class TaggableModel < ActiveRecord::Base
   acts_as_taggable
-  uggle :languages
-  uggle :skills
-  uggle :needs, :offerings
+  make_taggable :languages
+  make_taggable :skills
+  make_taggable :needs, :offerings
   has_many :untaggable_models
 
   attr_reader :tag_list_submethod_called

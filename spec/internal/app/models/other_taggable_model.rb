@@ -1,4 +1,4 @@
 class OtherTaggableModel < ActiveRecord::Base
-  uggle :tags, :languages
-  uggle :needs, :offerings
+  make_taggable :tags, :languages
+  make_taggable :needs, :offerings
 end

@@ -5,7 +5,7 @@ if using_postgresql?
   if postgresql_support_json?
     class TaggableModelWithJson < ActiveRecord::Base
       acts_as_taggable
-      uggle :skills
+      make_taggable :skills
     end
   end
 end
