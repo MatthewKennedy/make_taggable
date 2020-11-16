@@ -1,4 +1,4 @@
 class OtherTaggableModel < ActiveRecord::Base
-  acts_as_taggable_on :tags, :languages
-  acts_as_taggable_on :needs, :offerings
+  make_taggable :tags, :languages
+  make_taggable :needs, :offerings
 end

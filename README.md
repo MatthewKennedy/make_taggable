@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [ActsAsTaggableOn](#actsastaggableon)
+- [MakeTaggable](#actsastaggableon)
   - [Installation](#installation)
       - [Post Installation](#post-installation)
       - [For MySql users](#for-mysql-users)
@@ -28,9 +28,9 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# ActsAsTaggableOn
-[![Gem Version](https://badge.fury.io/rb/uggle.svg)](https://badge.fury.io/rb/uggle)
-[![Build Status](https://travis-ci.com/MatthewKennedy/uggle.svg?branch=master)](https://travis-ci.com/MatthewKennedy/uggle)
+# MakeTaggable
+[![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
+[![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
 
 This plugin was originally based on Acts as Taggable on Steroids by Jonathan Viney.
 It has evolved substantially since that point, but all credit goes to him for the
@@ -67,7 +67,7 @@ Install migrations
 
 ```shell
 # For the latest versions :
-rake acts_as_taggable_on_engine:install:migrations
+rake make_taggable_engine:install:migrations
 ```
 
 Review the generated migrations then migrate :
@@ -79,13 +79,13 @@ rake db:migrate
 You can circumvent at any time the problem of special characters [issue 623](https://github.com/mbleigh/acts-as-taggable-on/issues/623) by setting in an initializer file:
 
 ```ruby
-ActsAsTaggableOn.force_binary_collation = true
+MakeTaggable.force_binary_collation = true
 ```
 
 Or by running this rake task:
 
 ```shell
-rake acts_as_taggable_on_engine:tag_names:collate_bin
+rake make_taggable_engine:tag_names:collate_bin
 ```
 
 See the Configuration section for more details, and a general note valid for older
@@ -98,8 +98,8 @@ Setup
 
 ```ruby
 class User < ActiveRecord::Base
-  acts_as_taggable # Alias for acts_as_taggable_on :tags
-  acts_as_taggable_on :skills, :interests
+  acts_as_taggable # Alias for make_taggable :tags
+  make_taggable :skills, :interests
 end
 
 class UsersController < ApplicationController
@@ -150,9 +150,9 @@ remove existing tags so use it with attention.
 @user.save
 @user.reload
 @user.tags
-=> [#<ActsAsTaggableOn::Tag id: 1, name: "awesome", taggings_count: 1>,
- #<ActsAsTaggableOn::Tag id: 2, name: "slick", taggings_count: 1>,
- #<ActsAsTaggableOn::Tag id: 3, name: "hefty", taggings_count: 1>]
+=> [#<MakeTaggable::Tag id: 1, name: "awesome", taggings_count: 1>,
+ #<MakeTaggable::Tag id: 2, name: "slick", taggings_count: 1>,
+ #<MakeTaggable::Tag id: 3, name: "hefty", taggings_count: 1>]
 ```
 
 With the defined context in model, you have multiple new methods at disposal
@@ -165,9 +165,9 @@ these methods are added to the model: `skill_list`(and `skill_list.add`, `skill_
 @user.save
 @user.reload
 @user.skills
-=> [#<ActsAsTaggableOn::Tag id: 1, name: "joking", taggings_count: 1>,
- #<ActsAsTaggableOn::Tag id: 2, name: "clowning", taggings_count: 1>,
- #<ActsAsTaggableOn::Tag id: 3, name: "boxing", taggings_count: 1>]
+=> [#<MakeTaggable::Tag id: 1, name: "joking", taggings_count: 1>,
+ #<MakeTaggable::Tag id: 2, name: "clowning", taggings_count: 1>,
+ #<MakeTaggable::Tag id: 3, name: "boxing", taggings_count: 1>]
 
 @user.skill_list.add("coding")
 
@@ -179,9 +179,9 @@ these methods are added to the model: `skill_list`(and `skill_list.add`, `skill_
 @another_user.save
 
 User.skill_counts
-=> [#<ActsAsTaggableOn::Tag id: 1, name: "joking", taggings_count: 1>,
- #<ActsAsTaggableOn::Tag id: 2, name: "clowning", taggings_count: 2>,
- #<ActsAsTaggableOn::Tag id: 3, name: "boxing", taggings_count: 1>]
+=> [#<MakeTaggable::Tag id: 1, name: "joking", taggings_count: 1>,
+ #<MakeTaggable::Tag id: 2, name: "clowning", taggings_count: 2>,
+ #<MakeTaggable::Tag id: 3, name: "boxing", taggings_count: 1>]
 ```
 
 To preserve the order in which tags are created use `acts_as_ordered_taggable`:
@@ -209,15 +209,15 @@ end
 You can find the most or least used tags by using:
 
 ```ruby
-ActsAsTaggableOn::Tag.most_used
-ActsAsTaggableOn::Tag.least_used
+MakeTaggable::Tag.most_used
+MakeTaggable::Tag.least_used
 ```
 
 You can also filter the results by passing the method a limit, however the default limit is 20.
 
 ```ruby
-ActsAsTaggableOn::Tag.most_used(10)
-ActsAsTaggableOn::Tag.least_used(10)
+MakeTaggable::Tag.most_used(10)
+MakeTaggable::Tag.least_used(10)
 ```
 
 ### Finding Tagged Objects
@@ -227,7 +227,7 @@ This way you can mix and match to filter down your results.
 
 ```ruby
 class User < ActiveRecord::Base
-  acts_as_taggable_on :tags, :skills
+  make_taggable :tags, :skills
   scope :by_join_date, order("created_at DESC")
 end
 
@@ -294,9 +294,9 @@ User.tagged_with("same", :on => :customs) # => [@user]
 If you want to change how tags are parsed, you can define your own implementation:
 
 ```ruby
-class MyParser < ActsAsTaggableOn::GenericParser
+class MyParser < MakeTaggable::GenericParser
   def parse
-    ActsAsTaggableOn::TagList.new.tap do |tag_list|
+    MakeTaggable::TagList.new.tap do |tag_list|
       tag_list.add @tag_list.split('|')
     end
   end
@@ -320,7 +320,7 @@ Now you can use this parser, passing it as parameter:
 Or change it globally:
 
 ```ruby
-ActsAsTaggableOn.default_parser = MyParser
+MakeTaggable.default_parser = MyParser
 @user = User.new(:name => "Bobby")
 @user.tag_list = "east|south"
 @user.tag_list # => ["east", "south"]
@@ -336,7 +336,7 @@ class User < ActiveRecord::Base
 end
 
 class Photo < ActiveRecord::Base
-  acts_as_taggable_on :locations
+  make_taggable :locations
 end
 
 @some_user.tag(@some_photo, :with => "paris, normandy", :on => :locations)
@@ -344,7 +344,7 @@ end
 @some_user.owned_tags
 Photo.tagged_with("paris", :on => :locations, :owned_by => @some_user)
 @some_photo.locations_from(@some_user) # => ["paris", "normandy"]
-@some_photo.owner_tags_on(@some_user, :locations) # => [#<ActsAsTaggableOn::Tag id: 1, name: "paris">...]
+@some_photo.owner_tags_on(@some_user, :locations) # => [#<MakeTaggable::Tag id: 1, name: "paris">...]
 @some_photo.owner_tags_on(nil, :locations) # => Ownerships equivalent to saying @some_photo.locations
 @some_user.tag(@some_photo, :with => "paris, normandy", :on => :locations, :skip_save => true) #won't save @some_photo object
 ```
@@ -404,7 +404,7 @@ end
 ### Tag cloud calculations
 
 To construct tag clouds, the frequency of each tag needs to be calculated.
-Because we specified `acts_as_taggable_on` on the `User` class, we can
+Because we specified `make_taggable` on the `User` class, we can
 get a calculation of all the tag counts by using `User.tag_counts_on(:customs)`. But what if we wanted a tag count for
 a single user's posts? To achieve this we call tag_counts on the association:
 
@@ -420,7 +420,7 @@ Helper:
 
 ```ruby
 module PostsHelper
-  include ActsAsTaggableOn::TagsHelper
+  include MakeTaggable::TagsHelper
 end
 ```
 
@@ -456,44 +456,44 @@ CSS:
 If you would like to remove unused tag objects after removing taggings, add:
 
 ```ruby
-ActsAsTaggableOn.remove_unused_tags = true
+MakeTaggable.remove_unused_tags = true
 ```
 
 If you want force tags to be saved downcased:
 
 ```ruby
-ActsAsTaggableOn.force_lowercase = true
+MakeTaggable.force_lowercase = true
 ```
 
 If you want tags to be saved parametrized (you can redefine to_param as well):
 
 ```ruby
-ActsAsTaggableOn.force_parameterize = true
+MakeTaggable.force_parameterize = true
 ```
 
 If you would like tags to be case-sensitive and not use LIKE queries for creation:
 
 ```ruby
-ActsAsTaggableOn.strict_case_match = true
+MakeTaggable.strict_case_match = true
 ```
 
 If you would like to have an exact match covering special characters with MySql:
 
 ```ruby
-ActsAsTaggableOn.force_binary_collation = true
+MakeTaggable.force_binary_collation = true
 ```
 
 If you would like to specify table names:
 
 ```ruby
-ActsAsTaggableOn.tags_table = 'aato_tags'
-ActsAsTaggableOn.taggings_table = 'aato_taggings'
+MakeTaggable.tags_table = 'aato_tags'
+MakeTaggable.taggings_table = 'aato_taggings'
 ```
 
 If you want to change the default delimiter (it defaults to ','). You can also pass in an array of delimiters such as ([',', '|']):
 
 ```ruby
-ActsAsTaggableOn.delimiter = ','
+MakeTaggable.delimiter = ','
 ```
 
 *NOTE 1: SQLite by default can't upcase or downcase multibyte characters, resulting in unwanted behavior. Load the SQLite ICU extension for proper handle of such characters. [See docs](http://www.sqlite.org/src/artifact?ci=trunk&filename=ext/icu/README.txt)*

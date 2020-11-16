@@ -7,7 +7,7 @@ mysql:
   host: localhost
   username: root
   password:
-  database: acts_as_taggable_on
+  database: make_taggable
   charset: utf8
   
 postgresql:
@@ -15,5 +15,5 @@ postgresql:
   hostname: localhost
   username: postgres
   password:
-  database: acts_as_taggable_on
+  database: make_taggable
   encoding: utf8

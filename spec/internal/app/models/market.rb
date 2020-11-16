@@ -1,2 +1,2 @@
-class Market < ActsAsTaggableOn::Tag
+class Market < MakeTaggable::Tag
 end
