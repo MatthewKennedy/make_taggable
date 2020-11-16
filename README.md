@@ -29,7 +29,7 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # ActsAsTaggableOn
-[![Gem Version](https://badge.fury.io/rb/acts-as-taggable-on.svg)](http://badge.fury.io/rb/acts-as-taggable-on)
+[![Gem Version](https://badge.fury.io/rb/uggle.svg)](https://badge.fury.io/rb/uggle)
 [![Build Status](https://travis-ci.com/MatthewKennedy/uggle.svg?branch=master)](https://travis-ci.com/MatthewKennedy/uggle)
 
 This plugin was originally based on Acts as Taggable on Steroids by Jonathan Viney.
