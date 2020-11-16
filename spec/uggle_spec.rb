@@ -1,5 +1,5 @@
-RSpec.describe ActsAsTaggableOn do
+RSpec.describe Uggle do
   it "has a version number" do
-    expect(ActsAsTaggableOn::VERSION).not_to be nil
+    expect(Uggle::VERSION).not_to be nil
   end
 end

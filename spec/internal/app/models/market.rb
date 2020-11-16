@@ -1,2 +1,2 @@
-class Market < ActsAsTaggableOn::Tag
+class Market < Uggle::Tag
 end

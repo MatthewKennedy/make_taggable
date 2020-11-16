@@ -1,5 +1,5 @@
 class Company < ActiveRecord::Base
-  acts_as_taggable_on :locations, :markets
+  uggle :locations, :markets
 
   has_many :markets, :through => :market_taggings, :source => :tag
 

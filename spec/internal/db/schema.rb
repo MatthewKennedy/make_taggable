@@ -1,12 +1,12 @@
 ActiveRecord::Schema.define version: 0 do
-  create_table ActsAsTaggableOn.tags_table, force: true do |t|
+  create_table Uggle.tags_table, force: true do |t|
     t.string :name
     t.integer :taggings_count, default: 0
     t.string :type
   end
-  add_index ActsAsTaggableOn.tags_table, ['name'], name: 'index_tags_on_name', unique: true
+  add_index Uggle.tags_table, ['name'], name: 'index_tags_on_name', unique: true
 
-  create_table ActsAsTaggableOn.taggings_table, force: true do |t|
+  create_table Uggle.taggings_table, force: true do |t|
     t.integer :tag_id
 
     # You should make sure that the column created is
@@ -23,13 +23,13 @@ ActiveRecord::Schema.define version: 0 do
 
     t.datetime :created_at
   end
-  add_index ActsAsTaggableOn.taggings_table,
+  add_index Uggle.taggings_table,
             ['tag_id', 'taggable_id', 'taggable_type', 'context', 'tagger_id', 'tagger_type'],
             unique: true, name: 'taggings_idx'
-  add_index ActsAsTaggableOn.taggings_table, :tag_id , name: 'index_taggings_on_tag_id'
+  add_index Uggle.taggings_table, :tag_id , name: 'index_taggings_on_tag_id'
 
   # above copied from
-  # generators/acts_as_taggable_on/migration/migration_generator
+  # generators/uggle/migration/migration_generator
 
   create_table :taggable_models, force: true do |t|
     t.column :name, :string

@@ -1,14 +1,14 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'acts_as_taggable_on/version'
+require 'uggle/version'
 
 Gem::Specification.new do |gem|
   gem.name          = 'uggle'
-  gem.version       = ActsAsTaggableOn::VERSION
+  gem.version       = Uggle::VERSION
   gem.authors       = ['Matthew Kennedy', 'Michael Bleigh', 'Joost Baaij']
   gem.email         = %w(m.kennedy@me.com michael@intridea.com joost@spacebabies.nl)
-  gem.description   = %q{Uggle is a clone of ActsAsTaggableOn v6.5 with updates. you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality.}
+  gem.description   = %q{Uggle is a clone of Uggle v6.5 with updates. you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality.}
   gem.summary       = 'Advanced tagging for Rails 6'
   gem.homepage      = 'https://github.com/MatthewKennedy/uggle'
   gem.license       = 'MIT'

@@ -5,14 +5,14 @@ require 'active_support/core_ext/module'
 
 begin
   require 'rails/engine'
-  require 'acts_as_taggable_on/engine'
+  require 'uggle/engine'
   rescue LoadError
 
 end
 
 require 'digest/sha1'
 
-module ActsAsTaggableOn
+module Uggle
   extend ActiveSupport::Autoload
 
   autoload :Tag
@@ -88,9 +88,9 @@ module ActsAsTaggableOn
 
     def delimiter=(string)
       ActiveRecord::Base.logger.warn <<WARNING
-ActsAsTaggableOn.delimiter is deprecated \
+Uggle.delimiter is deprecated \
 and will be removed from v4.0+, use  \
-a ActsAsTaggableOn.default_parser instead
+a Uggle.default_parser instead
 WARNING
       @delimiter = string
     end
@@ -119,16 +119,16 @@ WARNING
         end
       end
     end
-
   end
-
   setup
 end
 
 ActiveSupport.on_load(:active_record) do
-  extend ActsAsTaggableOn::Taggable
-  include ActsAsTaggableOn::Tagger
+  extend Uggle::Taggable
+  include Uggle::Tagger
 end
+
 ActiveSupport.on_load(:action_view) do
-  include ActsAsTaggableOn::TagsHelper
+  include Uggle::TagsHelper
 end
+
