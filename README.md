@@ -32,7 +32,7 @@
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
 [![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
 
-This plugin was originally based on Acts as Taggable on Steroids by Jonathan Viney.
+This plugin was originally based on Acts as Taggable by Jonathan Viney.
 It has evolved substantially since that point, but all credit goes to him for the
 initial tagging functionality that so many people have used.
 
