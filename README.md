@@ -1,49 +1,16 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [MakeTaggable](#maketaggable)
-  - [Installation](#installation)
-      - [Post Installation](#post-installation)
-      - [For MySql users](#for-mysql-users)
-  - [Usage](#usage)
-    - [Finding most or least used tags](#finding-most-or-least-used-tags)
-    - [Finding Tagged Objects](#finding-tagged-objects)
-    - [Relationships](#relationships)
-    - [Dynamic Tag Contexts](#dynamic-tag-contexts)
-    - [Tag Parsers](#tag-parsers)
-    - [Tag Ownership](#tag-ownership)
-      - [Working with Owned Tags](#working-with-owned-tags)
-        - [Adding owned tags](#adding-owned-tags)
-        - [Removing owned tags](#removing-owned-tags)
-    - [Dirty objects](#dirty-objects)
-    - [Tag cloud calculations](#tag-cloud-calculations)
-  - [Configuration](#configuration)
-      - [Upgrading](#upgrading)
-  - [Contributors](#contributors)
-  - [Compatibility](#compatibility)
-  - [TODO](#todo)
-  - [Testing](#testing)
-  - [License](#license)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # MakeTaggable
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
 [![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
 
-This plugin was originally based on Acts as Taggable by Jonathan Viney.
-It has evolved substantially since that point, but all credit goes to him for the
-initial tagging functionality that so many people have used.
+First and formost: This Ruby gem is a direct clone of Acts as Taggable On, by Jonathan Viney, all credit goes to those who came before.
 
 For instance, in a social network, a user might have tags that are called skills,
 interests, sports, and more. There is no real way to differentiate between tags and
 so an implementation of this type is not possible with make taggable.
 
-Enter Acts as Taggable On. Rather than tying functionality to a specific keyword
+Enter Make Taggable. Rather than tying functionality to a specific keyword
 (namely `tags`), make taggable allows you to specify an arbitrary number of
-tag "contexts" that can be used locally or in combination in the same way steroids
-was used.
+tag "contexts" that can be used locally or in combination of ways.
 
 
 
@@ -74,23 +41,6 @@ Review the generated migrations then migrate :
 ```shell
 rake db:migrate
 ```
-
-#### For MySql users
-You can circumvent at any time the problem of special characters [issue 623](https://github.com/mbleigh/acts-as-taggable-on/issues/623) by setting in an initializer file:
-
-```ruby
-MakeTaggable.force_binary_collation = true
-```
-
-Or by running this rake task:
-
-```shell
-rake make_taggable_engine:tag_names:collate_bin
-```
-
-See the Configuration section for more details, and a general note valid for older
-version of the gem.
-
 
 ## Usage
 
