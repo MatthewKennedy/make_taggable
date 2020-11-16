@@ -459,7 +459,7 @@ We have a long list of valued contributors. [Check them all](https://github.com/
 
 ## Compatibility
 
-Versions 0.6.0 is compatible with Ruby 2.5 + and Rails 6.
+Versions 0.6.x is compatible with Ruby 2.5 + and Rails 6.
 
 
 ## TODO
