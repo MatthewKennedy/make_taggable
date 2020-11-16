@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [MakeTaggable](#actsastaggableon)
+- [MakeTaggable](#maketaggable)
   - [Installation](#installation)
       - [Post Installation](#post-installation)
       - [For MySql users](#for-mysql-users)
@@ -38,10 +38,10 @@ initial tagging functionality that so many people have used.
 
 For instance, in a social network, a user might have tags that are called skills,
 interests, sports, and more. There is no real way to differentiate between tags and
-so an implementation of this type is not possible with acts as taggable on steroids.
+so an implementation of this type is not possible with make taggable.
 
 Enter Acts as Taggable On. Rather than tying functionality to a specific keyword
-(namely `tags`), acts as taggable on allows you to specify an arbitrary number of
+(namely `tags`), make taggable allows you to specify an arbitrary number of
 tag "contexts" that can be used locally or in combination in the same way steroids
 was used.
 
@@ -52,7 +52,7 @@ was used.
 To use it, add it to your Gemfile:
 
 ```ruby
-gem 'acts-as-taggable-on', '~> 6.0'
+gem 'make_taggable', '~> 0.1.0'
 ```
 
 and bundle:
@@ -98,7 +98,7 @@ Setup
 
 ```ruby
 class User < ActiveRecord::Base
-  acts_as_taggable # Alias for make_taggable :tags
+  make_taggable # Alias for make_taggable :tags
   make_taggable :skills, :interests
 end
 
@@ -517,15 +517,8 @@ We have a long list of valued contributors. [Check them all](https://github.com/
 
 ## Compatibility
 
-Versions 2.x are compatible with Ruby 1.8.7+ and Rails 3.
+Versions 0.6.0 are compatible with Ruby 2.6 + and Rails 6.
 
-Versions 2.4.1 and up are compatible with Rails 4 too (thanks to arabonradar and cwoodcox).
-
-Versions >= 3.x are compatible with Ruby 1.9.3+ and Rails 3 and 4.
-
-Versions >= 4.x are compatible with Ruby 2.0.0+ and Rails 4 and 5.
-
-For an up-to-date roadmap, see https://github.com/mbleigh/acts-as-taggable-on/milestones
 
 ## TODO
 
@@ -546,5 +539,4 @@ You can run all the tests across all the Rails versions by running `rake apprais
 
 
 ## License
-
-See [LICENSE](https://github.com/mbleigh/acts-as-taggable-on/blob/master/LICENSE.md)
+MIT
