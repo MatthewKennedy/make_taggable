@@ -164,7 +164,7 @@ MakeTaggable::Tag.least_used(10)
 
 ### Finding Tagged Objects
 
-Acts As Taggable On uses scopes to create an association for tags.
+Make Taggable uses scopes to create an association for tags.
 This way you can mix and match to filter down your results.
 
 ```ruby
@@ -461,7 +461,7 @@ Versions 0.6.x is compatible with Ruby 2.5 + and Rails 6.
 
 ## Testing
 
-Acts As Taggable On uses RSpec for its test coverage. Inside the gem
+Make Taggable uses RSpec for its test coverage. Inside the gem
 directory, you can run the specs with:
 
 ```shell
