@@ -50,7 +50,7 @@ module MakeTaggable::Taggable
 
     def owner_tags_on(owner, context)
       owner_tags(owner).where(
-        "#{MakeTaggable::Tagging.table_name}" => {
+        "#{ MakeTaggable::Tagging.table_name }" => {
           context: context
         }
       )

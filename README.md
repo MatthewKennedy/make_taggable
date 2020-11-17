@@ -2,24 +2,16 @@
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
 [![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
 
-First and formost: This Ruby gem is a direct clone of Acts as Taggable On, by Jonathan Viney, all credit goes to those who came before.
+First and foremost: This Ruby gem is a direct clone of Acts as Taggable On by Jonathan Viney, all credit goes to those who came before.
 
-For instance, in a social network, a user might have tags that are called skills,
-interests, sports, and more. There is no real way to differentiate between tags and
-so an implementation of this type is not possible with make taggable.
-
-Enter Make Taggable. Rather than tying functionality to a specific keyword
-(namely `tags`), make taggable allows you to specify an arbitrary number of
-tag "contexts" that can be used locally or in combination of ways.
-
-
+The reason for this clone is that Acts As Taggable On seems to be almost abandoned, stuck with migrations that don't run on MySQL.
 
 ## Installation
 
 To use it, add it to your Gemfile:
 
 ```ruby
-gem 'make_taggable', '~> 0.1.0'
+gem 'make_taggable', '~> 0.6.0'
 ```
 
 and bundle:

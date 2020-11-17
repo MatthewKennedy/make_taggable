@@ -232,6 +232,7 @@ module MakeTaggable::Taggable
     def save_tags
       tagging_contexts.each do |context|
         next unless tag_list_cache_set_on(context)
+
         # List of currently assigned tag names
         tag_list = tag_list_cache_on(context).uniq
 
@@ -287,14 +288,14 @@ module MakeTaggable::Taggable
 
     # Filters the tag lists from the attribute names.
     def attributes_for_update(attribute_names)
-      tag_lists = tag_types.map {|tags_type| "#{tags_type.to_s.singularize}_list"}
-      super.delete_if {|attr| tag_lists.include? attr }
+      tag_lists = tag_types.map { |tags_type| "#{tags_type.to_s.singularize}_list" }
+      super.delete_if { |attr| tag_lists.include? attr }
     end
 
     # Filters the tag lists from the attribute names.
     def attributes_for_create(attribute_names)
-      tag_lists = tag_types.map {|tags_type| "#{tags_type.to_s.singularize}_list"}
-      super.delete_if {|attr| tag_lists.include? attr }
+      tag_lists = tag_types.map { |tags_type| "#{tags_type.to_s.singularize}_list" }
+      super.delete_if { |attr| tag_lists.include? attr }
     end
 
     ##
@@ -321,4 +322,3 @@ module MakeTaggable::Taggable
     end
   end
 end
-
