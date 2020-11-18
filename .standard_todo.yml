@@ -1,0 +1,31 @@
+# Auto generated files with errors to ignore.
+# Remove from this list as you refactor files.
+---
+ignore:
+- lib/make_taggable/tagging.rb
+- spec/internal/app/models/altered_inheriting_taggable_model.rb
+- spec/internal/app/models/columns_override_model.rb
+- spec/internal/app/models/company.rb
+- spec/internal/app/models/inheriting_taggable_model.rb
+- spec/internal/app/models/student.rb
+- spec/internal/db/schema.rb
+- spec/make_taggable/acts_as_tagger_spec.rb
+- spec/make_taggable/caching_spec.rb
+- spec/make_taggable/default_parser_spec.rb
+- spec/make_taggable/dirty_spec.rb
+- spec/make_taggable/generic_parser_spec.rb
+- spec/make_taggable/make_taggable_spec.rb
+- spec/make_taggable/related_spec.rb
+- spec/make_taggable/single_table_inheritance_spec.rb
+- spec/make_taggable/tag_list_spec.rb
+- spec/make_taggable/tag_spec.rb
+- spec/make_taggable/taggable_spec.rb
+- spec/make_taggable/tagger_spec.rb
+- spec/make_taggable/tagging_spec.rb
+- spec/make_taggable/tags_helper_spec.rb
+- spec/make_taggable/utils_spec.rb
+- spec/spec_helper.rb
+- spec/support/0-helpers.rb
+- spec/support/array.rb
+- spec/support/database.rb
+- spec/support/database_cleaner.rb
