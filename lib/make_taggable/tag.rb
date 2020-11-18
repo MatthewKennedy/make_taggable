@@ -3,11 +3,9 @@ module MakeTaggable
     self.table_name = MakeTaggable.tags_table
 
     ### ASSOCIATIONS:
-
     has_many :taggings, dependent: :destroy, class_name: "::MakeTaggable::Tagging"
 
     ### VALIDATIONS:
-
     validates_presence_of :name
     validates_uniqueness_of :name, if: :validates_name_uniqueness?
     validates_length_of :name, maximum: 255
@@ -55,7 +53,6 @@ module MakeTaggable
     end
 
     ### CLASS METHODS:
-
     def self.find_or_create_with_like_by_name(name)
       if MakeTaggable.strict_case_match
         find_or_create_all_with_like_by_name([name]).first
@@ -87,7 +84,6 @@ module MakeTaggable
     end
 
     ### INSTANCE METHODS:
-
     def ==(other)
       super || (other.is_a?(Tag) && name == other.name)
     end

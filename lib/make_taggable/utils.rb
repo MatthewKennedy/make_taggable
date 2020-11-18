@@ -1,6 +1,5 @@
-# This module is deprecated and will be removed in the incoming versions
-
 module MakeTaggable
+  # This module is deprecated and will be removed in the incoming versions
   module Utils
     class << self
       # Use MakeTaggable::Tag connection
