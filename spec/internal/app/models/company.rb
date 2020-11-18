@@ -1,7 +1,7 @@
 class Company < ActiveRecord::Base
   make_taggable :locations, :markets
 
-  has_many :markets, :through => :market_taggings, :source => :tag
+  has_many :markets, through: :market_taggings, source: :tag
 
   private
 

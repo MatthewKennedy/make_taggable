@@ -2,13 +2,6 @@
 # Remove from this list as you refactor files.
 ---
 ignore:
-- spec/internal/app/models/altered_inheriting_taggable_model.rb
-- spec/internal/app/models/columns_override_model.rb
-- spec/internal/app/models/company.rb
-- spec/internal/app/models/inheriting_taggable_model.rb
-- spec/internal/app/models/student.rb
-- spec/internal/db/schema.rb
-- spec/make_taggable/acts_as_tagger_spec.rb
 - spec/make_taggable/caching_spec.rb
 - spec/make_taggable/default_parser_spec.rb
 - spec/make_taggable/dirty_spec.rb
