@@ -3,15 +3,15 @@
 # https://github.com/mbleigh/acts-as-taggable-on/issues/623
 
 namespace :make_taggable_engine do
- namespace :tag_names do
-   desc "Forcing collate of tag names to utf8_bin"
-   task collate_bin: [:environment] do |t, args|
-     MakeTaggable::Configuration.apply_binary_collation(true)
-   end
+  namespace :tag_names do
+    desc "Forcing collate of tag names to utf8_bin"
+    task collate_bin: [:environment] do |t, args|
+      MakeTaggable::Configuration.apply_binary_collation(true)
+    end
 
-   desc "Forcing collate of tag names to utf8_general_ci"
-   task collate_ci: [:environment] do |t, args|
-     MakeTaggable::Configuration.apply_binary_collation(false)
-   end
- end
+    desc "Forcing collate of tag names to utf8_general_ci"
+    task collate_ci: [:environment] do |t, args|
+      MakeTaggable::Configuration.apply_binary_collation(false)
+    end
+  end
 end
