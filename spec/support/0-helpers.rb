@@ -1,5 +1,5 @@
 def using_sqlite?
-  MakeTaggable::Utils.connection && MakeTaggable::Utils.connection.adapter_name == 'SQLite'
+  MakeTaggable::Utils.connection && MakeTaggable::Utils.connection.adapter_name == "SQLite"
 end
 
 def supports_concurrency?
@@ -12,7 +12,7 @@ end
 
 def postgresql_version
   if using_postgresql?
-    MakeTaggable::Utils.connection.execute('SHOW SERVER_VERSION').first['server_version'].to_f
+    MakeTaggable::Utils.connection.execute("SHOW SERVER_VERSION").first["server_version"].to_f
   else
     0.0
   end
@@ -21,7 +21,6 @@ end
 def postgresql_support_json?
   postgresql_version >= 9.2
 end
-
 
 def using_mysql?
   MakeTaggable::Utils.using_mysql?
