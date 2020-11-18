@@ -21,7 +21,7 @@ module MakeTaggable
 
     def self.named(name)
       if MakeTaggable.strict_case_match
-        where(name: name)
+        where(["name = #{binary}?", as_8bit_ascii(name)])
       else
         where(Tag.arel_table[:name].matches(name))
       end
