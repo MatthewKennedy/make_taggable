@@ -62,10 +62,10 @@ module MakeTaggable::Taggable
 
     def related_where(klass, conditions)
       klass.select("#{klass.table_name}.*, COUNT(#{MakeTaggable::Tag.table_name}.#{MakeTaggable::Tag.primary_key}) AS count")
-      .from("#{klass.table_name}, #{MakeTaggable::Tag.table_name}, #{MakeTaggable::Tagging.table_name}")
-      .group(group_columns(klass))
-      .order('count DESC')
-      .where(conditions)
+        .from("#{klass.table_name}, #{MakeTaggable::Tag.table_name}, #{MakeTaggable::Tagging.table_name}")
+        .group(group_columns(klass))
+        .order("count DESC")
+        .where(conditions)
     end
   end
 end

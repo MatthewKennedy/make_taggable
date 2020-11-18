@@ -6,7 +6,6 @@ module MakeTaggable
   #   tag_list = MakeTaggable::DefaultParser.parse("One , Two,  Three")
   #   tag_list # ["One", "Two", "Three"]
   class DefaultParser < GenericParser
-
     def parse
       string = @tag_list
 
@@ -14,33 +13,32 @@ module MakeTaggable
       TagList.new.tap do |tag_list|
         string = string.to_s.dup
 
-        string.gsub!(double_quote_pattern) {
+        string.gsub!(double_quote_pattern) do
           # Append the matched tag to the tag list
           tag_list << Regexp.last_match[2]
           # Return the matched delimiter ($3) to replace the matched items
-          ''
-        }
+          ""
+        end
 
-        string.gsub!(single_quote_pattern) {
+        string.gsub!(single_quote_pattern) do
           # Append the matched tag ($2) to the tag list
           tag_list << Regexp.last_match[2]
           # Return an empty string to replace the matched items
-          ''
-        }
+          ""
+        end
 
         # split the string by the delimiter
         # and add to the tag_list
-        tag_list.add(string.split(Regexp.new delimiter))
+        tag_list.add(string.split(Regexp.new(delimiter)))
       end
     end
-
 
     # private
     def delimiter
       # Parse the quoted tags
       d = MakeTaggable.delimiter
       # Separate multiple delimiters by bitwise operator
-      d = d.join('|') if d.kind_of?(Array)
+      d = d.join("|") if d.is_a?(Array)
       d
     end
 
@@ -73,7 +71,5 @@ module MakeTaggable
     def single_quote_pattern
       /(\A|#{delimiter})\s*'(.*?)'\s*(?=#{delimiter}\s*|\z)/
     end
-
   end
-
 end

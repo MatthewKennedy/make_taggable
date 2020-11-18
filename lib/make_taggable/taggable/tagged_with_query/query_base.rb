@@ -2,10 +2,10 @@ module MakeTaggable::Taggable::TaggedWithQuery
   class QueryBase
     def initialize(taggable_model, tag_model, tagging_model, tag_list, options)
       @taggable_model = taggable_model
-      @tag_model      = tag_model
-      @tagging_model  = tagging_model
-      @tag_list       = tag_list
-      @options        = options
+      @tag_model = tag_model
+      @tagging_model = tagging_model
+      @tag_list = tag_list
+      @options = options
     end
 
     private
@@ -21,7 +21,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
     end
 
     def tagging_arel_table
-      @tagging_arel_table ||=tagging_model.arel_table
+      @tagging_arel_table ||= tagging_model.arel_table
     end
 
     def tag_match_type(tag)
@@ -40,9 +40,9 @@ module MakeTaggable::Taggable::TaggedWithQuery
       matches_attribute = matches_attribute.lower unless MakeTaggable.strict_case_match
 
       if options[:wild].present?
-        matches_attribute.matches_any(tag_list.map{|tag| "%#{escaped_tag(tag)}%"}, "!")
+        matches_attribute.matches_any(tag_list.map { |tag| "%#{escaped_tag(tag)}%" }, "!")
       else
-        matches_attribute.matches_any(tag_list.map{|tag| "#{escaped_tag(tag)}"}, "!")
+        matches_attribute.matches_any(tag_list.map { |tag| escaped_tag(tag).to_s }, "!")
       end
     end
 
@@ -53,7 +53,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
 
     def adjust_taggings_alias(taggings_alias)
       if taggings_alias.size > 75
-        taggings_alias = 'taggings_alias_' + Digest::SHA1.hexdigest(taggings_alias)
+        taggings_alias = "taggings_alias_" + Digest::SHA1.hexdigest(taggings_alias)
       end
       taggings_alias
     end

@@ -2,28 +2,27 @@ module MakeTaggable::Taggable::TaggedWithQuery
   class ExcludeTagsQuery < QueryBase
     def build
       taggable_model.joins(owning_to_tagger)
-                    .where(tags_not_in_list)
-                    .having(tags_that_matches_count)
-                    .readonly(false)
+        .where(tags_not_in_list)
+        .having(tags_that_matches_count)
+        .readonly(false)
     end
 
     private
 
     def tags_not_in_list
-      return taggable_arel_table[:id].not_in(
-            tagging_arel_table
-              .project(tagging_arel_table[:taggable_id])
-              .join(tag_arel_table)
-              .on(
-                  tagging_arel_table[:tag_id].eq(tag_arel_table[:id])
-                  .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
-                  .and(tags_match_type)
-                )
+      taggable_arel_table[:id].not_in(
+        tagging_arel_table
+          .project(tagging_arel_table[:taggable_id])
+          .join(tag_arel_table)
+          .on(
+            tagging_arel_table[:tag_id].eq(tag_arel_table[:id])
+            .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
+            .and(tags_match_type)
           )
+      )
 
-        # FIXME: missing time scope, this is also missing in the original implementation
+      # FIXME: missing time scope, this is also missing in the original implementation
     end
-
 
     def owning_to_tagger
       return [] unless options[:owned_by].present?
@@ -33,11 +32,11 @@ module MakeTaggable::Taggable::TaggedWithQuery
       arel_join = taggable_arel_table
         .join(tagging_arel_table)
         .on(
-            tagging_arel_table[:tagger_id].eq(owner.id)
-            .and(tagging_arel_table[:tagger_type].eq(owner.class.base_class.to_s))
-            .and(tagging_arel_table[:taggable_id].eq(taggable_arel_table[taggable_model.primary_key]))
-            .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
-          )
+          tagging_arel_table[:tagger_id].eq(owner.id)
+          .and(tagging_arel_table[:tagger_type].eq(owner.class.base_class.to_s))
+          .and(tagging_arel_table[:taggable_id].eq(taggable_arel_table[taggable_model.primary_key]))
+          .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
+        )
 
       if options[:match_all].present?
         arel_join = arel_join
@@ -47,7 +46,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
           )
       end
 
-      return arel_join.join_sources
+      arel_join.join_sources
     end
 
     def match_all_on_conditions

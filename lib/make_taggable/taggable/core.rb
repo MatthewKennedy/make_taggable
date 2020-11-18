@@ -1,9 +1,8 @@
-require_relative 'tagged_with_query'
-require_relative 'tag_list_type'
+require_relative "tagged_with_query"
+require_relative "tag_list_type"
 
 module MakeTaggable::Taggable
   module Core
-
     def self.included(base)
       base.extend MakeTaggable::Taggable::Core::ClassMethods
 
@@ -28,16 +27,16 @@ module MakeTaggable::Taggable
             # when preserving tag order, include order option so that for a 'tags' context
             # the associations tag_taggings & tags are always returned in created order
             has_many context_taggings, -> { includes(:tag).order(taggings_order).where(context: tags_type) },
-                     as: :taggable,
-                     class_name: 'MakeTaggable::Tagging',
-                     dependent: :destroy,
-                     after_add: :dirtify_tag_list,
-                     after_remove: :dirtify_tag_list
+              as: :taggable,
+              class_name: "MakeTaggable::Tagging",
+              dependent: :destroy,
+              after_add: :dirtify_tag_list,
+              after_remove: :dirtify_tag_list
 
             has_many context_tags, -> { order(taggings_order) },
-                     class_name: 'MakeTaggable::Tag',
-                     through: context_taggings,
-                     source: :tag
+              class_name: "MakeTaggable::Tag",
+              through: context_taggings,
+              source: :tag
 
             attribute "#{tags_type.singularize}_list".to_sym, MakeTaggable::Taggable::TagListType.new
           end
@@ -83,7 +82,7 @@ module MakeTaggable::Taggable
 
       # all column names are necessary for PostgreSQL group clause
       def grouped_column_names_for(object)
-        object.column_names.map { |column| "#{object.table_name}.#{column}" }.join(', ')
+        object.column_names.map { |column| "#{object.table_name}.#{column}" }.join(", ")
       end
 
       ##
@@ -139,7 +138,7 @@ module MakeTaggable::Taggable
     end
 
     def add_custom_context(value)
-      custom_contexts << value.to_s unless custom_contexts.include?(value.to_s) or self.class.tag_types.map(&:to_s).include?(value.to_s)
+      custom_contexts << value.to_s unless custom_contexts.include?(value.to_s) || self.class.tag_types.map(&:to_s).include?(value.to_s)
     end
 
     def cached_tag_list_on(context)
@@ -256,9 +255,9 @@ module MakeTaggable::Taggable
             new_tags |= current_tags[index...current_tags.size] & shared_tags
 
             # Order the array of tag objects to match the tag list
-            new_tags = tags.map do |t|
+            new_tags = tags.map { |t|
               new_tags.find { |n| n.name.downcase == t.name.downcase }
-            end.compact
+            }.compact
           end
         else
           # Delete discarded tags and create new tags

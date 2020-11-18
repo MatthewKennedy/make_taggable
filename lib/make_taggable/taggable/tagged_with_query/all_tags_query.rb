@@ -2,10 +2,10 @@ module MakeTaggable::Taggable::TaggedWithQuery
   class AllTagsQuery < QueryBase
     def build
       taggable_model.joins(each_tag_in_list)
-                    .group(by_taggable)
-                    .having(tags_that_matches_count)
-                    .order(order_conditions)
-                    .readonly(false)
+        .group(by_taggable)
+        .having(tags_that_matches_count)
+        .order(order_conditions)
+        .readonly(false)
     end
 
     private
@@ -16,8 +16,8 @@ module MakeTaggable::Taggable::TaggedWithQuery
       tag_list.each do |tag|
         tagging_alias = tagging_arel_table.alias(tagging_alias(tag))
         arel_join = arel_join
-                      .join(tagging_alias)
-                      .on(on_conditions(tag, tagging_alias))
+          .join(tagging_alias)
+          .on(on_conditions(tag, tagging_alias))
       end
 
       if options[:match_all].present?
@@ -28,7 +28,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
           )
       end
 
-      return arel_join.join_sources
+      arel_join.join_sources
     end
 
     def on_conditions(tag, tagging_alias)
@@ -54,7 +54,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
 
       if (owner = options[:owned_by]).present?
         on_condition = on_condition.and(tagging_alias[:tagger_id].eq(owner.id))
-                                   .and(tagging_alias[:tagger_type].eq(owner.class.base_class.to_s))
+          .and(tagging_alias[:tagger_type].eq(owner.class.base_class.to_s))
       end
 
       on_condition
@@ -62,7 +62,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
 
     def match_all_on_conditions
       on_condition = tagging_arel_table[:taggable_id].eq(taggable_arel_table[taggable_model.primary_key])
-                      .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
+        .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
 
       if options[:start_at].present?
         on_condition = on_condition.and(tagging_arel_table[:created_at].gteq(options[:start_at]))
@@ -97,10 +97,10 @@ module MakeTaggable::Taggable::TaggedWithQuery
 
     def order_conditions
       order_by = []
-      order_by << tagging_arel_table.project(tagging_arel_table[Arel.star].count.as('taggings_count')).order('taggings_count DESC').to_sql if options[:order_by_matching_tag_count].present? && options[:match_all].blank?
+      order_by << tagging_arel_table.project(tagging_arel_table[Arel.star].count.as("taggings_count")).order("taggings_count DESC").to_sql if options[:order_by_matching_tag_count].present? && options[:match_all].blank?
 
       order_by << options[:order] if options[:order].present?
-      order_by.join(', ')
+      order_by.join(", ")
     end
 
     def tagging_alias(tag)

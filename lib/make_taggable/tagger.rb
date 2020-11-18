@@ -13,21 +13,21 @@ module MakeTaggable
       #   class User < ActiveRecord::Base
       #     acts_as_tagger
       #   end
-      def acts_as_tagger(opts={})
+      def acts_as_tagger(opts = {})
         class_eval do
           owned_taggings_scope = opts.delete(:scope)
 
           has_many :owned_taggings, owned_taggings_scope,
-                   opts.merge(
-                     as: :tagger,
-                     class_name: '::MakeTaggable::Tagging',
-                     dependent: :destroy
-                   )
+            opts.merge(
+              as: :tagger,
+              class_name: "::MakeTaggable::Tagging",
+              dependent: :destroy
+            )
 
           has_many :owned_tags, -> { distinct },
-                   class_name: '::MakeTaggable::Tag',
-                   source: :tag,
-                   through: :owned_taggings
+            class_name: "::MakeTaggable::Tag",
+            source: :tag,
+            through: :owned_taggings
         end
 
         include MakeTaggable::Tagger::InstanceMethods
@@ -54,13 +54,13 @@ module MakeTaggable
       #
       # Example:
       #   @user.tag(@photo, :with => "paris, normandy", :on => :locations)
-      def tag(taggable, opts={})
+      def tag(taggable, opts = {})
         opts.reverse_merge!(force: true)
         skip_save = opts.delete(:skip_save)
         return false unless taggable.respond_to?(:is_taggable?) && taggable.is_taggable?
 
-        fail 'You need to specify a tag context using :on' unless opts.key?(:on)
-        fail 'You need to specify some tags using :with' unless opts.key?(:with)
+        fail "You need to specify a tag context using :on" unless opts.key?(:on)
+        fail "You need to specify some tags using :with" unless opts.key?(:with)
         fail "No context :#{opts[:on]} defined in #{taggable.class}" unless opts[:force] || taggable.tag_types.include?(opts[:on])
 
         taggable.set_owner_tag_list_on(self, opts[:on].to_s, opts[:with])

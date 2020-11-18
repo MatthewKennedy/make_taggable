@@ -1,16 +1,15 @@
 require "make_taggable/version"
-require 'active_record'
-require 'active_record/version'
-require 'active_support/core_ext/module'
+require "active_record"
+require "active_record/version"
+require "active_support/core_ext/module"
 
 begin
-  require 'rails/engine'
-  require 'make_taggable/engine'
-  rescue LoadError
-
+  require "rails/engine"
+  require "make_taggable/engine"
+rescue LoadError
 end
 
-require 'digest/sha1'
+require "digest/sha1"
 
 module MakeTaggable
   extend ActiveSupport::Autoload
@@ -25,7 +24,7 @@ module MakeTaggable
   autoload :TagsHelper
   autoload :VERSION
 
-  autoload_under 'taggable' do
+  autoload_under "taggable" do
     autoload :Cache
     autoload :Collection
     autoload :Core
@@ -37,7 +36,6 @@ module MakeTaggable
 
   autoload :Utils
   autoload :Compatibility
-
 
   class DuplicateTagError < StandardError
   end
@@ -52,25 +50,25 @@ module MakeTaggable
         @configuration.send(method_name, *args, &block) : super
   end
 
-  def self.respond_to?(method_name, include_private=false)
+  def self.respond_to_missing?(method_name, include_private = false)
     @configuration.respond_to? method_name
   end
 
   def self.glue
     setting = @configuration.delimiter
-    delimiter = setting.kind_of?(Array) ? setting[0] : setting
-    delimiter.ends_with?(' ') ? delimiter : "#{delimiter} "
+    delimiter = setting.is_a?(Array) ? setting[0] : setting
+    delimiter.ends_with?(" ") ? delimiter : "#{delimiter} "
   end
 
   class Configuration
     attr_accessor :force_lowercase, :force_parameterize,
-                  :remove_unused_tags, :default_parser,
-                  :tags_counter, :tags_table,
-                  :taggings_table
+      :remove_unused_tags, :default_parser,
+      :tags_counter, :tags_table,
+      :taggings_table
     attr_reader :delimiter, :strict_case_match
 
     def initialize
-      @delimiter = ','
+      @delimiter = ","
       @force_lowercase = false
       @force_parameterize = false
       @strict_case_match = false
@@ -87,11 +85,11 @@ module MakeTaggable
     end
 
     def delimiter=(string)
-      ActiveRecord::Base.logger.warn <<WARNING
-MakeTaggable.delimiter is deprecated \
-and will be removed from v4.0+, use  \
-a MakeTaggable.default_parser instead
-WARNING
+      ActiveRecord::Base.logger.warn <<~WARNING
+        MakeTaggable.delimiter is deprecated \
+        and will be removed from v4.0+, use  \
+        a MakeTaggable.default_parser instead
+      WARNING
       @delimiter = string
     end
 
@@ -110,11 +108,11 @@ WARNING
 
     def self.apply_binary_collation(bincoll)
       if Utils.using_mysql?
-        coll = 'utf8_general_ci'
-        coll = 'utf8_bin' if bincoll
+        coll = "utf8_general_ci"
+        coll = "utf8_bin" if bincoll
         begin
           ActiveRecord::Migration.execute("ALTER TABLE #{Tag.table_name} MODIFY name varchar(255) CHARACTER SET utf8 COLLATE #{coll};")
-        rescue Exception => e
+        rescue => e
           puts "Trapping #{e.class}: collation parameter ignored while migrating for the first time."
         end
       end
@@ -131,4 +129,3 @@ end
 ActiveSupport.on_load(:action_view) do
   include MakeTaggable::TagsHelper
 end
-

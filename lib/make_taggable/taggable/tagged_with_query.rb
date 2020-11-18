@@ -1,7 +1,7 @@
-require_relative 'tagged_with_query/query_base'
-require_relative 'tagged_with_query/exclude_tags_query'
-require_relative 'tagged_with_query/any_tags_query'
-require_relative 'tagged_with_query/all_tags_query'
+require_relative "tagged_with_query/query_base"
+require_relative "tagged_with_query/exclude_tags_query"
+require_relative "tagged_with_query/any_tags_query"
+require_relative "tagged_with_query/all_tags_query"
 
 module MakeTaggable::Taggable::TaggedWithQuery
   def self.build(taggable_model, tag_model, tagging_model, tag_list, options)

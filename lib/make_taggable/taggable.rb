@@ -1,6 +1,5 @@
 module MakeTaggable
   module Taggable
-
     def taggable?
       false
     end
@@ -56,17 +55,17 @@ module MakeTaggable
 
     private
 
-      # Make a model taggable on specified contexts
-      # and optionally preserves the order in which tags are created
-      #
-      # Separate methods used above for backwards compatibility
-      # so that the original make_taggable method is unaffected
-      # as it's not possible to add another argument to the method
-      # without the tag_types being enclosed in square brackets
-      #
-      # NB: method overridden in core module in order to create tag type
-      #     associations and methods after this logic has executed
-      #
+    # Make a model taggable on specified contexts
+    # and optionally preserves the order in which tags are created
+    #
+    # Separate methods used above for backwards compatibility
+    # so that the original make_taggable method is unaffected
+    # as it's not possible to add another argument to the method
+    # without the tag_types being enclosed in square brackets
+    #
+    # NB: method overridden in core module in order to create tag type
+    #     associations and methods after this logic has executed
+    #
     def taggable_on(preserve_tag_order, *tag_types)
       tag_types = tag_types.to_a.flatten.compact.map(&:to_sym)
 
@@ -80,8 +79,8 @@ module MakeTaggable
         self.preserve_tag_order = preserve_tag_order
 
         class_eval do
-          has_many :taggings, as: :taggable, dependent: :destroy, class_name: '::MakeTaggable::Tagging'
-          has_many :base_tags, through: :taggings, source: :tag, class_name: '::MakeTaggable::Tag'
+          has_many :taggings, as: :taggable, dependent: :destroy, class_name: "::MakeTaggable::Tagging"
+          has_many :base_tags, through: :taggings, source: :tag, class_name: "::MakeTaggable::Tag"
 
           def self.taggable?
             true

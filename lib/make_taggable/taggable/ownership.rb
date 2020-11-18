@@ -28,11 +28,11 @@ module MakeTaggable::Taggable
     end
 
     def owner_tags(owner)
-      if owner.nil?
-        scope = base_tags
+      scope = if owner.nil?
+        base_tags
       else
-        scope = base_tags.where(
-          "#{MakeTaggable::Tagging.table_name}" => {
+        base_tags.where(
+          MakeTaggable::Tagging.table_name.to_s => {
             tagger_id: owner.id,
             tagger_type: owner.class.base_class.to_s
           }
@@ -50,7 +50,7 @@ module MakeTaggable::Taggable
 
     def owner_tags_on(owner, context)
       owner_tags(owner).where(
-        "#{ MakeTaggable::Tagging.table_name }" => {
+        MakeTaggable::Tagging.table_name.to_s => {
           context: context
         }
       )
@@ -88,7 +88,6 @@ module MakeTaggable::Taggable
     def save_owned_tags
       tagging_contexts.each do |context|
         cached_owned_tag_list_on(context).each do |owner, tag_list|
-
           # Find existing tags or create non-existing tags:
           tags = find_or_create_tags_from_list_with_context(tag_list.uniq, context)
 
@@ -119,9 +118,11 @@ module MakeTaggable::Taggable
 
           # Find all taggings that belong to the taggable (self), are owned by the owner,
           # have the correct context, and are removed from the list.
-          MakeTaggable::Tagging.where(taggable_id: id, taggable_type: self.class.base_class.to_s,
-                                          tagger_type: owner.class.base_class.to_s, tagger_id: owner.id,
-                                          tag_id: old_tags, context: context).destroy_all if old_tags.present?
+          if old_tags.present?
+            MakeTaggable::Tagging.where(taggable_id: id, taggable_type: self.class.base_class.to_s,
+                                        tagger_type: owner.class.base_class.to_s, tagger_id: owner.id,
+                                        tag_id: old_tags, context: context).destroy_all
+          end
 
           # Create new taggings:
           new_tags.each do |tag|

@@ -1,11 +1,10 @@
-# encoding: utf-8
 module MakeTaggable
   class Tag < ::ActiveRecord::Base
     self.table_name = MakeTaggable.tags_table
 
     ### ASSOCIATIONS:
 
-    has_many :taggings, dependent: :destroy, class_name: '::MakeTaggable::Tagging'
+    has_many :taggings, dependent: :destroy, class_name: "::MakeTaggable::Tagging"
 
     ### VALIDATIONS:
 
@@ -19,21 +18,21 @@ module MakeTaggable
     end
 
     ### SCOPES:
-    scope :most_used, ->(limit = 20) { order('taggings_count desc').limit(limit) }
-    scope :least_used, ->(limit = 20) { order('taggings_count asc').limit(limit) }
+    scope :most_used, ->(limit = 20) { order("taggings_count desc").limit(limit) }
+    scope :least_used, ->(limit = 20) { order("taggings_count asc").limit(limit) }
 
     def self.named(name)
       if MakeTaggable.strict_case_match
         where(["name = #{binary}?", as_8bit_ascii(name)])
       else
-        where(['LOWER(name) = LOWER(?)', as_8bit_ascii(unicode_downcase(name))])
+        where(["LOWER(name) = LOWER(?)", as_8bit_ascii(unicode_downcase(name))])
       end
     end
 
     def self.named_any(list)
       clause = list.map { |tag|
-        sanitize_sql_for_named_any(tag).force_encoding('BINARY')
-      }.join(' OR ')
+        sanitize_sql_for_named_any(tag).force_encoding("BINARY")
+      }.join(" OR ")
       where(clause)
     end
 
@@ -45,21 +44,21 @@ module MakeTaggable
     def self.named_like_any(list)
       clause = list.map { |tag|
         sanitize_sql(["name #{MakeTaggable::Utils.like_operator} ? ESCAPE '!'", "%#{MakeTaggable::Utils.escape_like(tag.to_s)}%"])
-      }.join(' OR ')
+      }.join(" OR ")
       where(clause)
     end
 
     def self.for_context(context)
-      joins(:taggings).
-        where(["#{MakeTaggable.taggings_table}.context = ?", context]).
-        select("DISTINCT #{MakeTaggable.tags_table}.*")
+      joins(:taggings)
+        .where(["#{MakeTaggable.taggings_table}.context = ?", context])
+        .select("DISTINCT #{MakeTaggable.tags_table}.*")
     end
 
     ### CLASS METHODS:
 
     def self.find_or_create_with_like_by_name(name)
       if MakeTaggable.strict_case_match
-        self.find_or_create_all_with_like_by_name([name]).first
+        find_or_create_all_with_like_by_name([name]).first
       else
         named_like(name).first || create(name: name)
       end
@@ -72,27 +71,25 @@ module MakeTaggable
 
       existing_tags = named_any(list)
       list.map do |tag_name|
-        begin
-          tries ||= 3
-          comparable_tag_name = comparable_name(tag_name)
-          existing_tag = existing_tags.find { |tag| comparable_name(tag.name) == comparable_tag_name }
-          existing_tag || create(name: tag_name)
-        rescue ActiveRecord::RecordNotUnique
-          if (tries -= 1).positive?
-            ActiveRecord::Base.connection.execute 'ROLLBACK'
-            existing_tags = named_any(list)
-            retry
-          end
-
-          raise DuplicateTagError.new("'#{tag_name}' has already been taken")
+        tries ||= 3
+        comparable_tag_name = comparable_name(tag_name)
+        existing_tag = existing_tags.find { |tag| comparable_name(tag.name) == comparable_tag_name }
+        existing_tag || create(name: tag_name)
+      rescue ActiveRecord::RecordNotUnique
+        if (tries -= 1).positive?
+          ActiveRecord::Base.connection.execute "ROLLBACK"
+          existing_tags = named_any(list)
+          retry
         end
+
+        raise DuplicateTagError.new("'#{tag_name}' has already been taken")
       end
     end
 
     ### INSTANCE METHODS:
 
-    def ==(object)
-      super || (object.is_a?(Tag) && name == object.name)
+    def ==(other)
+      super || (other.is_a?(Tag) && name == other.name)
     end
 
     def to_s
@@ -104,7 +101,6 @@ module MakeTaggable
     end
 
     class << self
-
       private
 
       def comparable_name(str)
@@ -116,7 +112,7 @@ module MakeTaggable
       end
 
       def binary
-        MakeTaggable::Utils.using_mysql? ? 'BINARY ' : nil
+        MakeTaggable::Utils.using_mysql? ? "BINARY " : nil
       end
 
       def as_8bit_ascii(string)
@@ -131,7 +127,7 @@ module MakeTaggable
         if MakeTaggable.strict_case_match
           sanitize_sql(["name = #{binary}?", as_8bit_ascii(tag)])
         else
-          sanitize_sql(['LOWER(name) = LOWER(?)', as_8bit_ascii(unicode_downcase(tag))])
+          sanitize_sql(["LOWER(name) = LOWER(?)", as_8bit_ascii(unicode_downcase(tag))])
         end
       end
     end

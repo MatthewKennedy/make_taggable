@@ -113,7 +113,7 @@ module MakeTaggable::Taggable
         having = ["COUNT(#{MakeTaggable::Tagging.table_name}.tag_id) > 0"]
         having.push sanitize_sql(["COUNT(#{MakeTaggable::Tagging.table_name}.tag_id) >= ?", options.delete(:at_least)]) if options[:at_least]
         having.push sanitize_sql(["COUNT(#{MakeTaggable::Tagging.table_name}.tag_id) <= ?", options.delete(:at_most)]) if options[:at_most]
-        having = having.compact.join(' AND ')
+        having = having.compact.join(" AND ")
 
         group_columns = "#{MakeTaggable::Tagging.table_name}.tag_id"
 
@@ -166,7 +166,7 @@ module MakeTaggable::Taggable
       end
     end
 
-    def tag_counts_on(context, options={})
+    def tag_counts_on(context, options = {})
       self.class.tag_counts_on(context, options.merge(id: id))
     end
 

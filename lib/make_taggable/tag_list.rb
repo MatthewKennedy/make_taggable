@@ -1,5 +1,4 @@
-
-require 'active_support/core_ext/module/delegation'
+require "active_support/core_ext/module/delegation"
 
 module MakeTaggable
   class TagList < Array
@@ -34,8 +33,8 @@ module MakeTaggable
 
     # Concatenation --- Returns a new tag list built by concatenating the
     # two tag lists together to produce a third tag list.
-    def +(other_tag_list)
-      TagList.new.add(self).add(other_tag_list)
+    def +(other)
+      TagList.new.add(self).add(other)
     end
 
     # Appends the elements of +other_tag_list+ to +self+.
@@ -65,14 +64,14 @@ module MakeTaggable
     #   tag_list = TagList.new("Round", "Square,Cube")
     #   tag_list.to_s # 'Round, "Square,Cube"'
     def to_s
-      tags = frozen? ? self.dup : self
+      tags = frozen? ? dup : self
       tags.send(:clean!)
 
-      tags.map do |name|
+      tags.map { |name|
         d = MakeTaggable.delimiter
-        d = Regexp.new d.join('|') if d.kind_of? Array
+        d = Regexp.new d.join("|") if d.is_a? Array
         name.index(d) ? "\"#{name}\"" : name
-      end.join(MakeTaggable.glue)
+      }.join(MakeTaggable.glue)
     end
 
     private
@@ -85,22 +84,19 @@ module MakeTaggable
       map! { |tag| tag.mb_chars.downcase.to_s } if MakeTaggable.force_lowercase
       map!(&:parameterize) if MakeTaggable.force_parameterize
 
-      MakeTaggable.strict_case_match ? uniq! : uniq!{ |tag| tag.downcase }
+      MakeTaggable.strict_case_match ? uniq! : uniq! { |tag| tag.downcase }
       self
     end
-
 
     def extract_and_apply_options!(args)
       options = args.last.is_a?(Hash) ? args.pop : {}
       options.assert_valid_keys :parse, :parser
 
-      parser = options[:parser] ? options[:parser] : @parser
+      parser = options[:parser] || @parser
 
       args.map! { |a| parser.new(a).parse } if options[:parse] || options[:parser]
 
       args.flatten!
     end
-
   end
 end
-

@@ -12,7 +12,7 @@ module MakeTaggable
 
     def parse
       TagList.new.tap do |tag_list|
-        tag_list.add @tag_list.split(',').map(&:strip).reject(&:empty?)
+        tag_list.add @tag_list.split(",").map(&:strip).reject(&:empty?)
       end
     end
   end
