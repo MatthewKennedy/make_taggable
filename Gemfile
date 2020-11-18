@@ -8,4 +8,5 @@ group :local_development do
   gem 'appraisal'
   gem 'rake'
   gem 'byebug', platforms: [:mri]
+  gem 'standard'
 end
