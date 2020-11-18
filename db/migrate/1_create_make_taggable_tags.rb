@@ -1,6 +1,6 @@
 class CreateMakeTaggableTags < ActiveRecord::Migration[6.0]
   def change
-    create_table :tags do |t|
+    create_table MakeTaggable.tags_table do |t|
       t.string :name
       t.integer :taggings_count, default: 0
 

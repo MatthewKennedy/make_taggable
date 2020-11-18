@@ -10,7 +10,7 @@ module MakeTaggable
     validates_uniqueness_of :name, if: :validates_name_uniqueness?
     validates_length_of :name, maximum: 255
 
-    # monkey patch this method if don't need name uniqueness validation
+    # Monkey patch this method if don't need name uniqueness validation
     def validates_name_uniqueness?
       true
     end
@@ -21,9 +21,9 @@ module MakeTaggable
 
     def self.named(name)
       if MakeTaggable.strict_case_match
-        where(["name = #{binary}?", as_8bit_ascii(name)])
+        where(name: name)
       else
-        where(["LOWER(name) = LOWER(?)", as_8bit_ascii(unicode_downcase(name))])
+        where(Tag.arel_table[:name].matches(name))
       end
     end
 
