@@ -2,7 +2,6 @@
 # Remove from this list as you refactor files.
 ---
 ignore:
-- lib/make_taggable/tagging.rb
 - spec/internal/app/models/altered_inheriting_taggable_model.rb
 - spec/internal/app/models/columns_override_model.rb
 - spec/internal/app/models/company.rb

@@ -1,6 +1,7 @@
 # MakeTaggable
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
 [![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
+[![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 
 First and foremost: This Ruby gem is a direct clone of Acts as Taggable On by Jonathan Viney, all credit goes to those who came before.
 

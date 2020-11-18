@@ -46,8 +46,11 @@ module MakeTaggable
   end
 
   def self.method_missing(method_name, *args, &block)
-    @configuration.respond_to?(method_name) ?
-        @configuration.send(method_name, *args, &block) : super
+    if @configuration.respond_to?(method_name)
+      @configuration.send(method_name, *args, &block)
+    else
+      super
+    end
   end
 
   def self.respond_to_missing?(method_name, include_private = false)

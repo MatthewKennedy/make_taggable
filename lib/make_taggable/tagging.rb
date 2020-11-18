@@ -2,7 +2,7 @@ module MakeTaggable
   class Tagging < ::ActiveRecord::Base #:nodoc:
     self.table_name = MakeTaggable.taggings_table
 
-    DEFAULT_CONTEXT = "tags"
+    DEFAULT_CONTEXT = 'tags'
     belongs_to :tag, class_name: "::MakeTaggable::Tag", counter_cache: MakeTaggable.tags_counter
     belongs_to :taggable, polymorphic: true
 
@@ -24,12 +24,8 @@ module MakeTaggable
     private
 
     def remove_unused_tags
-      if MakeTaggable.remove_unused_tags
-        if MakeTaggable.tags_counter
-          tag.destroy if tag.reload.taggings_count.zero?
-        else
-          tag.destroy if tag.reload.taggings.count.zero?
-        end
+      if MakeTaggable.remove_unused_tags && MakeTaggable.tags_counter && tag.reload.taggings_count.zero?
+        tag.destroy
       end
     end
   end
