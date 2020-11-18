@@ -29,7 +29,10 @@ if File.exist?(database_yml)
   end
 
   require File.dirname(__FILE__) + "/../internal/db/schema.rb"
-  Dir[File.dirname(__dir__) + "/internal/app/models/*.rb"].each { |f| require f }
+
+  Dir[File.dirname(__dir__) + "/internal/app/models/*.rb"].sort.each do |file|
+    require file
+  end
 
 else
   fail "Please create #{database_yml} first to configure your database. Take a look at: #{database_yml}.sample"

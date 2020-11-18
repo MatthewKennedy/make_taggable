@@ -2,5 +2,4 @@
 # Remove from this list as you refactor files.
 ---
 ignore:
-- spec/make_taggable/single_table_inheritance_spec.rb
-- spec/make_taggable/taggable_spec.rb
+- spec/make_taggable/caching_spec.rb
