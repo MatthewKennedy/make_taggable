@@ -23,7 +23,7 @@ module MakeTaggable
       if MakeTaggable.strict_case_match
         where(["name = #{binary}?", as_8bit_ascii(name)])
       else
-        where(Tag.arel_table[:name].matches(name))
+        where(["LOWER(name) = LOWER(?)", as_8bit_ascii(unicode_downcase(name))])
       end
     end
 
