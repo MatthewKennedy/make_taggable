@@ -2,7 +2,7 @@ module MakeTaggable
   class Tagging < ::ActiveRecord::Base #:nodoc:
     self.table_name = MakeTaggable.taggings_table
 
-    DEFAULT_CONTEXT = 'tags'
+    DEFAULT_CONTEXT = "tags"
     belongs_to :tag, class_name: "::MakeTaggable::Tag", counter_cache: MakeTaggable.tags_counter
     belongs_to :taggable, polymorphic: true
 
