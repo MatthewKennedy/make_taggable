@@ -1,13 +1,4 @@
 require "spec_helper"
-require "db/migrate/3_add_index_to_tags"
-
-shared_examples_for "without unique index" do
-  prepend_before(:all) { AddIndexToTags.down }
-  append_after(:all) do
-    MakeTaggable::Tag.delete_all
-    AddIndexToTags.up
-  end
-end
 
 describe MakeTaggable::Tag do
   before(:each) do
@@ -28,10 +19,6 @@ describe MakeTaggable::Tag do
     end
 
     context "case insensitive collation without indexes or case sensitive collation with indexes" do
-      if using_case_insensitive_collation?
-        include_context "without unique index"
-      end
-
       before(:each) do
         MakeTaggable::Tag.create(name: "Awesome")
         MakeTaggable::Tag.create(name: "awesome")
@@ -124,10 +111,6 @@ describe MakeTaggable::Tag do
     end
 
     context "case sensitive" do
-      if using_case_insensitive_collation?
-        include_context "without unique index"
-      end
-
       it "should find by name case sensitive" do
         MakeTaggable.strict_case_match = true
         expect {
@@ -143,10 +126,6 @@ describe MakeTaggable::Tag do
     end
 
     context "case sensitive" do
-      if using_case_insensitive_collation?
-        include_context "without unique index"
-      end
-
       it "should find or create by name case sensitive" do
         MakeTaggable.strict_case_match = true
         expect {
@@ -242,10 +221,6 @@ describe MakeTaggable::Tag do
     end
 
     context "case sensitive" do
-      if using_case_insensitive_collation?
-        include_context "without unique index"
-      end
-
       it "should find by name case sensitively" do
         expect {
           MakeTaggable::Tag.find_or_create_with_like_by_name("AWESOME")
@@ -256,10 +231,6 @@ describe MakeTaggable::Tag do
     end
 
     context "case sensitive" do
-      if using_case_insensitive_collation?
-        include_context "without unique index"
-      end
-
       it "should have a named_scope named(something) that matches exactly" do
         uppercase_tag = MakeTaggable::Tag.create(name: "Cool")
         @tag.name = "cool"
@@ -289,15 +260,6 @@ describe MakeTaggable::Tag do
     let(:duplicate_tag) { MakeTaggable::Tag.new(name: "ror") }
 
     before { MakeTaggable::Tag.create(name: "ror") }
-
-    context "when don't need unique names" do
-      include_context "without unique index"
-      it "should not run uniqueness validation" do
-        allow(duplicate_tag).to receive(:validates_name_uniqueness?) { false }
-        duplicate_tag.save
-        expect(duplicate_tag).to be_persisted
-      end
-    end
 
     context "when do need unique names" do
       it "should run uniqueness validation" do

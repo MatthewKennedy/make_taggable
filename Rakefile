@@ -1,19 +1,7 @@
-require "rubygems"
-require "bundler/setup"
+require "bundler/gem_tasks"
 
-desc "Default: run specs"
-task default: :spec
-
-desc "Copy sample spec database.yml over if not exists"
-task :copy_db_config do
-  cp "spec/internal/config/database.yml.sample", "spec/internal/config/database.yml"
-end
-
-task spec: [:copy_db_config]
+APP_RAKEFILE = File.expand_path("spec/dummy/Rakefile", __dir__)
 
 require "rspec/core/rake_task"
-RSpec::Core::RakeTask.new do |t|
-  t.pattern = "spec/**/*_spec.rb"
-end
-
-Bundler::GemHelper.install_tasks
+RSpec::Core::RakeTask.new(:spec)
+task default: :spec

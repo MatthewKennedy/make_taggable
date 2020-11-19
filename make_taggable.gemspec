@@ -1,32 +1,27 @@
-lib = File.expand_path("../lib", __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+$:.push File.expand_path("../lib", __FILE__)
+
 require "make_taggable/version"
 
-Gem::Specification.new do |gem|
-  gem.name = "make_taggable"
-  gem.version = MakeTaggable::VERSION
-  gem.authors = ["Matthew Kennedy", "Michael Bleigh", "Joost Baaij"]
-  gem.email = %w[m.kennedy@me.com michael@intridea.com joost@spacebabies.nl]
-  gem.description = "MakeTaggable is a clone of ActsAsTaggableOn v6.5 with fresh migrations to fix the MySQL issues: With MakeTaggable you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality."
-  gem.summary = "Advanced tagging for Rails 6"
-  gem.homepage = "https://github.com/MatthewKennedy/make_taggable"
-  gem.license = "MIT"
+Gem::Specification.new do |spec|
+  spec.name = "make_taggable"
+  spec.version = MakeTaggable::VERSION
+  spec.authors = ["Matthew Kennedy", "Michael Bleigh", "Joost Baaij"]
+  spec.email = %w[m.kennedy@me.com michael@intridea.com joost@spacebabies.nl]
+  spec.description = "MakeTaggable is a clone of ActsAsTaggableOn v6.5 with fresh migrations to fix the MySQL issues: With MakeTaggable you can tag a single model on several contexts, such as skills, interests, and awards. It also provides other advanced functionality."
+  spec.summary = "Advanced tagging for Rails 6"
+  spec.homepage = "https://github.com/MatthewKennedy/make_taggable"
+  spec.license = "MIT"
 
-  gem.files = `git ls-files`.split($/)
-  gem.test_files = gem.files.grep(%r{^spec/})
-  gem.require_paths = ["lib"]
-  gem.required_ruby_version = ">= 2.5.0"
+  spec.files = `git ls-files`.split($/)
+  spec.test_files = spec.files.grep(%r{^spec/})
+  spec.require_paths = ["lib"]
 
-  if File.exist?("UPGRADING.md")
-    gem.post_install_message = File.read("UPGRADING.md")
-  end
+  spec.add_dependency "rails", ">= 5.2"
 
-  gem.add_runtime_dependency "activerecord", ">= 5.0", "< 7.1"
-
-  gem.add_development_dependency "rspec-rails"
-  gem.add_development_dependency "rspec-its"
-  gem.add_development_dependency "rspec"
-  gem.add_development_dependency "barrier"
-  gem.add_development_dependency "database_cleaner"
-  gem.add_development_dependency "sqlite3"
+  spec.add_development_dependency "rspec", ">=3.0"
+  spec.add_development_dependency "rspec-rails"
+  spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "standard"
+  spec.add_development_dependency "appraisal"
+  spec.add_development_dependency "rspec-its"
 end

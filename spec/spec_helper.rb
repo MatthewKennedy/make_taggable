@@ -1,20 +1,19 @@
-begin
-  require "byebug"
-rescue LoadError
-end
-$LOAD_PATH << "." unless $LOAD_PATH.include?(".")
-$LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
-require "logger"
+# Configure Rails Environment
+ENV["RAILS_ENV"] = "test"
 
-require File.expand_path("../../lib/make_taggable", __FILE__)
-I18n.enforce_available_locales = true
+require_relative "../spec/dummy/config/environment"
+ActiveRecord::Migrator.migrations_paths = [File.expand_path("../spec/dummy/db/migrate", __dir__)]
+ActiveRecord::Migration.maintain_test_schema!
+
+require "rspec/rails"
 require "rails"
 require "rspec/its"
-require "barrier"
-require "database_cleaner"
 
 Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 
 RSpec.configure do |config|
-  config.raise_errors_for_deprecations!
+  config.fixture_path = "spec/fixtures"
+  config.global_fixtures = :all
+  config.use_transactional_fixtures = true
+  config.infer_base_class_for_anonymous_controllers = true
 end

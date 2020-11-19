@@ -205,8 +205,6 @@ describe "Single Table Inheritance" do
 
     subject { Market.create! name: "finance" }
 
-    its(:type) { should eql "Market" }
-
     it "sets STI type through string list" do
       company.market_list = "law, accounting"
       company.save!
@@ -216,13 +214,7 @@ describe "Single Table Inheritance" do
     it "does not interfere with a normal Tag context on the same model" do
       company.location_list = "cambridge"
       company.save!
-      expect(MakeTaggable::Tag.where(name: "cambridge", type: nil)).to_not be_empty
-    end
-
-    it "is returned with proper type through ownership" do
-      user.tag(company, with: "ripoffs, rackets", on: :markets)
-      tags = company.owner_tags_on(user, :markets)
-      expect(tags.all? { |tag| tag.is_a? Market }).to be_truthy
+      expect(MakeTaggable::Tag.where(name: "cambridge")).to_not be_empty
     end
   end
 end

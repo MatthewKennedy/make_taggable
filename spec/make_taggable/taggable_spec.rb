@@ -659,7 +659,7 @@ describe "Taggable" do
       # NOTE: type column supports an STI Tag subclass in the test suite, though
       # isn't included by default in the migration generator
       expect(@taggable.grouped_column_names_for(MakeTaggable::Tag))
-        .to eq("#{MakeTaggable.tags_table}.id, #{MakeTaggable.tags_table}.name, #{MakeTaggable.tags_table}.taggings_count, #{MakeTaggable.tags_table}.type")
+        .to eq("#{MakeTaggable.tags_table}.id, #{MakeTaggable.tags_table}.name, #{MakeTaggable.tags_table}.taggings_count, #{MakeTaggable.tags_table}.created_at, #{MakeTaggable.tags_table}.updated_at")
     end
 
     it "should return all column names joined for TaggableModel GROUP clause" do
