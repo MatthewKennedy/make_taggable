@@ -120,8 +120,4 @@ describe "Acts As Taggable On" do
       }.not_to raise_error
     end
   end
-
-  describe "CachingWithArray" do
-    pending "#TODO"
-  end
 end
