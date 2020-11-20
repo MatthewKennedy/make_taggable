@@ -3,9 +3,11 @@
 [![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 
-First and foremost: This Ruby gem is a direct clone of Acts as Taggable On by Jonathan Viney, all credit goes to those who came before.
+MakeTaggable is a fork of acts-as-taggable-on v6.5 with code updates and a new set of migrations. All credit goes to those who contributed before acts-as-taggable-on became MakeTaggable: Michael Bleigh & Joost Baaij.
 
-The reason for this clone is that Acts As Taggable On seems to be almost abandoned, stuck with migrations that don't run on MySQL.
+Why fork acts-as-taggable-on? Act As Taggable On appears stuck with a set of legacy migrations from rails pre [4.2] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
+
+For the PostgreSQL users, this is not an issue, but if you have an app or gem that used acts-as-taggable-on, you can no longer test against MySQL, so it seems a fresh start would be useful to clear out any legacy issues and move forward.
 
 ## Installation
 
@@ -456,9 +458,8 @@ Versions 0.6.x is compatible with Ruby 2.5 + and Rails 6.
 
 
 ## TODO
-
-- Write benchmark script
-- Resolve concurrency issues
+- Review migrations indexes they seem excessive looking at the schema.
+- See if the newer version of ActiveRecord or arel can be used instead of the MySQL workarounds.
 
 ## Testing
 
