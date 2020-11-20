@@ -2,15 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "rails", github: "rails/rails"
-
-group :local_development do
-  gem "guard"
-  gem "guard-rspec"
-  gem "appraisal"
-  gem "rake"
-  gem "byebug", platforms: [:mri]
-  gem "standard"
-end
+gem "byebug", group: [:development, :test]
+gem "rails", git: "https://github.com/rails/rails.git"
 
 gemspec path: "../"
