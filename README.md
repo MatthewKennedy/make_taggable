@@ -12,7 +12,7 @@ The reason for this clone is that Acts As Taggable On seems to be almost abandon
 To use it, add it to your Gemfile:
 
 ```ruby
-gem 'make_taggable', '~> 0.6.0'
+gem "make_taggable", "~> 0.6.0"
 ```
 
 and bundle:
@@ -27,12 +27,12 @@ Install migrations
 
 ```shell
 # For the latest versions :
-rake make_taggable_engine:install:migrations
+rails make_taggable_engine:install:migrations
 ```
 
 Review the generated migrations then migrate :
 ```shell
-rake db:migrate
+rails db:migrate
 ```
 
 ## Usage

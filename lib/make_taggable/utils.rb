@@ -1,8 +1,6 @@
 module MakeTaggable
-  # This module is deprecated and will be removed in the incoming versions
   module Utils
     class << self
-      # Use MakeTaggable::Tag connection
       def connection
         MakeTaggable::Tag.connection
       end
