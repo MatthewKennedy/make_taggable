@@ -1,4 +1,4 @@
-class AddIndexToTaggings < ActiveRecord::Migration[6.0]
+class AddIndexToTaggings < ActiveRecord::Migration[5.2]
   def change
     add_index MakeTaggable.taggings_table, :taggable_id
     add_index MakeTaggable.taggings_table, :tagger_id

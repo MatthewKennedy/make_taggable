@@ -1,4 +1,4 @@
-class CreateMakeTaggableTaggings < ActiveRecord::Migration[6.0]
+class CreateMakeTaggableTaggings < ActiveRecord::Migration[5.2]
   def change
     create_table MakeTaggable.taggings_table do |t|
       t.references :tag, foreign_key: {to_table: MakeTaggable.tags_table}
