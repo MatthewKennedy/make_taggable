@@ -7,7 +7,6 @@ ActiveRecord::Migration.maintain_test_schema!
 
 require "rspec/rails"
 require "rails"
-require "rspec/its"
 
 Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 

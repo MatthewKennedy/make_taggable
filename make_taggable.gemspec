@@ -23,5 +23,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "standard"
   spec.add_development_dependency "appraisal"
-  spec.add_development_dependency "rspec-its"
 end

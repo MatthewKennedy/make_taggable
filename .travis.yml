@@ -19,12 +19,14 @@ env:
   - DB=postgresql
 
 gemfile:
-  - gemfiles/activerecord_6.0.gemfile
+  - gemfiles/rails_5.gemfile
+  - gemfiles/rails_6.gemfile
+  - gemfiles/rails_master.gemfile
 
 bundler_args: '--without local_development --jobs 3 --retry 3'
 
 before_install:
-  - gem install bundler
+  - gem update bundler
 
 script: bundle exec rake
 

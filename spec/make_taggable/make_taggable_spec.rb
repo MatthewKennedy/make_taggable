@@ -184,28 +184,25 @@ describe "Acts As Taggable On" do
       subject { @taggable }
 
       it { should respond_to(:save_cached_tag_list) }
-      its(:cached_language_list) { should be_blank }
-      its(:cached_status_list) { should be_blank }
-      its(:cached_glass_list) { should be_blank }
+
+      it { expect(@taggable.cached_language_list).to eq nil }
+      it { expect(@taggable.cached_status_list).to eq nil }
+      it { expect(@taggable.cached_glass_list).to eq nil }
 
       context "language taggings cache after update" do
         before { @taggable.update(language_list: "ruby, .net") }
         subject { @taggable }
 
-        its(:language_list) { should == ["ruby", ".net"] }
-        its(:cached_language_list) { should == "ruby, .net" } # passes
-        its(:instance_variables) { should include((RUBY_VERSION < "1.9" ? "@language_list" : :@language_list)) }
+        it { expect(@taggable.language_list).to eq ["ruby", ".net"] }
+        it { expect(@taggable.cached_language_list).to eq "ruby, .net" }
       end
 
       context "status taggings cache after update" do
         before { @taggable.update(status_list: "happy, married") }
         subject { @taggable }
 
-        its(:status_list) { should == ["happy", "married"] }
-        its(:cached_status_list) { should == "happy, married" } # fails
-        its(:cached_status_list) { should_not == "" } # fails, is blank
-        its(:instance_variables) { should include((RUBY_VERSION < "1.9" ? "@status_list" : :@status_list)) }
-        its(:instance_variables) { should_not include((RUBY_VERSION < "1.9" ? "@statu_list" : :@statu_list)) } # fails, note: one "s"
+        it { expect(@taggable.status_list).to eq ["happy", "married"] }
+        it { expect(@taggable.cached_status_list).to eq "happy, married" }
       end
 
       context "glass taggings cache after update" do
@@ -214,16 +211,8 @@ describe "Acts As Taggable On" do
         end
 
         subject { @taggable }
-        its(:glass_list) { should == ["rectangle", "aviator"] }
-        its(:cached_glass_list) { should == "rectangle, aviator" } # fails
-        its(:cached_glass_list) { should_not == "" } # fails, is blank
-        if RUBY_VERSION < "1.9"
-          its(:instance_variables) { should include("@glass_list") }
-          its(:instance_variables) { should_not include("@glas_list") } # fails, note: one "s"
-        else
-          its(:instance_variables) { should include(:@glass_list) }
-          its(:instance_variables) { should_not include(:@glas_list) } # fails, note: one "s"
-        end
+        it { expect(@taggable.glass_list).to eq ["rectangle", "aviator"] }
+        it { expect(@taggable.cached_glass_list).to eq "rectangle, aviator" }
       end
     end
   end
