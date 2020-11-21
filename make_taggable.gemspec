@@ -12,8 +12,8 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/MatthewKennedy/make_taggable"
   spec.license = "MIT"
 
-  if File.exist?('UPGRADING.md')
-    spec.post_install_message = File.read('UPGRADING.md')
+  if File.exist?("UPGRADING.md")
+    spec.post_install_message = File.read("UPGRADING.md")
   end
 
   spec.files = `git ls-files`.split($/)
