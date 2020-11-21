@@ -37,6 +37,21 @@ Review the generated migrations then migrate :
 rails db:migrate
 ```
 
+#### For MySql users
+You can circumvent at any time the problem of special characters [issue 623](https://github.com/mbleigh/acts-as-taggable-on/issues/623) by setting in an initializer file:
+
+```ruby
+MakeTaggable.force_binary_collation = true
+```
+
+Or by running this rake task:
+
+```shell
+rails make_taggable_on_engine:tag_names:collate_bin
+```
+
+See the Configuration section for more details.
+
 ## Usage
 
 Setup

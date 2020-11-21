@@ -29,9 +29,9 @@ module MakeTaggable::Taggable::TaggedWithQuery
       matches_attribute = matches_attribute.lower unless MakeTaggable.strict_case_match
 
       if options[:wild].present?
-        matches_attribute.matches("%#{escaped_tag(tag)}%", "!")
+        matches_attribute.matches("%#{escaped_tag(tag)}%", "!", MakeTaggable.strict_case_match)
       else
-        matches_attribute.matches(escaped_tag(tag), "!")
+        matches_attribute.matches(escaped_tag(tag), "!", MakeTaggable.strict_case_match)
       end
     end
 
@@ -40,9 +40,9 @@ module MakeTaggable::Taggable::TaggedWithQuery
       matches_attribute = matches_attribute.lower unless MakeTaggable.strict_case_match
 
       if options[:wild].present?
-        matches_attribute.matches_any(tag_list.map { |tag| "%#{escaped_tag(tag)}%" }, "!")
+        matches_attribute.matches_any(tag_list.map { |tag| "%#{escaped_tag(tag)}%" }, "!", MakeTaggable.strict_case_match)
       else
-        matches_attribute.matches_any(tag_list.map { |tag| escaped_tag(tag).to_s }, "!")
+        matches_attribute.matches_any(tag_list.map { |tag| escaped_tag(tag).to_s }, "!", MakeTaggable.strict_case_match)
       end
     end
 
