@@ -11,16 +11,10 @@ For the PostgreSQL users, this is not an issue, but if you have an app or gem th
 
 ## Installation
 
-To use it, add it to your Gemfile:
-
-```ruby
-gem "make_taggable", "~> 0.6.0"
-```
-
-and bundle:
+To use make_taggable, run the followng from the root of your application:
 
 ```shell
-bundle
+bundle add make_taggable
 ```
 
 #### Post Installation
@@ -47,7 +41,7 @@ MakeTaggable.force_binary_collation = true
 Or by running this rake task:
 
 ```shell
-rails make_taggable_on_engine:tag_names:collate_bin
+rails make_taggable_engine:tag_names:collate_bin
 ```
 
 See the Configuration section for more details.
