@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_19_222432) do
+ActiveRecord::Schema.define(version: 2020_11_21_222011) do
 
   create_table "cache_methods_injected_models", force: :cascade do |t|
     t.string "cached_tag_list"

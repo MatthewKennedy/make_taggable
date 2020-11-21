@@ -1,4 +1,4 @@
-# This migration comes from make_taggable_engine (originally 3)
+# This migration comes from make_taggable_engine (originally 4)
 class AddIndexToTags < ActiveRecord::Migration[5.2]
   def change
     add_index MakeTaggable.tags_table, :name, unique: true
