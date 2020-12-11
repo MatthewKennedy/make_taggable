@@ -21,6 +21,7 @@ env:
 gemfile:
   - gemfiles/rails_5.gemfile
   - gemfiles/rails_6.gemfile
+  - gemfiles/rails_6_1.gemfile
   - gemfiles/rails_master.gemfile
 
 bundler_args: '--without local_development --jobs 3 --retry 3'
