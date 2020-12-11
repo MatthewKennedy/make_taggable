@@ -26,6 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "mysql2"
   spec.add_development_dependency "rspec", ">=3.0"
   spec.add_development_dependency "rspec-rails"
-  spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "standard"
 end
