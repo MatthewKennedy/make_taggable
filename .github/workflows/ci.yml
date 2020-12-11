@@ -45,7 +45,6 @@ jobs:
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
-          gem install mysql2
           bundle exec appraisal install
       - name: StandardRb check
         run: bundle exec standardrb
@@ -92,7 +91,6 @@ jobs:
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
-          gem install pg
           bundle exec appraisal install
       - name: StandardRb check
         run: bundle exec standardrb
