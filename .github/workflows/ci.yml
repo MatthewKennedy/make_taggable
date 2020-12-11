@@ -21,6 +21,7 @@ jobs:
       mysql:
         image: mysql:8
         env:
+          DB: mysql
           MYSQL_ROOT_PASSWORD: password
           MSQL_DATABASE: test
         ports: ['3306:3306']
@@ -67,6 +68,7 @@ jobs:
       postgres:
         image: postgres:12
         env:
+          DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: test
