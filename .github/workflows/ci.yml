@@ -53,7 +53,7 @@ jobs:
           DATABASE_URL: mysql2://root:password@127.0.0.1:3306/test
           RAILS_ENV: test
         run: |
-          bundle exec appraisal rake
+          bundle exec rake
 
 
   postgres:
@@ -105,7 +105,7 @@ jobs:
           POSTGRES_DB: pg_test
         run: |
           cp spec/dummy/config/database.yml.ci spec/dummy/config/database.yml
-          bundle exec appraisal rake
+          bundle exec rake
 
 
   sqlite:
@@ -144,4 +144,4 @@ jobs:
         env:
           RAILS_ENV: test
         run: |
-          bundle exec appraisal rake
+          bundle exec rake
