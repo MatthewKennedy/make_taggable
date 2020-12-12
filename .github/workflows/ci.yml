@@ -100,7 +100,7 @@ jobs:
           DATABASE_URL: postgres://postgres:password@localhost:5432/test
           RAILS_ENV: test
         run: |
-          cp config/database.yml.ci config/database.yml
+          cp dummy/config/database.yml.ci dummy/config/database.yml
           bundle exec appraisal rake
 
 
