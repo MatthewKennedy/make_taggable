@@ -68,7 +68,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: test
+          POSTGRES_DB: pg_test
         ports: ['5432:5432']
 
     steps:
@@ -97,16 +97,15 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/test
+          DATABASE_URL: postgres://postgres:password@localhost:5432/pg_test
           RAILS_ENV: test
           POSTGRES_HOST: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: test
+          POSTGRES_DB: pg_test
         run: |
           cp spec/dummy/config/database.yml.ci spec/dummy/config/database.yml
-
-          bundle exec rake db:create
+          bundle exec appraisal rake
 
 
   sqlite:
