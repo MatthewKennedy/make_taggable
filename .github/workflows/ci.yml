@@ -99,8 +99,12 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/test
           RAILS_ENV: test
+          POSTGRES_HOST: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test
         run: |
-          cp dummy/config/database.yml.ci dummy/config/database.yml
+          cp spec/dummy/config/database.yml.ci spec/dummy/config/database.yml
           bundle exec appraisal rake
 
 
