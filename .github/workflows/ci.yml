@@ -105,7 +105,8 @@ jobs:
           POSTGRES_DB: test
         run: |
           cp spec/dummy/config/database.yml.ci spec/dummy/config/database.yml
-          bundle exec appraisal rake
+
+          bundle exec rake db:create
 
 
   sqlite:
