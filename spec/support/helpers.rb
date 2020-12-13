@@ -19,7 +19,7 @@ def postgresql_version
 end
 
 def postgresql_support_json?
-  postgresql_version >= 14.2
+  postgresql_version >= 9.2
 end
 
 def using_mysql?
