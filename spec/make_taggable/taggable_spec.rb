@@ -301,7 +301,7 @@ describe "Taggable" do
     TaggableModel.create(name: "Igor", tag_list: "привет")
     TaggableModel.create(name: "Katia", tag_list: "ПРИВЕТ")
 
-    expect(MakeTaggable::Tag.all.size).to eq(2)
+    expect(MakeTaggable::Tag.all.size).to eq(1)
     expect(TaggableModel.tagged_with("привет").to_a).to eq(TaggableModel.tagged_with("ПРИВЕТ").to_a)
   end
 
