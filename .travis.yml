@@ -28,7 +28,9 @@ bundler_args: '--without local_development --jobs 3 --retry 3'
 before_install:
   - gem update bundler
 
-script: bundle exec rake
+script: 
+  - bundle exec rake set_db
+  - bundle exec rake
 
 jobs:
   allow_failures:
