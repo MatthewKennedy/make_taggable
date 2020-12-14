@@ -101,7 +101,7 @@ jobs:
           RAILS_ENV: test
         run: |
           cp spec/dummy/config/pg_database.yml.ci spec/dummy/config/database.yml
-          bundle exec appraisal rake
+          bundle exec rake
 
 
   sqlite:
