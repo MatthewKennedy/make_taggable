@@ -11,3 +11,5 @@ tmp
 *.lock
 *.iml
 /.idea
+spec/dummy/db/schema.rb
+/gemfiles/*

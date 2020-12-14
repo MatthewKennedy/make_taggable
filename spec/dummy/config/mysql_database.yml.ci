@@ -1,0 +1,8 @@
+---
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+
+test:
+  <<: *default
+  database: my_sql_test_db

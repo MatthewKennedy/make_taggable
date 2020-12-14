@@ -1,4 +1,4 @@
-class CreateUntaggableModels < ActiveRecord::Migration[5.2]
+class CreateUntaggableModels < ActiveRecord::Migration[4.2]
   def change
     create_table :untaggable_models do |t|
       t.column :taggable_model_id, :integer

@@ -20,7 +20,7 @@ jobs:
         image: mysql:8
         env:
           MYSQL_ROOT_PASSWORD: password
-          MSQL_DATABASE: test
+          MSQL_DATABASE: my_sql_test_db
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
@@ -45,14 +45,14 @@ jobs:
           gem install bundler
           bundle install --jobs 4 --retry 3
           bundle exec appraisal install
-      - name: StandardRb check
-        run: bundle exec standardrb
 
       - name: Run tests
         env:
-          DATABASE_URL: mysql2://root:password@127.0.0.1:3306/test
+          DATABASE_URL: mysql2://root:password@127.0.0.1:3306/my_sql_test_db
           RAILS_ENV: test
         run: |
+          cp spec/dummy/config/mysql_database.yml.ci spec/dummy/config/database.yml
+          bundle exec rake set_db
           bundle exec appraisal rake
 
 
@@ -92,8 +92,6 @@ jobs:
           gem install bundler
           bundle install --jobs 4 --retry 3
           bundle exec appraisal install
-      - name: StandardRb check
-        run: bundle exec standardrb
 
       - name: Run tests
         env:
@@ -101,6 +99,7 @@ jobs:
           RAILS_ENV: test
         run: |
           cp spec/dummy/config/pg_database.yml.ci spec/dummy/config/database.yml
+          bundle exec rake set_db
           bundle exec appraisal rake
 
 
@@ -133,11 +132,10 @@ jobs:
           gem install bundler
           bundle install --jobs 4 --retry 3
           bundle exec appraisal install
-      - name: StandardRb check
-        run: bundle exec standardrb
 
       - name: Run tests
         env:
           RAILS_ENV: test
         run: |
+          bundle exec rake set_db
           bundle exec appraisal rake
