@@ -2,7 +2,8 @@
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
 [![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
-
+![StandardRB](https://github.com/MatthewKennedy/make_taggable/workflows/StandardRB/badge.svg)
+![Tests](https://github.com/MatthewKennedy/make_taggable/workflows/Tests/badge.svg)
 MakeTaggable is a fork of acts-as-taggable-on v6.5 with code updates and a new set of migrations. All credit goes to those who contributed before acts-as-taggable-on became MakeTaggable: Michael Bleigh & Joost Baaij.
 
 Why fork acts-as-taggable-on? Act As Taggable On appears stuck with a set of legacy migrations from rails pre [6.0] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.

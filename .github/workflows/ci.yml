@@ -9,6 +9,8 @@ on:
     branches:
       - master
 jobs:
+
+# MYSQL ##################
   mysql:
     runs-on: ubuntu-latest
     strategy:
@@ -55,7 +57,7 @@ jobs:
           bundle exec rake set_db
           bundle exec appraisal rake
 
-
+# POSTGRES ##################
   postgres:
     runs-on: ubuntu-latest
     strategy:
@@ -102,7 +104,7 @@ jobs:
           bundle exec rake set_db
           bundle exec appraisal rake
 
-
+# SQLITE ##################
   sqlite:
     runs-on: ubuntu-latest
     strategy:
