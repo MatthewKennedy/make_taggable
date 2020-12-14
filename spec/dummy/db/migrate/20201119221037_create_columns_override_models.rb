@@ -1,4 +1,4 @@
-class CreateColumnsOverrideModels < ActiveRecord::Migration[6.0]
+class CreateColumnsOverrideModels < ActiveRecord::Migration[4.2]
   def change
     create_table :columns_override_models do |t|
       t.column :name, :string
