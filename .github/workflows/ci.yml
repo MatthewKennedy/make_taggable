@@ -54,7 +54,7 @@ jobs:
           RAILS_ENV: test
         run: |
           cp spec/dummy/config/mysql_database.yml.ci spec/dummy/config/database.yml
-          bundle exec rake set_db
+          bundle exec rake test_app
           bundle exec appraisal rake
 
 # POSTGRES ##################
@@ -101,7 +101,7 @@ jobs:
           RAILS_ENV: test
         run: |
           cp spec/dummy/config/pg_database.yml.ci spec/dummy/config/database.yml
-          bundle exec rake set_db
+          bundle exec rake test_app
           bundle exec appraisal rake
 
 # SQLITE ##################
@@ -139,5 +139,5 @@ jobs:
         env:
           RAILS_ENV: test
         run: |
-          bundle exec rake set_db
+          bundle exec rake test_app
           bundle exec appraisal rake
