@@ -16,6 +16,14 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.6', '2.7']
+        gemfile:
+          - rails_5
+          - rails_6
+          - rails_6_1
+          - rails_master
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
+      BUNDLE_PATH_RELATIVE_TO_CWD: true
 
     services:
       mysql:
@@ -33,14 +41,8 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-
-      - name: Cache gems
-        uses: actions/cache@v1
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-${{ matrix.ruby }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.ruby }}-gem-
+          bundler: default
+          bundler-cache: true
 
       - name: Install dependencies
         run: |
