@@ -5,7 +5,7 @@
 
 MakeTaggable is a fork of acts-as-taggable-on v6.5 with code updates and a new set of migrations. All credit goes to those who contributed before acts-as-taggable-on became MakeTaggable: Michael Bleigh & Joost Baaij.
 
-Why fork acts-as-taggable-on? Act As Taggable On appears stuck with a set of legacy migrations from rails pre [4.2] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
+Why fork acts-as-taggable-on? Act As Taggable On appears stuck with a set of legacy migrations from rails pre [6.0] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
 
 For the PostgreSQL users, this is not an issue, but if you have an app or gem that used acts-as-taggable-on, you can no longer test against MySQL, so it seems a fresh start would be useful to clear out any legacy issues and move forward.
 

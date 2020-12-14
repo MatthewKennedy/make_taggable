@@ -1,4 +1,4 @@
-class CreateTaggableModels < ActiveRecord::Migration[4.2]
+class CreateTaggableModels < ActiveRecord::Migration[6.0]
   def change
     create_table :taggable_models do |t|
       t.column :name, :string
