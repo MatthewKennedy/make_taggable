@@ -46,9 +46,6 @@ jobs:
           bundle install --jobs 4 --retry 3
           bundle exec appraisal install
 
-      - name: StandardRb check
-        run: bundle exec standardrb
-
       - name: Run tests
         env:
           DATABASE_URL: mysql2://root:password@127.0.0.1:3306/my_sql_test_db
@@ -96,9 +93,6 @@ jobs:
           bundle install --jobs 4 --retry 3
           bundle exec appraisal install
 
-      - name: StandardRb check
-        run: bundle exec standardrb
-
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/pg_test
@@ -138,9 +132,6 @@ jobs:
           gem install bundler
           bundle install --jobs 4 --retry 3
           bundle exec appraisal install
-
-      - name: StandardRb check
-        run: bundle exec standardrb
 
       - name: Run tests
         env:
