@@ -1,297 +1,135 @@
-require "spec_helper"
+module MakeTaggable
+  class Tag < ::ActiveRecord::Base
+    self.table_name = MakeTaggable.tags_table
 
-describe MakeTaggable::Tag do
-  before(:each) do
-    @tag = MakeTaggable::Tag.new
-    @user = TaggableModel.create(name: "Pablo")
-  end
+    ### ASSOCIATIONS:
 
-  describe "named like any" do
-    context "case insensitive collation and unique index on tag name", if: using_case_insensitive_collation? do
-      before(:each) do
-        MakeTaggable::Tag.create(name: "Awesome")
-        MakeTaggable::Tag.create(name: "epic")
-      end
+    has_many :taggings, dependent: :destroy, class_name: "::MakeTaggable::Tagging"
 
-      it "should find both tags" do
-        expect(MakeTaggable::Tag.named_like_any(%w[awesome epic]).count).to eq(2)
-      end
+    ### VALIDATIONS:
+
+    validates_presence_of :name
+    validates_uniqueness_of :name, if: :validates_name_uniqueness?
+    validates_length_of :name, maximum: 255
+
+    # monkey patch this method if don't need name uniqueness validation
+    def validates_name_uniqueness?
+      true
     end
 
-    context "case insensitive collation without indexes or case sensitive collation with indexes" do
-      before(:each) do
-        MakeTaggable::Tag.create(name: "Awesome")
-        MakeTaggable::Tag.create(name: "awesome")
-        MakeTaggable::Tag.create(name: "epic")
-      end
+    ### SCOPES:
+    scope :most_used, ->(limit = 20) { order("taggings_count desc").limit(limit) }
+    scope :least_used, ->(limit = 20) { order("taggings_count asc").limit(limit) }
 
-      it "should find both tags" do
-        expect(MakeTaggable::Tag.named_like_any(%w[awesome epic]).count).to eq(3)
-      end
-    end
-  end
-
-  describe "named any" do
-    context "with some special characters combinations", if: using_mysql? do
-      it "should not raise an invalid encoding exception" do
-        expect { MakeTaggable::Tag.named_any(["holä", "hol'ä"]) }.not_to raise_error
-      end
-    end
-  end
-
-  describe "for context" do
-    before(:each) do
-      @user.skill_list.add("ruby")
-      @user.save
-    end
-
-    it "should return tags that have been used in the given context" do
-      expect(MakeTaggable::Tag.for_context("skills").pluck(:name)).to include("ruby")
-    end
-
-    it "should not return tags that have been used in other contexts" do
-      expect(MakeTaggable::Tag.for_context("needs").pluck(:name)).to_not include("ruby")
-    end
-  end
-
-  describe "find or create by name" do
-    before(:each) do
-      @tag.name = "awesome"
-      @tag.save
-    end
-
-    it "should find by name" do
-      expect(MakeTaggable::Tag.find_or_create_with_like_by_name("awesome")).to eq(@tag)
-    end
-
-    it "should find by name case insensitive" do
-      expect(MakeTaggable::Tag.find_or_create_with_like_by_name("AWESOME")).to eq(@tag)
-    end
-
-    it "should create by name" do
-      expect(-> {
-        MakeTaggable::Tag.find_or_create_with_like_by_name("epic")
-      }).to change(MakeTaggable::Tag, :count).by(1)
-    end
-  end
-
-  describe "find or create by unicode name", unless: using_sqlite? do
-    before(:each) do
-      @tag.name = "привет"
-      @tag.save
-    end
-
-    it "should find by name" do
-      expect(MakeTaggable::Tag.find_or_create_with_like_by_name("привет")).to eq(@tag)
-    end
-
-    it "should find by name case insensitive" do
-      expect(MakeTaggable::Tag.find_or_create_with_like_by_name("ПРИВЕТ")).to eq(@tag)
-    end
-
-    it "should find by name accent insensitive", if: using_case_insensitive_collation? do
-      @tag.name = "inupiat"
-      @tag.save
-      expect(MakeTaggable::Tag.find_or_create_with_like_by_name("Iñupiat")).to eq(@tag)
-    end
-  end
-
-  describe "find or create all by any name" do
-    before(:each) do
-      @tag.name = "awesome"
-      @tag.save
-    end
-
-    it "should find by name" do
-      expect(MakeTaggable::Tag.find_or_create_all_with_like_by_name("awesome")).to eq([@tag])
-    end
-
-    it "should find by name case insensitive" do
-      expect(MakeTaggable::Tag.find_or_create_all_with_like_by_name("AWESOME")).to eq([@tag])
-    end
-
-    context "case sensitive" do
-      it "should find by name case sensitive" do
-        MakeTaggable.strict_case_match = true
-        expect {
-          MakeTaggable::Tag.find_or_create_all_with_like_by_name("AWESOME")
-        }.to change(MakeTaggable::Tag, :count).by(1)
+    def self.named(name)
+      if MakeTaggable.strict_case_match
+        where(["name = #{binary}?", as_8bit_ascii(name)])
+      else
+        where(["LOWER(name) = LOWER(?)", as_8bit_ascii(unicode_downcase(name))])
       end
     end
 
-    it "should create by name" do
-      expect {
-        MakeTaggable::Tag.find_or_create_all_with_like_by_name("epic")
-      }.to change(MakeTaggable::Tag, :count).by(1)
+    def self.named_any(list)
+      clause = list.map { |tag|
+        sanitize_sql_for_named_any(tag).force_encoding("BINARY")
+      }.join(" OR ")
+      where(clause)
     end
 
-    context "case sensitive" do
-      it "should find or create by name case sensitive" do
-        MakeTaggable.strict_case_match = true
-        expect {
-          expect(MakeTaggable::Tag.find_or_create_all_with_like_by_name("AWESOME", "awesome").map(&:name)).to eq(%w[AWESOME awesome])
-        }.to change(MakeTaggable::Tag, :count).by(1)
+    def self.named_like(name)
+      clause = ["name #{MakeTaggable::Utils.like_operator} ? ESCAPE '!'", "%#{MakeTaggable::Utils.escape_like(name)}%"]
+      where(clause)
+    end
+
+    def self.named_like_any(list)
+      clause = list.map { |tag|
+        sanitize_sql(["name #{MakeTaggable::Utils.like_operator} ? ESCAPE '!'", "%#{MakeTaggable::Utils.escape_like(tag.to_s)}%"])
+      }.join(" OR ")
+      where(clause)
+    end
+
+    def self.for_context(context)
+      joins(:taggings)
+        .where(["#{MakeTaggable.taggings_table}.context = ?", context])
+        .select("DISTINCT #{MakeTaggable.tags_table}.*")
+    end
+
+    ### CLASS METHODS:
+
+    def self.find_or_create_with_like_by_name(name)
+      if MakeTaggable.strict_case_match
+        find_or_create_all_with_like_by_name([name]).first
+      else
+        named_like(name).first || create(name: name)
       end
     end
 
-    it "should find or create by name" do
-      expect {
-        expect(MakeTaggable::Tag.find_or_create_all_with_like_by_name("awesome", "epic").map(&:name)).to eq(%w[awesome epic])
-      }.to change(MakeTaggable::Tag, :count).by(1)
-    end
+    def self.find_or_create_all_with_like_by_name(*list)
+      list = Array(list).flatten
 
-    it "should return an empty array if no tags are specified" do
-      expect(MakeTaggable::Tag.find_or_create_all_with_like_by_name([])).to be_empty
-    end
-  end
+      return [] if list.empty?
 
-  it "should require a name" do
-    @tag.valid?
-    # TODO, we should find another way to check this
-    expect(@tag.errors[:name]).to eq(["can't be blank"])
+      existing_tags = named_any(list)
+      list.map do |tag_name|
+        tries ||= 3
+        comparable_tag_name = comparable_name(tag_name)
+        existing_tag = existing_tags.find { |tag| comparable_name(tag.name) == comparable_tag_name }
+        existing_tag || create(name: tag_name)
+      rescue ActiveRecord::RecordNotUnique
+        if (tries -= 1).positive?
+          ActiveRecord::Base.connection.execute "ROLLBACK"
+          existing_tags = named_any(list)
+          retry
+        end
 
-    @tag.name = "something"
-    @tag.valid?
-
-    expect(@tag.errors[:name]).to be_empty
-  end
-
-  it "should limit the name length to 255 or less characters" do
-    @tag.name = "fgkgnkkgjymkypbuozmwwghblmzpqfsgjasflblywhgkwndnkzeifalfcpeaeqychjuuowlacmuidnnrkprgpcpybarbkrmziqihcrxirlokhnzfvmtzixgvhlxzncyywficpraxfnjptxxhkqmvicbcdcynkjvziefqzyndxkjmsjlvyvbwraklbalykyxoliqdlreeykuphdtmzfdwpphmrqvwvqffojkqhlzvinqajsxbszyvrqqyzusxranr"
-    @tag.valid?
-    # TODO, we should find another way to check this
-    expect(@tag.errors[:name]).to eq(["is too long (maximum is 255 characters)"])
-
-    @tag.name = "fgkgnkkgjymkypbuozmwwghblmzpqfsgjasflblywhgkwndnkzeifalfcpeaeqychjuuowlacmuidnnrkprgpcpybarbkrmziqihcrxirlokhnzfvmtzixgvhlxzncyywficpraxfnjptxxhkqmvicbcdcynkjvziefqzyndxkjmsjlvyvbwraklbalykyxoliqdlreeykuphdtmzfdwpphmrqvwvqffojkqhlzvinqajsxbszyvrqqyzusxran"
-    @tag.valid?
-    expect(@tag.errors[:name]).to be_empty
-  end
-
-  it "should equal a tag with the same name" do
-    @tag.name = "awesome"
-    new_tag = MakeTaggable::Tag.new(name: "awesome")
-    expect(new_tag).to eq(@tag)
-  end
-
-  it "should return its name when to_s is called" do
-    @tag.name = "cool"
-    expect(@tag.to_s).to eq("cool")
-  end
-
-  it "have named_scope named(something)" do
-    @tag.name = "cool"
-    @tag.save!
-    expect(MakeTaggable::Tag.named("cool")).to include(@tag)
-  end
-
-  it "have named_scope named_like(something)" do
-    @tag.name = "cool"
-    @tag.save!
-    @another_tag = MakeTaggable::Tag.create!(name: "coolip")
-    expect(MakeTaggable::Tag.named_like("cool")).to include(@tag, @another_tag)
-  end
-
-  describe "escape wildcard symbols in like requests" do
-    before(:each) do
-      @tag.name = "cool"
-      @tag.save
-      @another_tag = MakeTaggable::Tag.create!(name: "coo%")
-      @another_tag2 = MakeTaggable::Tag.create!(name: "coolish")
-    end
-
-    it "return escaped result when '%' char present in tag" do
-      expect(MakeTaggable::Tag.named_like("coo%")).to_not include(@tag)
-      expect(MakeTaggable::Tag.named_like("coo%")).to include(@another_tag)
-    end
-  end
-
-  describe "when using strict_case_match" do
-    before do
-      MakeTaggable.strict_case_match = true
-      @tag.name = "awesome"
-      @tag.save!
-    end
-
-    after do
-      MakeTaggable.strict_case_match = false
-    end
-
-    it "should find by name" do
-      expect(MakeTaggable::Tag.find_or_create_with_like_by_name("awesome")).to eq(@tag)
-    end
-
-    context "case sensitive" do
-      it "should find by name case sensitively" do
-        expect {
-          MakeTaggable::Tag.find_or_create_with_like_by_name("AWESOME")
-        }.to change(MakeTaggable::Tag, :count)
-
-        expect(MakeTaggable::Tag.last.name).to eq("AWESOME")
+        raise DuplicateTagError.new("'#{tag_name}' has already been taken")
       end
     end
 
-    context "case sensitive" do
-      it "should have a named_scope named(something) that matches exactly" do
-        uppercase_tag = MakeTaggable::Tag.create(name: "Cool")
-        @tag.name = "cool"
-        @tag.save!
+    ### INSTANCE METHODS:
 
-        expect(MakeTaggable::Tag.named("cool")).to include(@tag)
-        expect(MakeTaggable::Tag.named("cool")).to_not include(uppercase_tag)
-      end
+    def ==(other)
+      super || (other.is_a?(Tag) && name == other.name)
     end
 
-    it "should not change encoding" do
-      name = "\u3042"
-      original_encoding = name.encoding
-      record = MakeTaggable::Tag.find_or_create_with_like_by_name(name)
-      record.reload
-      expect(record.name.encoding).to eq(original_encoding)
+    def to_s
+      name
     end
 
-    context "named any with some special characters combinations", if: using_mysql? do
-      it "should not raise an invalid encoding exception" do
-        expect { MakeTaggable::Tag.named_any(["holä", "hol'ä"]) }.not_to raise_error
-      end
+    def count
+      read_attribute(:count).to_i
     end
-  end
 
-  describe "name uniqeness validation" do
-    let(:duplicate_tag) { MakeTaggable::Tag.new(name: "ror") }
+    class << self
+      private
 
-    before { MakeTaggable::Tag.create(name: "ror") }
-
-    context "when do need unique names" do
-      it "should run uniqueness validation" do
-        expect(duplicate_tag).to_not be_valid
+      def comparable_name(str)
+        if MakeTaggable.strict_case_match
+          str
+        else
+          unicode_downcase(str.to_s)
+        end
       end
 
-      it "add error to name" do
-        duplicate_tag.save
-
-        expect(duplicate_tag.errors.size).to eq(1)
-        expect(duplicate_tag.errors.messages[:name]).to include("has already been taken")
+      def binary
+        MakeTaggable::Utils.using_mysql? ? "BINARY " : nil
       end
-    end
-  end
 
-  describe "popular tags" do
-    before do
-      %w[sports rails linux tennis golden_syrup].each_with_index do |t, i|
-        tag = MakeTaggable::Tag.new(name: t)
-        tag.taggings_count = i
-        tag.save!
+      def as_8bit_ascii(string)
+        string.to_s.mb_chars
       end
-    end
 
-    it "should find the most popular tags" do
-      expect(MakeTaggable::Tag.most_used(3).first.name).to eq("golden_syrup")
-      expect(MakeTaggable::Tag.most_used(3).length).to eq(3)
-    end
+      def unicode_downcase(string)
+        as_8bit_ascii(string).downcase
+      end
 
-    it "should find the least popular tags" do
-      expect(MakeTaggable::Tag.least_used(3).first.name).to eq("sports")
-      expect(MakeTaggable::Tag.least_used(3).length).to eq(3)
+      def sanitize_sql_for_named_any(tag)
+        if MakeTaggable.strict_case_match
+          sanitize_sql(["name = #{binary}?", as_8bit_ascii(tag)])
+        else
+          sanitize_sql(["LOWER(name) = LOWER(?)", as_8bit_ascii(unicode_downcase(tag))])
+        end
+      end
     end
   end
 end
