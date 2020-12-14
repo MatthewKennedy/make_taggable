@@ -1,4 +1,4 @@
-class CreateOtherCachedModels < ActiveRecord::Migration[5.2]
+class CreateOtherCachedModels < ActiveRecord::Migration[4.2]
   def change
     create_table :other_cached_models do |t|
       t.column :name, :string

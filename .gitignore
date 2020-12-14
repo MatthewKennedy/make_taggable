@@ -12,3 +12,4 @@ tmp
 *.iml
 /.idea
 spec/dummy/db/schema.rb
+/gemfiles/*

@@ -1,4 +1,4 @@
-class CreateCompanies < ActiveRecord::Migration[5.2]
+class CreateCompanies < ActiveRecord::Migration[4.2]
   def change
     create_table :companies do |t|
       t.column :name, :string
