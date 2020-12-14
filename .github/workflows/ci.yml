@@ -100,7 +100,7 @@ jobs:
           DATABASE_URL: postgres://postgres:password@localhost:5432/pg_test
           RAILS_ENV: test
         run: |
-          bundle exec set_db
+          bundle exec rake set_db
           bundle exec appraisal rake
 
 
