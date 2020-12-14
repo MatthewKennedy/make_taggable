@@ -111,8 +111,8 @@ module MakeTaggable
 
     def self.apply_binary_collation(bincoll)
       if Utils.using_mysql?
-        coll = "utf8_general_ci"
-        coll = "utf8_bin" if bincoll
+        coll = "utf8mb4_general_ci"
+        coll = "utf8mb4_bin" if bincoll
         begin
           ActiveRecord::Migration.execute("ALTER TABLE #{Tag.table_name} MODIFY name varchar(255) CHARACTER SET utf8 COLLATE #{coll};")
         rescue => e

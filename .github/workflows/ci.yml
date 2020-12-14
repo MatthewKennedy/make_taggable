@@ -56,7 +56,7 @@ jobs:
         run: |
           cp spec/dummy/config/mysql_database.yml.ci spec/dummy/config/database.yml
           bundle exec rake set_db
-        # bundle exec appraisal rake
+          bundle exec appraisal rake
 
 
   postgres:
