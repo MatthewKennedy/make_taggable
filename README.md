@@ -497,6 +497,22 @@ bundle exec appraisal install
 bundle exec appraisal rake
 ```
 
+## Code Formatting
+
+please use the following Standard Rb commands to format your code:
+
+Check for code errors:
+
+```shell
+bundle exec standardrb
+```
+
+Fix code errors:
+
+```shell
+bundle exec standardrb --fix
+```
+
 
 ## Contributors
 
