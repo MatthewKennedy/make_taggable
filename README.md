@@ -5,11 +5,10 @@
 ![SQLite Tests](https://github.com/MatthewKennedy/make_taggable/workflows/SQLite%20Tests/badge.svg)
 ![Standard Rb](https://github.com/MatthewKennedy/make_taggable/workflows/Standard%20Rb/badge.svg)
 
-MakeTaggable is a fork of ActsAsTaggableOn with code updates and a new set of migrations. All credit goes to those who contributed to ActsAsTaggableOn: Michael Bleigh & Joost Baaij.
+MakeTaggable is a fork of ActsAsTaggableOn with code updates, fresh migrations, and tested against a dummy Rails app.
+**All credit goes to those who contributed to ActsAsTaggableOn: Michael Bleigh & Joost Baaij**.
 
-Why fork ActsAsTaggableOn? ActsAsTaggableOn appears stuck with a set of legacy migrations from rails pre [6.0] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
-
-For the PostgreSQL users, this is not an issue, but if you have an app or gem that used ActsAsTaggableOn, you can no longer test against MySQL, so it seems a fresh start would be useful to clear out any legacy issues and move forward.
+**Why fork ActsAsTaggableOn?** ActsAsTaggableOn appears stuck with a set of legacy migrations that do not run on MySQL.
 
 ## Installation
 
@@ -178,7 +177,7 @@ MakeTaggable::Tag.least_used(10)
 
 ### Finding Tagged Objects
 
-Make Taggable uses scopes to create an association for tags.
+MakeTaggable uses scopes to create an association for tags.
 This way you can mix and match to filter down your results.
 
 ```ruby
@@ -465,12 +464,12 @@ We have a long list of valued contributors. [Check them all](https://github.com/
 
 ## Compatibility
 
-Versions 0.6.x is compatible with Ruby 2.5 + and Rails 5.2 upwards.
+Versions 0.7.x is compatible with Ruby 2.5 + and Rails 5.2 upwards.
 
 
 ## Testing
 
-Make Taggable uses RSpec for its test coverage. Inside the gem directory, you can run the specs by following the steps below:
+MakeTaggable uses RSpec for its test coverage. Inside the gem directory, you can run the specs by following the steps below:
 
 Install the rquired gems:
 
@@ -499,4 +498,4 @@ bundle exec appraisal rake
 ```
 
 ## License
-MIT
+The gem is available as open source under the terms of the [MIT License](https://github.com/MatthewKennedy/make_taggable/blob/master/LICENSE.txt).
