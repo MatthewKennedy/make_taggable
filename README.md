@@ -1,9 +1,8 @@
 # MakeTaggable
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
-[![Build Status](https://travis-ci.com/MatthewKennedy/make_taggable.svg?branch=master)](https://travis-ci.com/MatthewKennedy/make_taggable)
-[![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 ![StandardRB](https://github.com/MatthewKennedy/make_taggable/workflows/StandardRB/badge.svg)
 ![Tests](https://github.com/MatthewKennedy/make_taggable/workflows/Tests/badge.svg)
+
 MakeTaggable is a fork of acts-as-taggable-on v6.5 with code updates and a new set of migrations. All credit goes to those who contributed before acts-as-taggable-on became MakeTaggable: Michael Bleigh & Joost Baaij.
 
 Why fork acts-as-taggable-on? Act As Taggable On appears stuck with a set of legacy migrations from rails pre [6.0] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
@@ -476,12 +475,19 @@ Versions 0.6.x is compatible with Ruby 2.5 + and Rails 6.
 Make Taggable uses RSpec for its test coverage. Inside the gem
 directory, you can run the specs with:
 
+Set up the test enviroment.
 ```shell
-bundle
-rake spec
+bundle exec update
+
+bundle exec rake test_app
 ```
 
-You can run all the tests across all the Rails versions by running `rake appraise`.  If you'd also like to [run the tests across all rubies and databases as configured for Travis CI, install and run `wwtd`](https://github.com/grosser/wwtd).
+Run tests.
+```shell
+bundle exec rake
+```
+
+You can run all the tests across all the Rails versions by running `bundle exec rake appraise`.  If you'd also like to [run the tests across all rubies and databases as configured for Travis CI, install and run `wwtd`](https://github.com/grosser/wwtd).
 
 
 ## License
