@@ -484,7 +484,7 @@ Setup the dummy test app:
 bundle exec rake test_app
 ```
 
-To run the spec tests against SQLite use the followiong command.
+Run the spec tests against SQLite use the followiong command.
 
 ```shell
 bundle exec rake
