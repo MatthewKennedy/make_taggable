@@ -1,16 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [How to contribute:](#how-to-contribute)
-  - [Bug reports / Issues](#bug-reports--issues)
-  - [Code](#code)
-    - [Commit Messages](#commit-messages)
-    - [About Pull Requests (PR's)](#about-pull-requests-prs)
-  - [Documentation](#documentation)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # How to contribute:
 
 ## Bug reports / Issues
@@ -23,15 +10,14 @@
 1. [Fork and clone the repo](https://help.github.com/articles/fork-a-repo)
 2. Install the gem dependencies: `bundle install`
 3. Make the changes you want and back them up with tests.
-  * [Run the tests](https://github.com/MatthewKennedy/make_taggable#testing)
-4. Update the CHANGELOG.md file with your changes and give yourself credit
-5. Commit and create a pull request with details as to what has been changed and why
+4. Run the tests](https://github.com/MatthewKennedy/make_taggable#testing)
+5. Update the CHANGELOG.md file with your changes and give yourself credit
+6. Commit and create a pull request with details as to what has been changed and why
   * Use well-described, small (atomic) commits.
   * Include links to any relevant github issues.
   * *Don't* change the VERSION file.
-6. Extra Credit: [Confirm it runs and tests pass on the rubies specified in the travis config](.travis.yml). I will otherwise confirm it runs on these.
 
-How I handle pull requests:
+## How I handle pull requests:
 
 * If the tests pass and the pull request looks good, I will merge it.
 * If the pull request needs to be changed,
@@ -39,18 +25,6 @@ How I handle pull requests:
     * either by adding more commits, or
     * by force pushing to it
   * I can make any changes myself and manually merge the code in.
-
-### Commit Messages
-
-* [A Note About Git Commit Messages](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
-* [http://stopwritingramblingcommitmessages.com/](http://stopwritingramblingcommitmessages.com/)
-* [ThoughtBot style guide](https://github.com/thoughtbot/guides/tree/master/style#git)
-
-### About Pull Requests (PR's)
-
-* [All Your Open Source Code Are Belong To Us](https://github.com/MatthewKennedy/make_taggable)
-* [Using Pull Requests](https://help.github.com/articles/using-pull-requests)
-* [Github pull requests made easy](http://www.element84.com/github-pull-requests-made-easy.html)
 
 ## Documentation
 
