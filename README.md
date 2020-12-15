@@ -493,7 +493,9 @@ bundle exec rake
 You can also run all the tests across all the Rails versions by running:
 
 ```shell
-bundle exec rake appraise
+bundle exec appraisal install
+
+bundle exec appraisal rake
 ```
 
 ## License
