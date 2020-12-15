@@ -497,9 +497,9 @@ bundle exec appraisal install
 bundle exec appraisal rake
 ```
 
-## Code Formatting
+## Contributing
 
-please use the following Standard Rb commands to format your code:
+Please use the following Standard Rb commands to format your code before creating a pull request:
 
 Check for code errors:
 
@@ -512,10 +512,9 @@ Fix code errors:
 ```shell
 bundle exec standardrb --fix
 ```
+For more information please review the [Contributing](https://github.com/MatthewKennedy/make_taggable/blob/master/CONTRIBUTING.md) section.
 
-
-## Contributors
-
+#### Contributors
 List of valued contributors From Acts-As-Taggable-On: [Check them all](https://github.com/mbleigh/acts-as-taggable-on/contributors)
 
 
