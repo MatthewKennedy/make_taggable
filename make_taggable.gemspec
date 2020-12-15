@@ -1,7 +1,4 @@
-lib = File.expand_path("../lib/", __FILE__)
-$LOAD_PATH.unshift lib unless $LOAD_PATH.include?(lib)
-
-require "make_taggable/version"
+require_relative "lib/make_taggable/version"
 
 Gem::Specification.new do |spec|
   spec.name = "make_taggable"
@@ -21,8 +18,12 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "https://github.com/MatthewKennedy/make_taggable/blob/master/CHANGELOG.md"
 
-  spec.files = `git ls-files`.split($/)
-  spec.test_files = spec.files.grep(%r{^spec/})
+  spec.files = Dir.chdir(File.expand_path("..", __FILE__)) do
+    `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
+  end
+
+  spec.bindir = "exe"
+  spec.executables = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rails", ">= 5.2.0", "<= 6.2.0"
