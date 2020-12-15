@@ -25,32 +25,20 @@ jobs:
         ports: ['5432:5432']
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
 
       - name: Set up Ruby ${{ matrix.ruby }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-
-      - name: Cache gems
-        uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-${{ matrix.ruby }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.ruby }}-gem-
-
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundle install --jobs 4 --retry 3
-          bundle exec appraisal install
+          bundler-cache: true
 
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/pg_test
           RAILS_ENV: test
         run: |
-          cp spec/dummy/config/pg_database.yml.ci spec/dummy/config/database.yml
+          gem update --system
+          bundle exec appraisal install
           bundle exec rake test_app
           bundle exec appraisal rake
