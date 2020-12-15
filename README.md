@@ -456,17 +456,15 @@ MakeTaggable.delimiter = ','
 
 ## Upgrading
 
-see [UPGRADING](UPGRADING.md)
+Install new migrations by running:
 
-
-## Contributors
-
-List of valued contributors From Acts-As-Taggable-On: [Check them all](https://github.com/mbleigh/acts-as-taggable-on/contributors)
-
+```shell
+rails make_taggable_engine:install:migrations
+```
 
 ## Compatibility
 
-Versions 0.7.x is compatible with Ruby 2.5 + and Rails 5.2 upwards.
+Version 0.7.x is compatible with Ruby 2.5 > and Rails 5.2 >
 
 
 ## Testing
@@ -499,5 +497,11 @@ bundle exec appraisal install
 bundle exec appraisal rake
 ```
 
+
+## Contributors
+
+List of valued contributors From Acts-As-Taggable-On: [Check them all](https://github.com/mbleigh/acts-as-taggable-on/contributors)
+
+
 ## License
-The gem is available as open source under the terms of the [MIT License](https://github.com/MatthewKennedy/make_taggable/blob/master/LICENSE.txt).
+This gem is available as open source under the terms of the [MIT License](https://github.com/MatthewKennedy/make_taggable/blob/master/LICENSE.txt).
