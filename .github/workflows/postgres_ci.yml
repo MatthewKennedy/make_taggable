@@ -31,25 +31,16 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
 
-      - name: Cache gems
-        uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-${{ matrix.ruby }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.ruby }}-gem-
-
-      - name: Install dependencies
+      - name: Set up Test Enviroment
         run: |
-          gem install bundler
-          bundle install --jobs 4 --retry 3
           bundle exec appraisal install
+          bundle exec rake test_app
 
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:password@localhost:5432/pg_test
           RAILS_ENV: test
         run: |
-          bundle exec rake test_app
           bundle exec appraisal rake
