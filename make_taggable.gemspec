@@ -17,10 +17,6 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/MatthewKennedy/make_taggable"
   spec.license = "MIT"
 
-  if File.exist?("UPGRADING.md")
-    spec.post_install_message = File.read("UPGRADING.md")
-  end
-
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "https://github.com/MatthewKennedy/make_taggable/blob/master/CHANGELOG.md"
@@ -38,4 +34,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec-rails", "~> 4.0.0"
   spec.add_development_dependency "standard", "~> 0.10.0"
   spec.add_development_dependency "sqlite3", "~> 1.4.0"
+
+  if File.exist?("UPGRADING.md")
+    spec.post_install_message = File.read("UPGRADING.md")
+  end
 end
