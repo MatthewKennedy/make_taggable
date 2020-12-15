@@ -108,10 +108,8 @@ describe "Acts As Taggable On" do
       ActiveRecord::Base.connection.execute(
         "INSERT INTO cache_methods_injected_models (cached_tag_list) VALUES ('ciao')"
       )
-      class CacheMethodsInjectedModel < ActiveRecord::Base
-        acts_as_taggable
-      end
     end
+
     after(:all) { Object.send(:remove_const, :CacheMethodsInjectedModel) }
 
     it "cached_tag_list_on? get injected correctly" do
