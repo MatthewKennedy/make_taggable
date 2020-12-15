@@ -15,7 +15,7 @@
 
 ## Bug reports / Issues
 
-  * Is something broken or not working as expected? Check for an existing issue or [create a new one](https://github.com/mbleigh/acts-as-taggable-on/issues/new)
+  * Is something broken or not working as expected? Check for an existing issue or [create a new one](https://github.com/MatthewKennedy/make_taggable/issues/new)
   * IMPORTANT: Include the version of the gem, if you've install from git, what Ruby and Rails you are running, etc.
 
 ## Code
@@ -23,7 +23,7 @@
 1. [Fork and clone the repo](https://help.github.com/articles/fork-a-repo)
 2. Install the gem dependencies: `bundle install`
 3. Make the changes you want and back them up with tests.
-  * [Run the tests](https://github.com/mbleigh/acts-as-taggable-on#testing) (`bundle exec rake spec`)
+  * [Run the tests](https://github.com/MatthewKennedy/make_taggable#testing)
 4. Update the CHANGELOG.md file with your changes and give yourself credit
 5. Commit and create a pull request with details as to what has been changed and why
   * Use well-described, small (atomic) commits.
@@ -48,7 +48,7 @@ How I handle pull requests:
 
 ### About Pull Requests (PR's)
 
-* [All Your Open Source Code Are Belong To Us](http://www.benjaminfleischer.com/2013/07/30/all-your-open-source-code-are-belong-to-us/)
+* [All Your Open Source Code Are Belong To Us](https://github.com/MatthewKennedy/make_taggable)
 * [Using Pull Requests](https://help.github.com/articles/using-pull-requests)
 * [Github pull requests made easy](http://www.element84.com/github-pull-requests-made-easy.html)
 

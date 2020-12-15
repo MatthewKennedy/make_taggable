@@ -519,4 +519,4 @@ List of valued contributors From Acts-As-Taggable-On: [Check them all](https://g
 
 
 ## License
-This gem is available as open source under the terms of the [MIT License](https://github.com/MatthewKennedy/make_taggable/blob/master/LICENSE.txt).
+This gem is available as open source under the terms of the [MIT License](https://github.com/MatthewKennedy/make_taggable/blob/master/LICENSE.md).
