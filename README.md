@@ -5,10 +5,9 @@
 ![SQLite Tests](https://github.com/MatthewKennedy/make_taggable/workflows/SQLite%20Tests/badge.svg)
 ![Standard Rb](https://github.com/MatthewKennedy/make_taggable/workflows/Standard%20Rb/badge.svg)
 
-MakeTaggable is a fork of ActsAsTaggableOn with code updates, fresh migrations, and tested against a dummy Rails app.
-**All credit goes to those who contributed to ActsAsTaggableOn: Michael Bleigh & Joost Baaij**.
+MakeTaggable is a fork of ActsAsTaggableOn with code updates, fresh migrations that work on MySQL, and tested against a dummy Rails app.
 
-**Why fork ActsAsTaggableOn?** ActsAsTaggableOn appears stuck with a set of legacy migrations that do not run on MySQL.
+All credit goes to those who contributed to ActsAsTaggableOn: Michael Bleigh & Joost Baaij.
 
 ## Installation
 
@@ -23,11 +22,10 @@ bundle add make_taggable
 Install migrations
 
 ```shell
-# For the latest versions :
 rails make_taggable_engine:install:migrations
 ```
 
-Review the generated migrations then migrate :
+Review the generated migrations then migrate:
 ```shell
 rails db:migrate
 ```
@@ -46,6 +44,7 @@ rails make_taggable_engine:tag_names:collate_bin
 ```
 
 See the Configuration section for more details.
+
 
 ## Usage
 
@@ -460,7 +459,7 @@ see [UPGRADING](UPGRADING.md)
 
 ## Contributors
 
-We have a long list of valued contributors. [Check them all](https://github.com/mbleigh/acts-as-taggable-on/contributors)
+List of valued contributors From ActsAsTaggable: [Check them all](https://github.com/mbleigh/acts-as-taggable-on/contributors)
 
 ## Compatibility
 
