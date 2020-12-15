@@ -5,9 +5,9 @@
 ![SQLite Tests](https://github.com/MatthewKennedy/make_taggable/workflows/SQLite%20Tests/badge.svg)
 ![Standard Rb](https://github.com/MatthewKennedy/make_taggable/workflows/Standard%20Rb/badge.svg)
 
-MakeTaggable is a fork of ActsAsTaggableOn with code updates, fresh migrations that work on MySQL, and tested against a dummy Rails app.
+MakeTaggable is a fork of Acts-As-Taggable-On with code updates, fresh migrations that work on MySQL, and tested against a dummy Rails app.
 
-All credit goes to those who contributed to ActsAsTaggableOn: Michael Bleigh & Joost Baaij.
+All credit goes to those who contributed to Acts-As-Taggable-On: Michael Bleigh & Joost Baaij.
 
 ## Installation
 
@@ -405,6 +405,7 @@ CSS:
 .css4 { font-size: 1.6em; }
 ```
 
+
 ## Configuration
 
 If you would like to remove unused tag objects after removing taggings, add:
@@ -453,13 +454,15 @@ MakeTaggable.delimiter = ','
 *NOTE 1: SQLite by default can't upcase or downcase multibyte characters, resulting in unwanted behavior. Load the SQLite ICU extension for proper handle of such characters. [See docs](http://www.sqlite.org/src/artifact?ci=trunk&filename=ext/icu/README.txt)*
 
 
-#### Upgrading
+## Upgrading
 
 see [UPGRADING](UPGRADING.md)
 
+
 ## Contributors
 
-List of valued contributors From ActsAsTaggable: [Check them all](https://github.com/mbleigh/acts-as-taggable-on/contributors)
+List of valued contributors From Acts-As-Taggable-On: [Check them all](https://github.com/mbleigh/acts-as-taggable-on/contributors)
+
 
 ## Compatibility
 
