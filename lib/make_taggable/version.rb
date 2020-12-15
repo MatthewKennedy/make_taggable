@@ -1,4 +1,3 @@
-# Acts As Taggable With Updates
 module MakeTaggable
-  VERSION = "0.6.6"
+  VERSION = "0.7.0"
 end
