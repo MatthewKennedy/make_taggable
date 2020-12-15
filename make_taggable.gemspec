@@ -20,13 +20,13 @@ Gem::Specification.new do |spec|
   spec.test_files = spec.files.grep(%r{^spec/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "rails"
+  spec.add_dependency "rails", ">= 5.2.0", "< 6.2"
 
-  spec.add_development_dependency "appraisal"
-  spec.add_development_dependency "mysql2"
-  spec.add_development_dependency "pg"
-  spec.add_development_dependency "rspec"
-  spec.add_development_dependency "rspec-rails"
-  spec.add_development_dependency "standard"
-  spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "appraisal", ">= 2.0.0", "< 3.0.0"
+  spec.add_development_dependency "mysql2", ">= 0.5.0", "< 0.6.0"
+  spec.add_development_dependency "pg", ">= 1.2.0", "< 2.0.0"
+  spec.add_development_dependency "rspec", ">= 3.10.0", "< 4.0.0"
+  spec.add_development_dependency "rspec-rails", ">= 4.0.0", "< 5.0.0"
+  spec.add_development_dependency "standard", ">= 0.10.0", "< 1.0.0"
+  spec.add_development_dependency "sqlite3", ">= 1.4.0", "< 2.0.0"
 end
