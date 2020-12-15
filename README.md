@@ -1,9 +1,11 @@
 # MakeTaggable
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
-![StandardRB](https://github.com/MatthewKennedy/make_taggable/workflows/StandardRB/badge.svg)
-![Tests](https://github.com/MatthewKennedy/make_taggable/workflows/Tests/badge.svg)
+![Postgres Tests](https://github.com/MatthewKennedy/make_taggable/workflows/Postgres%20Tests/badge.svg)
+![MySQL Tests](https://github.com/MatthewKennedy/make_taggable/workflows/MySQL%20Tests/badge.svg)
+![SQLite Tests](https://github.com/MatthewKennedy/make_taggable/workflows/SQLite%20Tests/badge.svg)
+![Standard Rb](https://github.com/MatthewKennedy/make_taggable/workflows/Standard%20Rb/badge.svg)
 
-MakeTaggable is a fork of acts-as-taggable-on v6.5 with code updates and a new set of migrations. All credit goes to those who contributed before acts-as-taggable-on became MakeTaggable: Michael Bleigh & Joost Baaij.
+MakeTaggable is a fork of acts-as-taggable-on with code updates and a new set of migrations. All credit goes to those who contributed before acts-as-taggable-on became MakeTaggable: Michael Bleigh & Joost Baaij.
 
 Why fork acts-as-taggable-on? Act As Taggable On appears stuck with a set of legacy migrations from rails pre [6.0] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
 
