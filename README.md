@@ -1,13 +1,11 @@
 # MakeTaggable
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
-![Postgres Tests](https://github.com/MatthewKennedy/make_taggable/workflows/Postgres%20Tests/badge.svg)
-![MySQL Tests](https://github.com/MatthewKennedy/make_taggable/workflows/MySQL%20Tests/badge.svg)
-![SQLite Tests](https://github.com/MatthewKennedy/make_taggable/workflows/SQLite%20Tests/badge.svg)
+![Postgres CI](https://github.com/MatthewKennedy/make_taggable/workflows/Postgres%20CI/badge.svg)
+![MySQL CI](https://github.com/MatthewKennedy/make_taggable/workflows/MySQL%20CI/badge.svg)
+![SQLite CI](https://github.com/MatthewKennedy/make_taggable/workflows/SQLite%20CI/badge.svg)
 ![Standard Rb](https://github.com/MatthewKennedy/make_taggable/workflows/Standard%20Rb/badge.svg)
 
-MakeTaggable is a fork of Acts-As-Taggable-On with code updates, fresh migrations that work on MySQL, and tested against a dummy Rails app.
-
-All credit goes to those who contributed to Acts-As-Taggable-On: Michael Bleigh & Joost Baaij.
+MakeTaggable is a tagging gem for Rails applications that allows custom tagging along dynamic contexts.
 
 ## Installation
 
