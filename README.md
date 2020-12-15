@@ -465,28 +465,36 @@ We have a long list of valued contributors. [Check them all](https://github.com/
 
 ## Compatibility
 
-Versions 0.6.x is compatible with Ruby 2.5 + and Rails 5.2 upwards
+Versions 0.6.x is compatible with Ruby 2.5 + and Rails 5.2 upwards.
 
 
 ## Testing
 
-Make Taggable uses RSpec for its test coverage. Inside the gem
-directory, you can run the specs with:
+Make Taggable uses RSpec for its test coverage. Inside the gem directory, you can run the specs by following the steps below:
 
-Set up the test enviroment.
+Install the rquired gems:
+
 ```shell
-bundle exec update
+bundle install
+```
 
+Setup the dummy test app:
+
+```shell
 bundle exec rake test_app
 ```
 
-Run tests.
+To run the spec tests against SQLite use the followiong command.
+
 ```shell
 bundle exec rake
 ```
 
-You can run all the tests across all the Rails versions by running `bundle exec rake appraise`.  If you'd also like to [run the tests across all rubies and databases as configured for Travis CI, install and run `wwtd`](https://github.com/grosser/wwtd).
+You can also run all the tests across all the Rails versions by running:
 
+```shell
+bundle exec rake appraise
+```
 
 ## License
 MIT
