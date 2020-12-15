@@ -1,4 +1,4 @@
-name: StandardRB
+name: Standard Rb
 
 on:
   pull_request:

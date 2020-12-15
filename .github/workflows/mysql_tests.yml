@@ -1,0 +1,55 @@
+---
+name: MySQL Tests
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - master
+jobs:
+  mysql:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: ['2.6', '2.7']
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MSQL_DATABASE: my_sql_test_db
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: Cache gems
+        uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-${{ matrix.ruby }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.ruby }}-gem-
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+          bundle exec appraisal install
+
+      - name: Run tests
+        env:
+          DATABASE_URL: mysql2://root:password@127.0.0.1:3306/my_sql_test_db
+          RAILS_ENV: test
+        run: |
+          cp spec/dummy/config/mysql_database.yml.ci spec/dummy/config/database.yml
+          bundle exec rake test_app
+          bundle exec appraisal rake
