@@ -5,11 +5,11 @@
 ![SQLite Tests](https://github.com/MatthewKennedy/make_taggable/workflows/SQLite%20Tests/badge.svg)
 ![Standard Rb](https://github.com/MatthewKennedy/make_taggable/workflows/Standard%20Rb/badge.svg)
 
-MakeTaggable is a fork of acts-as-taggable-on with code updates and a new set of migrations. All credit goes to those who contributed before acts-as-taggable-on became MakeTaggable: Michael Bleigh & Joost Baaij.
+MakeTaggable is a fork of ActsAsTaggableOn with code updates and a new set of migrations. All credit goes to those who contributed to ActsAsTaggableOn: Michael Bleigh & Joost Baaij.
 
-Why fork acts-as-taggable-on? Act As Taggable On appears stuck with a set of legacy migrations from rails pre [6.0] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
+Why fork ActsAsTaggableOn? ActsAsTaggableOn appears stuck with a set of legacy migrations from rails pre [6.0] that added and removed indexes so much that the migrations do not run on a fresh install using MySQL.
 
-For the PostgreSQL users, this is not an issue, but if you have an app or gem that used acts-as-taggable-on, you can no longer test against MySQL, so it seems a fresh start would be useful to clear out any legacy issues and move forward.
+For the PostgreSQL users, this is not an issue, but if you have an app or gem that used ActsAsTaggableOn, you can no longer test against MySQL, so it seems a fresh start would be useful to clear out any legacy issues and move forward.
 
 ## Installation
 
@@ -34,13 +34,13 @@ rails db:migrate
 ```
 
 #### For MySql users
-You can circumvent at any time the problem of special characters [issue 623](https://github.com/mbleigh/acts-as-taggable-on/issues/623) by setting in an initializer file:
+To make MySQL play nice with spÉcial characters you can setting the following line in an initializer file:
 
 ```ruby
 MakeTaggable.force_binary_collation = true
 ```
 
-Or by running this rake task:
+Or by run this rake task:
 
 ```shell
 rails make_taggable_engine:tag_names:collate_bin
@@ -465,12 +465,8 @@ We have a long list of valued contributors. [Check them all](https://github.com/
 
 ## Compatibility
 
-Versions 0.6.x is compatible with Ruby 2.5 + and Rails 6.
+Versions 0.6.x is compatible with Ruby 2.5 + and Rails 5.2 upwards
 
-
-## TODO
-- Review migrations indexes they seem excessive looking at the schema.
-- See if the newer version of ActiveRecord or arel can be used instead of the MySQL workarounds.
 
 ## Testing
 

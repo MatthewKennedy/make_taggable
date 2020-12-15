@@ -1,5 +1,6 @@
 ---
 name: MySQL Tests
+
 on:
   pull_request:
     branches:
@@ -12,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['2.6', '2.7']
+        ruby: ['2.5', '2.6', '2.7']
 
     services:
       mysql:
