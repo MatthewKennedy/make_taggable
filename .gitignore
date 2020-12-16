@@ -13,4 +13,3 @@ tmp
 /.idea
 spec/dummy/db/schema.rb
 spec/dummy/db/migrate/[!0]*
-/gemfiles/*
