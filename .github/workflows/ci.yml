@@ -33,6 +33,15 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.5', '2.6', '2.7']
+        gemfile:
+          - rails_5
+          - rails_6
+          - rails_6_1
+          - rails_master
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
+      BUNDLE_PATH_RELATIVE_TO_CWD: true
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby ${{ matrix.ruby }}
@@ -57,6 +66,14 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.5', '2.6', '2.7']
+        gemfile:
+          - rails_5
+          - rails_6
+          - rails_6_1
+          - rails_master
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
+      BUNDLE_PATH_RELATIVE_TO_CWD: true
 
     services:
       mysql:
@@ -92,6 +109,14 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.5', '2.6', '2.7']
+        gemfile:
+          - rails_5
+          - rails_6
+          - rails_6_1
+          - rails_master
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
+      BUNDLE_PATH_RELATIVE_TO_CWD: true
 
     services:
       postgres:
