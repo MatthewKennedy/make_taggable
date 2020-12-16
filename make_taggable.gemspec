@@ -31,6 +31,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "appraisal", "~> 2.3.0"
   spec.add_development_dependency "mysql2", "~> 0.5.0"
   spec.add_development_dependency "pg", "~> 1.2.0"
+  spec.add_development_dependency "rspec", "~> 3.10.0"
+  spec.add_development_dependency "rspec-rails", "~> 4.0.0"
   spec.add_development_dependency "standard", "~> 0.10.0"
   spec.add_development_dependency "sqlite3", "~> 1.4.0"
 
