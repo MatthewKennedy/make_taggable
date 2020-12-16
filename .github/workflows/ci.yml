@@ -97,9 +97,8 @@ jobs:
           RAILS_ENV: test
         run: |
           gem update --system
-          bundle exec appraisal install
           bundle exec rake test_app
-          bundle exec appraisal rake
+          bundle exec rake
 
 
   # POSTGRES
@@ -140,6 +139,5 @@ jobs:
           RAILS_ENV: test
         run: |
           gem update --system
-          bundle exec appraisal install
           bundle exec rake test_app
-          bundle exec appraisal rake
+          bundle exec rake
