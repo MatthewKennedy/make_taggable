@@ -80,10 +80,7 @@ jobs:
           DATABASE_URL: mysql2://root:password@127.0.0.1:3306/my_sql_test_db
           RAILS_ENV: test
         run: |
-          gem update --system
-          bundle exec appraisal install
-          bundle exec rake test_app
-          bundle exec appraisal rake
+          run: bundle exec rake db:create db:up
 
 
   # POSTGRES
