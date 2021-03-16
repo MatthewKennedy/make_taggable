@@ -1,6 +1,7 @@
 # MakeTaggable
 [![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
 ![CI](https://github.com/MatthewKennedy/make_taggable/workflows/CI/badge.svg)
+[![Standard Rb](https://github.com/MatthewKennedy/make_taggable/actions/workflows/standard-ci.yml/badge.svg)](https://github.com/MatthewKennedy/make_taggable/actions/workflows/standard-ci.yml)
 
 MakeTaggable is a tagging gem for Rails applications that allows custom tagging along dynamic contexts.
 
