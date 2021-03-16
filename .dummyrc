@@ -1,5 +1,5 @@
---database=postgresql
---webpack
+--skip-bootsnap
+--skip-webpack
 --skip-action-cable
 --skip-spring
 --skip-coffee
