@@ -16,17 +16,7 @@ def copy_templates
   directory "config/boot.rb", force: true
 end
 
-def migrate_test_db
-  run "bundle exec rake db:migrate RAILS_ENV=test"
-end
-
-def remove_gem_files
-  run "rm gemfile"
-  run "rm Gemfile.lock"
-end
 after_bundle do
   add_make_taggable_to_application_rb
   copy_templates
-  migrate_test_db
- # remove_gem_files
 end

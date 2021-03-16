@@ -4,4 +4,14 @@
 --skip-spring
 --skip-coffee
 --skip-turbolinks
+--skip-listen
+--skip-action-text
+--skip-active-storage
+--skip-action-cable
+--skip-action-mailer
+--skip-action-mailbox
+--skip-active-job
+--skip-javascript
+--skip-test
+
 --template=spec/template/test_app_template.rb
