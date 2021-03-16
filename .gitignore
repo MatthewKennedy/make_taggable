@@ -4,6 +4,7 @@
 .bundle
 .ruby-version
 spec/internal/config/database.yml
+dummy
 spec/dummy
 tmp*.sw?
 *.sw?
@@ -12,6 +13,5 @@ tmp
 *.lock
 *.iml
 /.idea
-spec/dummy
 spec/dummy/db/schema.rb
 spec/dummy/db/migrate/[!0]*
