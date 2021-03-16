@@ -4,6 +4,7 @@
 .bundle
 .ruby-version
 spec/internal/config/database.yml
+spec/dummy
 tmp*.sw?
 *.sw?
 tmp

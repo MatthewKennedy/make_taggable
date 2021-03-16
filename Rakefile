@@ -1,4 +1,5 @@
 require "bundler/gem_tasks"
+require "rails/dummy/tasks"
 
 import "./lib/tasks/tags_collate_utf8.rake"
 
