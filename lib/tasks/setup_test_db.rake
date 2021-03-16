@@ -7,6 +7,7 @@ end
 
 desc 'LLL'
 task :ll_app do
+  ENV["RAILS_ENV"] = "test"
   ENV['ENGINE'] = 'make_taggable_engine'
   Rake::Task['dummy:app'].invoke
 end

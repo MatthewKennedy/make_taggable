@@ -12,5 +12,6 @@ tmp
 *.lock
 *.iml
 /.idea
+spec/dummy
 spec/dummy/db/schema.rb
 spec/dummy/db/migrate/[!0]*
