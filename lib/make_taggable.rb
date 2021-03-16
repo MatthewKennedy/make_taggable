@@ -60,7 +60,7 @@ module MakeTaggable
   def self.glue
     setting = @configuration.delimiter
     delimiter = setting.is_a?(Array) ? setting[0] : setting
-    delimiter.ends_with?(" ") ? delimiter : "#{delimiter} "
+    delimiter.end_with?(" ") ? delimiter : "#{delimiter} "
   end
 
   class Configuration

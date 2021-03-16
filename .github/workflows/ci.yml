@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['2.5', '2.6', '2.7']
+        ruby: ['2.5', '2.6', '2.7', '3.0']
         gemfile:
           - rails_5
           - rails_6
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['2.5', '2.6', '2.7']
+        ruby: ['2.5', '2.6', '2.7', '3.0']
         gemfile:
           - rails_5
           - rails_6
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['2.5', '2.6', '2.7']
+        ruby: ['2.5', '2.6', '2.7', '3.0']
         gemfile:
           - rails_5
           - rails_6
