@@ -18,9 +18,7 @@ module MakeTaggable
       @taggings_table = :taggings
     end
 
-    def strict_case_match=(force_cs)
-      @strict_case_match = force_cs
-    end
+    attr_writer :strict_case_match
 
     def delimiter=(string)
       ActiveRecord::Base.logger.warn <<~WARNING
