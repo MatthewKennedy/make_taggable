@@ -467,19 +467,19 @@ Version 0.7.x is compatible with Ruby 2.5 > and Rails 5.2 >
 
 MakeTaggable uses RSpec for its test coverage. Inside the gem directory, you can run the specs by following the steps below:
 
-Install the rquired gems:
+1. Install the rquired gems:
 
 ```shell
-bundle install
+bundle update
 ```
 
-Setup the dummy test app:
+2. Setup the dummy test app:
 
 ```shell
-bundle exec rake test_app
+bundle exec rake create_test_app
 ```
 
-Run the spec tests against SQLite use the followiong command.
+3. Run the spec tests against SQLite use the following command.
 
 ```shell
 bundle exec rake
