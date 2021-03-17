@@ -26,21 +26,6 @@ Review the generated migrations then migrate:
 rails db:migrate
 ```
 
-#### For MySql users
-To make MySQL play nice with spÉcial characters you can setting the following line in an initializer file:
-
-```ruby
-MakeTaggable.force_binary_collation = true
-```
-
-Or by run this rake task:
-
-```shell
-rails make_taggable_engine:tag_names:collate_bin
-```
-
-See the Configuration section for more details.
-
 
 ## Usage
 
@@ -426,12 +411,6 @@ If you would like tags to be case-sensitive and not use LIKE queries for creatio
 
 ```ruby
 MakeTaggable.strict_case_match = true
-```
-
-If you would like to have an exact match covering special characters with MySql:
-
-```ruby
-MakeTaggable.force_binary_collation = true
 ```
 
 If you would like to specify table names:
