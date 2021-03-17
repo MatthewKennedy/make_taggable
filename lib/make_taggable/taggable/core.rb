@@ -99,6 +99,7 @@ module MakeTaggable::Taggable
       #                       * <tt>:end_at</tt> - Restrict the tags to those created before a certain time
       #
       # Example:
+      #
       #   User.tagged_with(["awesome", "cool"])                     # Users that are tagged with awesome and cool
       #   User.tagged_with(["awesome", "cool"], :exclude => true)   # Users that are not tagged with awesome or cool
       #   User.tagged_with(["awesome", "cool"], :any => true)       # Users that are tagged with awesome or cool
@@ -302,7 +303,8 @@ module MakeTaggable::Taggable
     # context is provided so that you may conditionally use a Tag subclass
     # only for some contexts.
     #
-    # @example Custom Tag class for one context
+    # Example: Custom Tag class for one context
+    #
     #   class Company < ActiveRecord::Base
     #     make_taggable :markets, :locations
     #

@@ -8,6 +8,7 @@ module MakeTaggable
     # This is an alias for calling <tt>make_taggable :tags</tt>.
     #
     # Example:
+    #
     #   class Book < ActiveRecord::Base
     #     acts_as_taggable
     #   end
@@ -19,6 +20,7 @@ module MakeTaggable
     # This is an alias for calling <tt>acts_as_ordered_taggable_on :tags</tt>.
     #
     # Example:
+    #
     #   class Book < ActiveRecord::Base
     #     acts_as_ordered_taggable
     #   end
@@ -32,6 +34,7 @@ module MakeTaggable
     # @param [Array] tag_types An array of taggable contexts
     #
     # Example:
+    #
     #   class User < ActiveRecord::Base
     #     make_taggable :languages, :skills
     #   end
@@ -46,6 +49,7 @@ module MakeTaggable
     # @param [Array] tag_types An array of taggable contexts
     #
     # Example:
+    #
     #   class User < ActiveRecord::Base
     #     acts_as_ordered_taggable_on :languages, :skills
     #   end

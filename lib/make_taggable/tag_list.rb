@@ -15,6 +15,7 @@ module MakeTaggable
     # Use the <tt>:parse</tt> option to add an unparsed tag string.
     #
     # Example:
+    #
     #   tag_list.add("Fun", "Happy")
     #   tag_list.add("Fun, Happy", :parse => true)
     def add(*names)
@@ -24,7 +25,7 @@ module MakeTaggable
       self
     end
 
-    # Append---Add the tag to the tag_list. This
+    # Append--- Add the tag to the tag_list. This
     # expression returns the tag_list itself, so several appends
     # may be chained together.
     def <<(obj)
@@ -48,6 +49,7 @@ module MakeTaggable
     # Use the <tt>:parse</tt> option to add an unparsed tag string.
     #
     # Example:
+    #
     #   tag_list.remove("Sad", "Lonely")
     #   tag_list.remove("Sad, Lonely", :parse => true)
     def remove(*names)
@@ -61,6 +63,7 @@ module MakeTaggable
     # The tags are joined with <tt>TagList.delimiter</tt> and quoted if necessary.
     #
     # Example:
+    #
     #   tag_list = TagList.new("Round", "Square,Cube")
     #   tag_list.to_s # 'Round, "Square,Cube"'
     def to_s

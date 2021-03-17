@@ -16,7 +16,6 @@ module MakeTaggable::Taggable
       #   to mimic the underlying behavior.  While processing this first
       #   call to columns, we do the caching column check and dynamically add
       #   the class and instance methods
-      #   FIXME: this method cannot compile in rubinius
       def columns
         @make_taggable_cache_columns ||= begin
           db_columns = super
@@ -32,7 +31,6 @@ module MakeTaggable::Taggable
 
       private
 
-      # @private
       def _has_tags_cache_columns?(db_columns)
         db_column_names = db_columns.map(&:name)
         tag_types.any? do |context|
@@ -40,7 +38,6 @@ module MakeTaggable::Taggable
         end
       end
 
-      # @private
       def _add_tags_caching_methods
         send :include, MakeTaggable::Taggable::Cache::InstanceMethods
         extend MakeTaggable::Taggable::Cache::ClassMethods

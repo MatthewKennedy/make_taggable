@@ -2,9 +2,10 @@ module MakeTaggable
   ##
   # Returns a new TagList using the given tag string.
   #
-  # Example:
-  # tag_list = MakeTaggable::GenericParser.new.parse("One , Two, Three")
-  # tag_list # ["One", "Two", "Three"]
+  #  Example:
+  #
+  #   tag_list = MakeTaggable::GenericParser.new.parse("One , Two, Three")
+  #   tag_list # ["One", "Two", "Three"]
   class GenericParser
     def initialize(tag_list)
       @tag_list = tag_list
