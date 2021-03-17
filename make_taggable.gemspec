@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activerecord", ">= 5.2.0", "<= 7.5.0"
+  spec.add_dependency "zeitwerk"
 
   spec.add_development_dependency "rails", ">= 5.2.0", "<= 7.5.0"
   spec.add_development_dependency "appraisal", "~> 2.3.0"

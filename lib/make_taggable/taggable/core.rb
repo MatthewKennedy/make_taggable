@@ -65,6 +65,7 @@ module MakeTaggable::Taggable
             end
 
             private
+
             def dirtify_tag_list(tagging)
               attribute_will_change! tagging.context.singularize+"_list"
             end
