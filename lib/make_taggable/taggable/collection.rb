@@ -162,18 +162,12 @@ module MakeTaggable::Taggable
 
       def tag_scope_joins(tag_scope, tagging_scope)
         tag_scope = tag_scope.joins("JOIN (#{safe_to_sql(tagging_scope)}) AS #{MakeTaggable::Tagging.table_name} ON #{MakeTaggable::Tagging.table_name}.tag_id = #{MakeTaggable::Tag.table_name}.id")
-        tag_scope.extending(CalculationMethods)
+        tag_scope.extending(MakeTaggable::Taggable::Calculation)
       end
     end
 
     def tag_counts_on(context, options = {})
       self.class.tag_counts_on(context, options.merge(id: id))
-    end
-
-    module CalculationMethods
-      def count(column_name = :all)
-        super(column_name)
-      end
     end
   end
 end
