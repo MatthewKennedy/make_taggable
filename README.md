@@ -467,7 +467,7 @@ Version 0.7.x is compatible with Ruby 2.5 > and Rails 5.2 >
 
 MakeTaggable uses RSpec for its test coverage. Inside the gem directory, you can run the specs by following the steps below:
 
-1. Install the rquired gems:
+1. Install the required gems:
 
 ```shell
 bundle update
