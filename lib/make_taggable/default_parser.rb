@@ -3,6 +3,7 @@ module MakeTaggable
   # Returns a new TagList using the given tag string.
   #
   # Example:
+  #
   #   tag_list = MakeTaggable::DefaultParser.parse("One , Two,  Three")
   #   tag_list # ["One", "Two", "Three"]
   class DefaultParser < GenericParser
@@ -33,7 +34,6 @@ module MakeTaggable
       end
     end
 
-    # private
     def delimiter
       # Parse the quoted tags
       d = MakeTaggable.delimiter
@@ -43,8 +43,8 @@ module MakeTaggable
     end
 
     # (             # Tag start delimiter ($1)
-    # \A       |  # Either string start or
-    # #{delimiter}        # a delimiter
+    # \A       |    # Either string start or
+    # #{delimiter}  # a delimiter
     # )
     # \s*"          # quote (") optionally preceded by whitespace
     # (.*?)         # Tag ($2)
@@ -58,8 +58,8 @@ module MakeTaggable
     end
 
     # (             # Tag start delimiter ($1)
-    # \A       |  # Either string start or
-    # #{delimiter}        # a delimiter
+    # \A       |    # Either string start or
+    # #{delimiter}  # a delimiter
     # )
     # \s*'          # quote (') optionally preceded by whitespace
     # (.*?)         # Tag ($2)

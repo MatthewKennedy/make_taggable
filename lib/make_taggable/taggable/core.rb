@@ -50,13 +50,10 @@ module MakeTaggable::Taggable
               parsed_new_list = MakeTaggable.default_parser.new(new_tags).parse
 
               if self.class.preserve_tag_order? || (parsed_new_list.sort != #{tag_type}_list.sort)
-                if MakeTaggable::Utils.legacy_activerecord?
-                  set_attribute_was("#{tag_type}_list", #{tag_type}_list)
-                else
-                  unless #{tag_type}_list_changed?
-                    @attributes["#{tag_type}_list"] = ActiveModel::Attribute.from_user("#{tag_type}_list", #{tag_type}_list, MakeTaggable::Taggable::TagListType.new)
-                  end
+                unless #{tag_type}_list_changed?
+                  @attributes["#{tag_type}_list"] = ActiveModel::Attribute.from_user("#{tag_type}_list", #{tag_type}_list, MakeTaggable::Taggable::TagListType.new)
                 end
+
                 write_attribute("#{tag_type}_list", parsed_new_list)
               end
 
@@ -68,6 +65,7 @@ module MakeTaggable::Taggable
             end
 
             private
+
             def dirtify_tag_list(tagging)
               attribute_will_change! tagging.context.singularize+"_list"
             end
@@ -99,6 +97,7 @@ module MakeTaggable::Taggable
       #                       * <tt>:end_at</tt> - Restrict the tags to those created before a certain time
       #
       # Example:
+      #
       #   User.tagged_with(["awesome", "cool"])                     # Users that are tagged with awesome and cool
       #   User.tagged_with(["awesome", "cool"], :exclude => true)   # Users that are not tagged with awesome or cool
       #   User.tagged_with(["awesome", "cool"], :any => true)       # Users that are tagged with awesome or cool
@@ -302,7 +301,8 @@ module MakeTaggable::Taggable
     # context is provided so that you may conditionally use a Tag subclass
     # only for some contexts.
     #
-    # @example Custom Tag class for one context
+    # Example: Custom Tag class for one context
+    #
     #   class Company < ActiveRecord::Base
     #     make_taggable :markets, :locations
     #

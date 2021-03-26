@@ -20,8 +20,6 @@ module MakeTaggable::Taggable::TaggedWithQuery
             .and(tags_match_type)
           )
       )
-
-      # FIXME: missing time scope, this is also missing in the original implementation
     end
 
     def owning_to_tagger

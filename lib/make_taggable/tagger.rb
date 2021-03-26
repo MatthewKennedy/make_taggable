@@ -10,6 +10,7 @@ module MakeTaggable
       # of tags.
       #
       # Example:
+      #
       #   class User < ActiveRecord::Base
       #     acts_as_tagger
       #   end
@@ -53,6 +54,7 @@ module MakeTaggable
       #               * <tt>:on</tt>   - The context on which you want to tag
       #
       # Example:
+      #
       #   @user.tag(@photo, :with => "paris, normandy", :on => :locations)
       def tag(taggable, opts = {})
         opts.reverse_merge!(force: true)

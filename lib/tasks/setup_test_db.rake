@@ -1,5 +1,3 @@
-require "fileutils"
-
 desc "Create a test app"
 task :create_test_app do
   ENV["RAILS_ENV"] = "test"
