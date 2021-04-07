@@ -5,7 +5,7 @@
 
 MakeTaggable is a tagging gem for Rails applications that allows custom tagging along dynamic contexts.
 
-## Installation.
+## Installation
 
 To use make_taggable, run the followng from the root of your application:
 
