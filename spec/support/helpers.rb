@@ -29,3 +29,9 @@ end
 def using_case_insensitive_collation?
   using_mysql? && MakeTaggable::Utils.connection.collation =~ /_ci\Z/
 end
+
+# MySQL has no partial indexes, so the unique index guarding unowned taggings
+# cannot be created there.
+def supports_partial_indexes?
+  !using_mysql?
+end

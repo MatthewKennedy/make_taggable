@@ -47,10 +47,16 @@ bundle exec appraisal rake
 
 ### A note on test ordering
 
-The suite runs in defined order. Several examples mutate shared model classes — adding a context to
-`TaggableModel`, flipping `preserve_tag_order` — and rely on siblings having run first. Randomising
-the order exposes this. Making those examples self-contained is welcome work; until then, please
-don't add new examples that depend on a sibling's side effects.
+The suite runs in random order, so an example that depends on a sibling having run first will fail
+sooner or later. Reproduce a failure with the seed it reports:
+
+```shell
+bundle exec rspec --order random:12345
+```
+
+Examples are free to change global state — the tagging declarations on the shared models, and the
+`MakeTaggable` configuration — because `spec_helper.rb` snapshots both and restores them after every
+example. Anything else you make global is yours to clean up.
 
 ## Documentation
 

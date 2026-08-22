@@ -23,6 +23,10 @@ This release renames the declaration methods and changes how delimiters are esca
 
 4. Requirements are now Ruby 3.2 and Active Record 7.2 or newer.
 
+Note for anyone upgrading past 1.0: a later migration adds a unique index
+preventing duplicate unowned taggings. If it fails, your taggings table
+already holds duplicates -- docs/database.md has a snippet to clear them.
+
 Install any new migrations:
 
     rails make_taggable_engine:install:migrations

@@ -34,22 +34,39 @@ That suits read-heavy tagging. If your application writes taggings in bulk, the 
 looking at — every index is maintained on insert, and several of the standalone ones are prefixes of
 composites that already exist. Drop what your queries do not use.
 
-### The unique index does not stop duplicate unowned taggings
+### Duplicate unowned taggings
 
 `taggings_idx` is unique across
 `[tag_id, taggable_id, taggable_type, context, tagger_id, tagger_type]`. Because `tagger_id` and
-`tagger_type` are null for unowned taggings, and SQL treats nulls as distinct, **the database will
-accept two identical unowned taggings**. Only the Active Record uniqueness validation prevents them,
-and a validation cannot prevent a race between two concurrent writes.
+`tagger_type` are null on every tagging nobody owns, and SQL compares nulls as distinct, that index
+does not stop two identical unowned taggings. Only the model validation does, and a validation
+cannot win a race between two concurrent writes.
 
-If duplicate taggings would be a problem for you, add a partial unique index. On PostgreSQL:
+Migration 6 closes it with a partial unique index, `taggings_unowned_idx`, covering
+`[tag_id, taggable_id, taggable_type, context]` where `tagger_id IS NULL`.
+
+**MySQL has no partial indexes**, so it keeps the validation on its own and the migration is a no-op
+there. If duplicate taggings would be a serious problem on MySQL, the usual workaround is a
+generated column holding a sentinel for the null tagger, indexed uniquely alongside the rest.
+
+If the migration fails with a uniqueness error, the table already contains duplicates. Remove them
+first:
 
 ```ruby
-add_index :taggings,
-  [:tag_id, :taggable_id, :taggable_type, :context],
-  unique: true,
-  where: "tagger_id IS NULL",
-  name: "taggings_unowned_idx"
+duplicates = MakeTaggable::Tagging
+  .where(tagger_id: nil)
+  .group(:tag_id, :taggable_id, :taggable_type, :context)
+  .having("COUNT(*) > 1")
+  .pluck(Arel.sql("MIN(id), COUNT(*)"))
+
+duplicates.each do |keep_id, _count|
+  tagging = MakeTaggable::Tagging.find(keep_id)
+  MakeTaggable::Tagging
+    .where(tagger_id: nil, tag_id: tagging.tag_id, taggable_id: tagging.taggable_id,
+      taggable_type: tagging.taggable_type, context: tagging.context)
+    .where.not(id: keep_id)
+    .delete_all
+end
 ```
 
 ## PostgreSQL

@@ -112,4 +112,28 @@ RSpec.describe MakeTaggable::Tagging do
       end
     end
   end
+
+  describe "duplicate unowned taggings" do
+    it "is rejected by a validation" do
+      taggable = TaggableModel.create!(name: "Bob", tag_list: "diving")
+      tagging = MakeTaggable::Tagging.first
+
+      duplicate = MakeTaggable::Tagging.new(
+        tag_id: tagging.tag_id, taggable: taggable, context: "tags"
+      )
+
+      expect(duplicate).not_to be_valid
+    end
+
+    it "is rejected by the database, so a race cannot slip one through", if: supports_partial_indexes? do
+      taggable = TaggableModel.create!(name: "Bob", tag_list: "diving")
+      tagging = MakeTaggable::Tagging.first
+
+      duplicate = MakeTaggable::Tagging.new(
+        tag_id: tagging.tag_id, taggable: taggable, context: "tags"
+      )
+
+      expect { duplicate.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+  end
 end
