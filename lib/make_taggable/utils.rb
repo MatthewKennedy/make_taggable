@@ -5,6 +5,17 @@ module MakeTaggable
   # Database differences the rest of the library needs to work around.
   #
   module Utils
+    ##
+    # Adapter names that are PostgreSQL as far as SQL generation is concerned.
+    #
+    # PostGIS is the PostgreSQL adapter with spatial types layered on top. It reports its own
+    # adapter name, so it has to be named here or the library treats a PostGIS application as
+    # though it were on MySQL -- `LIKE` in place of `ILIKE`, and the wrong grouping strategy.
+    #
+    # @return [Array<String>] frozen
+    #
+    POSTGRESQL_ADAPTER_NAMES = %w[PostgreSQL PostGIS].freeze
+
     class << self
       ##
       # The connection tags are read and written through.
@@ -18,10 +29,12 @@ module MakeTaggable
       ##
       # Whether tags are stored in PostgreSQL.
       #
+      # True for PostGIS as well, which is PostgreSQL underneath.
+      #
       # @return [TrueClass, FalseClass]
       #
       def using_postgresql?
-        connection && connection.adapter_name == "PostgreSQL"
+        !!connection && POSTGRESQL_ADAPTER_NAMES.include?(connection.adapter_name)
       end
 
       ##
@@ -47,7 +60,7 @@ module MakeTaggable
       ##
       # The case-insensitive pattern operator for the current adapter.
       #
-      # @return [String] `"ILIKE"` on PostgreSQL, otherwise `"LIKE"`
+      # @return [String] `"ILIKE"` on PostgreSQL and PostGIS, otherwise `"LIKE"`
       #
       def like_operator
         using_postgresql? ? "ILIKE" : "LIKE"
