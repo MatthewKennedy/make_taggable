@@ -1,31 +1,74 @@
-# How to contribute:
+# Contributing
 
-## Bug reports / Issues
+## Bug reports
 
-  * Is something broken or not working as expected? Check for an existing issue or [create a new one](https://github.com/MatthewKennedy/make_taggable/issues/new)
-  * IMPORTANT: Include the version of the gem, if you've install from git, what Ruby and Rails you are running, etc.
+Check for an [existing issue](https://github.com/MatthewKennedy/make_taggable/issues) first, then
+[open a new one](https://github.com/MatthewKennedy/make_taggable/issues/new).
 
-## Code
+Please include the version of the gem, your Ruby and Rails versions, your database adapter, and the
+smallest model and code that reproduce the problem.
 
-1. [Fork and clone the repo](https://help.github.com/articles/fork-a-repo)
-2. Install the gem dependencies: `bundle install`
-3. Make the changes you want and back them up with tests.
-4. Run the tests](https://github.com/MatthewKennedy/make_taggable#testing)
-5. Update the CHANGELOG.md file with your changes and give yourself credit
-6. Commit and create a pull request with details as to what has been changed and why
-  * Use well-described, small (atomic) commits.
-  * Include links to any relevant github issues.
-  * *Don't* change the VERSION file.
+## Making a change
 
-## How I handle pull requests:
+1. [Fork and clone the repo](https://help.github.com/articles/fork-a-repo).
+2. `bundle install`.
+3. Write a failing test first, then make it pass.
+4. Run the suite: `bundle exec rake`.
+5. Format: `bundle exec standardrb --fix`.
+6. Document any public API you added: `bundle exec yard stats --list-undoc` should report 100%.
+7. Add an entry to [CHANGELOG.md](CHANGELOG.md) under "unreleased".
+8. Open a pull request explaining what changed and why.
 
-* If the tests pass and the pull request looks good, I will merge it.
-* If the pull request needs to be changed,
-  * you can change it by updating the branch you generated the pull request from
-    * either by adding more commits, or
-    * by force pushing to it
-  * I can make any changes myself and manually merge the code in.
+Keep commits small and well described, and link any relevant issues. Don't bump the version — that
+happens at release.
+
+## Running the tests
+
+The suite runs against bare Active Record, using in-memory SQLite by default. There is no dummy
+application to generate.
+
+```shell
+bundle exec rake
+```
+
+Against another adapter:
+
+```shell
+DATABASE_ADAPTER=postgresql DATABASE_URL=postgres://localhost/make_taggable_test bundle exec rake
+DATABASE_ADAPTER=mysql2 DATABASE_URL=mysql2://root@127.0.0.1/make_taggable_test bundle exec rake
+```
+
+Across every supported Rails version:
+
+```shell
+bundle exec appraisal install
+bundle exec appraisal rake
+```
+
+### A note on test ordering
+
+The suite runs in defined order. Several examples mutate shared model classes — adding a context to
+`TaggableModel`, flipping `preserve_tag_order` — and rely on siblings having run first. Randomising
+the order exposes this. Making those examples self-contained is welcome work; until then, please
+don't add new examples that depend on a sibling's side effects.
 
 ## Documentation
 
-* Update the wiki
+Prose documentation lives in [docs/](docs). API documentation is YARD comments in `lib`, following
+the style already there: a `##` opening line, a description, a blank line, then tags with real Ruby
+types.
+
+Build it locally with `bundle exec yard doc`.
+
+## Releasing
+
+Maintainers only. Bump `lib/make_taggable/version.rb`, move the "unreleased" changelog heading to
+the new version, then tag:
+
+```shell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The release workflow runs the suite, checks formatting and documentation coverage, and publishes to
+RubyGems via trusted publishing.
