@@ -34,6 +34,27 @@ That suits read-heavy tagging. If your application writes taggings in bulk, the 
 looking at — every index is maintained on insert, and several of the standalone ones are prefixes of
 composites that already exist. Drop what your queries do not use.
 
+### Concurrent tag creation
+
+`tags.name` carries a unique index, so two requests creating the same tag at the same moment leave
+one of them holding an `ActiveRecord::RecordNotUnique`.
+
+`Tag.find_or_create_all_with_like_by_name` -- which every tag list goes through -- absorbs that. It
+re-reads the tags and retries, up to three times, and raises
+{MakeTaggable::DuplicateTagError} if the name is still taken after that.
+
+Each insert takes a savepoint of its own, so the failed insert is the only thing rolled back. If you
+call this inside a transaction of your own, that transaction and everything written into it survive
+the retry:
+
+```ruby
+Order.transaction do
+  order.update!(state: "placed")
+  order.tag_list = "priority"   # a race here rolls back nothing but the tag insert
+  order.save!
+end
+```
+
 ### Duplicate unowned taggings
 
 `taggings_idx` is unique across
