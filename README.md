@@ -1,7 +1,8 @@
 # MakeTaggable
 
-[![Gem Version](https://badge.fury.io/rb/make_taggable.svg)](https://badge.fury.io/rb/make_taggable)
-![CI](https://github.com/MatthewKennedy/make_taggable/workflows/CI/badge.svg)
+[![Gem Version](https://img.shields.io/gem/v/make_taggable)](https://rubygems.org/gems/make_taggable)
+[![Downloads](https://img.shields.io/gem/dt/make_taggable)](https://rubygems.org/gems/make_taggable)
+[![CI](https://github.com/MatthewKennedy/make_taggable/actions/workflows/ci.yml/badge.svg)](https://github.com/MatthewKennedy/make_taggable/actions/workflows/ci.yml)
 [![Standard Rb](https://github.com/MatthewKennedy/make_taggable/actions/workflows/standard-ci.yml/badge.svg)](https://github.com/MatthewKennedy/make_taggable/actions/workflows/standard-ci.yml)
 
 Tagging for Active Record models, across any number of named contexts.
