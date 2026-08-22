@@ -64,6 +64,12 @@ Prose documentation lives in [docs/](docs). API documentation is YARD comments i
 the style already there: a `##` opening line, a description, a blank line, then tags with real Ruby
 types.
 
+`spec/docs_spec.rb` holds the prose to the versions the gemspec promises. It checks that every Ruby
+block parses, that no example declares a migration version newer than the supported floor, that
+calls the floor does not have are shown alongside an alternative, and that every relative link
+resolves. It runs with the rest of the suite, so it runs on every Rails version in the matrix --
+including the oldest, which is where documentation written on the newest tends to break.
+
 Build it locally with `bundle exec yard doc`.
 
 ## Releasing
