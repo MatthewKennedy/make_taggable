@@ -5,6 +5,25 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- A migration adding `taggings_unowned_idx`, a partial unique index that stops duplicate unowned
+  taggings at the database level. `taggings_idx` never could: it spans the nullable tagger columns,
+  and SQL compares nulls as distinct, so only the model validation stood in the way and a validation
+  cannot win a race. MySQL has no partial indexes, so the migration is a no-op there.
+
+  Install it with `rails make_taggable_engine:install:migrations`. If it fails, the table already
+  holds duplicates -- see [docs/database.md](docs/database.md).
+
+### Internal
+
+- The suite runs in random order. Examples were leaking state into each other: tagging declarations
+  on the shared models, and the library configuration -- one example leaving `remove_unused_tags`
+  on could make an unrelated example fail a foreign key check. Both are now snapshotted and restored
+  around every example.
+
 ## [1.0.0] - 2026-08-22
 
 ### Breaking
