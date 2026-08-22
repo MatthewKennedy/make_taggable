@@ -13,7 +13,7 @@ order they were added in, and be cached on the record for display.
 
 ## Requirements
 
-| | |
+| Component | Supported |
 |---|---|
 | Ruby | 3.2 or newer |
 | Active Record | 7.2 or newer |
@@ -73,7 +73,7 @@ params.expect(book: [:title, :tag_list])
 
 ## Documentation
 
-| | |
+| Guide | Covers |
 |---|---|
 | [Getting started](docs/getting-started.md) | Install, first tagged model, reading and writing |
 | [Tag contexts](docs/contexts.md) | Multiple contexts, ordered tags, contexts created at runtime |
