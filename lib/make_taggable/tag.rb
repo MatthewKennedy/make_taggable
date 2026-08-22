@@ -116,14 +116,22 @@ module MakeTaggable
     ##
     # Finds a tag by name, creating it when it does not exist yet.
     #
+    # The name is matched in full. Honours the configured case sensitivity.
+    #
     # @param name [String] the tag name
     # @return [MakeTaggable::Tag]
+    #
+    # @example
+    #   MakeTaggable::Tag.find_or_create_with_like_by_name("ruby")
     #
     def self.find_or_create_with_like_by_name(name)
       if MakeTaggable.strict_case_match
         find_or_create_all_with_like_by_name([name]).first
       else
-        named_like(name).first || create(name: name)
+        # Matching has to happen in Ruby's terms rather than the column's: the
+        # MySQL migration collates tag names as utf8mb4_bin, which would make a
+        # LIKE comparison case sensitive whatever strict_case_match says.
+        named(name).first || create(name: name)
       end
     end
 

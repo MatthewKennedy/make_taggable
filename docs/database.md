@@ -60,8 +60,21 @@ add_index :taggings,
 
 ## MySQL
 
-- The default collation is case insensitive, which matches the library's default behaviour.
-- For exact matching including accented characters, turn on binary collation:
+**The shipped migrations collate tag names as `utf8mb4_bin`.** Migration 3 applies it
+unconditionally on MySQL, so the `tags.name` column is case- and accent-sensitive at the database
+level whatever `force_binary_collation` is set to.
+
+That matters if you query the column yourself: `WHERE name LIKE '%ruby%'` will not match `"Ruby"` on
+MySQL, though it does on SQLite and PostgreSQL. The library's own lookups are unaffected, because
+`Tag.named` and `Tag.named_any` compare with `LOWER()` on both sides rather than relying on the
+collation.
+
+To go back to a case-insensitive column, run `rails make_taggable_engine:tag_names:collate_ci`.
+
+Other notes:
+
+- For exact matching including accented characters *and* case-sensitive library lookups, turn on
+  binary collation through the configuration, which also flips `strict_case_match`:
 
   ```ruby
   MakeTaggable.force_binary_collation = true

@@ -90,6 +90,10 @@ an application that already has data means renaming the tables yourself.
 MySQL only. Switches the `tags.name` column to `utf8mb4_bin`, so names compare exactly including
 accented and other multi-byte characters, and forces `strict_case_match` on.
 
+Note that the shipped migrations already apply `utf8mb4_bin` to the column on MySQL. What this
+setting adds is `strict_case_match`, which is what actually makes the library's lookups case
+sensitive — see [database.md](database.md).
+
 ```ruby
 MakeTaggable.force_binary_collation = true
 ```

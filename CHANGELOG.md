@@ -33,6 +33,11 @@ See [UPGRADING.md](UPGRADING.md).
 - `MakeTaggable.delimiter=` no longer raises `NoMethodError` when Active Record has no logger,
   which is the case in a plain Active Record process or an initializer that runs early.
 - Class names are parameterised through `sanitize_sql` rather than interpolated into SQL.
+- `Tag.find_or_create_with_like_by_name` matches the whole name rather than a substring of it.
+  Asking for `"ruby"` while a tag named `"ruby on rails"` existed returned that tag instead of
+  creating the one requested. It is also no longer at the mercy of the column's collation, which
+  the MySQL migration sets to `utf8mb4_bin` -- on MySQL the method created a duplicate row for a
+  name differing only in case, despite `strict_case_match` being off.
 - `Tag.find_or_create_all_with_like_by_name` no longer creates two rows for a list holding two
   spellings of one name, such as `["Ruby", "ruby"]`. Tags created during the call were invisible to
   the names that followed. Tagging through a tag list was never affected, since the list dedupes

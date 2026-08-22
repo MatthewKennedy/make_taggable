@@ -167,6 +167,12 @@ RSpec.describe MakeTaggable::Tag do
       expect(described_class.find_or_create_with_like_by_name("ruby")).to eq(existing)
     end
 
+    it "does not return a different tag that merely contains the name" do
+      described_class.create!(name: "ruby on rails")
+
+      expect(described_class.find_or_create_with_like_by_name("ruby").name).to eq("ruby")
+    end
+
     it "matches an existing tag differing in case" do
       described_class.create!(name: "Ruby")
 
