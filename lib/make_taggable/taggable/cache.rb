@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable
   module Cache
     def self.included(base)
@@ -63,7 +65,7 @@ module MakeTaggable::Taggable
       end
 
       def make_taggable(*args)
-        super(*args)
+        super
         initialize_tags_cache
       end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "tagged_with_query"
 require_relative "tag_list_type"
 
@@ -17,9 +19,10 @@ module MakeTaggable::Taggable
     module ClassMethods
       def initialize_make_taggable_core
         include taggable_mixin
+
         tag_types.map(&:to_s).each do |tags_type|
           tag_type = tags_type.to_s.singularize
-          context_taggings = "#{tag_type}_taggings".to_sym
+          context_taggings = :"#{tag_type}_taggings"
           context_tags = tags_type.to_sym
           taggings_order = (preserve_tag_order? ? "#{MakeTaggable::Tagging.table_name}.id" : [])
 
@@ -38,7 +41,7 @@ module MakeTaggable::Taggable
               through: context_taggings,
               source: :tag
 
-            attribute "#{tags_type.singularize}_list".to_sym, MakeTaggable::Taggable::TagListType.new
+            attribute :"#{tags_type.singularize}_list", MakeTaggable::Taggable::TagListType.new
           end
 
           taggable_mixin.class_eval <<-RUBY, __FILE__, __LINE__ + 1
@@ -50,12 +53,8 @@ module MakeTaggable::Taggable
               parsed_new_list = MakeTaggable.default_parser.new(new_tags).parse
 
               if self.class.preserve_tag_order? || (parsed_new_list.sort != #{tag_type}_list.sort)
-                if MakeTaggable::Utils.legacy_activerecord?
-                  set_attribute_was("#{tag_type}_list", #{tag_type}_list)
-                else
-                  unless #{tag_type}_list_changed?
-                    @attributes["#{tag_type}_list"] = ActiveModel::Attribute.from_user("#{tag_type}_list", #{tag_type}_list, MakeTaggable::Taggable::TagListType.new)
-                  end
+                unless #{tag_type}_list_changed?
+                  @attributes["#{tag_type}_list"] = ActiveModel::Attribute.from_user("#{tag_type}_list", #{tag_type}_list, MakeTaggable::Taggable::TagListType.new)
                 end
                 write_attribute("#{tag_type}_list", parsed_new_list)
               end
@@ -76,7 +75,7 @@ module MakeTaggable::Taggable
       end
 
       def taggable_on(preserve_tag_order, *tag_types)
-        super(preserve_tag_order, *tag_types)
+        super
         initialize_make_taggable_core
       end
 
@@ -219,7 +218,7 @@ module MakeTaggable::Taggable
         instance_variable_set("@all_#{context.to_s.singularize}_list", nil)
       end
 
-      super(*args)
+      super
     end
 
     ##

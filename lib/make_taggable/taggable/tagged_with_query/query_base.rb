@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable::TaggedWithQuery
   class QueryBase
     def initialize(taggable_model, tag_model, tagging_model, tag_list, options)

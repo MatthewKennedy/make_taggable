@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe "Tagger" do
+RSpec.describe "Tagger" do
   before(:each) do
     @user = User.create
     @taggable = TaggableModel.create(name: "Bob Jones")

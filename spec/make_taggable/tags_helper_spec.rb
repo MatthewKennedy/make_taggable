@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe MakeTaggable::TagsHelper do
+RSpec.describe MakeTaggable::TagsHelper do
   before(:each) do
     @bob = TaggableModel.create(name: "Bob Jones", language_list: "ruby, php")
     @tom = TaggableModel.create(name: "Tom Marley", language_list: "ruby, java")

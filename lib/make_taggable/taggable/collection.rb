@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable
   module Collection
     def self.included(base)
@@ -29,7 +31,7 @@ module MakeTaggable::Taggable
       end
 
       def make_taggable(*args)
-        super(*args)
+        super
         initialize_make_taggable_collection
       end
 
@@ -101,7 +103,7 @@ module MakeTaggable::Taggable
         # Current model is STI descendant, so add type checking to the join condition
         unless descends_from_active_record?
           taggable_join = "INNER JOIN #{table_name} ON #{table_name}.#{primary_key} = #{MakeTaggable::Tagging.table_name}.taggable_id"
-          taggable_join << " AND #{table_name}.#{inheritance_column} = '#{name}'"
+          taggable_join += sanitize_sql([" AND #{table_name}.#{inheritance_column} = ?", name])
           tagging_scope = tagging_scope.joins(taggable_join)
         end
 
@@ -128,7 +130,7 @@ module MakeTaggable::Taggable
       end
 
       def safe_to_sql(relation)
-        connection.respond_to?(:unprepared_statement) ? connection.unprepared_statement { relation.to_sql } : relation.to_sql
+        connection.unprepared_statement { relation.to_sql }
       end
 
       private
@@ -170,13 +172,12 @@ module MakeTaggable::Taggable
       self.class.tag_counts_on(context, options.merge(id: id))
     end
 
+    # These relations carry a custom SELECT -- the tag columns plus an aliased
+    # count -- which Active Record would otherwise fold into the COUNT(). Count
+    # rows instead, whatever the relation selects.
     module CalculationMethods
-      # Rails 5 TODO: Remove options argument as soon we remove support to
-      # activerecord-deprecated_finders.
-      # See https://github.com/rails/rails/blob/master/activerecord/lib/active_record/relation/calculations.rb#L38
-      def count(column_name = :all, options = {})
-        # https://github.com/rails/rails/commit/da9b5d4a8435b744fcf278fffd6d7f1e36d4a4f2
-        super(column_name)
+      def count(column_name = :all)
+        super
       end
     end
   end

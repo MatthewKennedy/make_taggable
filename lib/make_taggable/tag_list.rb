@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_support/core_ext/module/delegation"
 
 module MakeTaggable
@@ -39,7 +41,7 @@ module MakeTaggable
 
     # Appends the elements of +other_tag_list+ to +self+.
     def concat(other_tag_list)
-      super(other_tag_list).send(:clean!)
+      super.send(:clean!)
       self
     end
 
@@ -67,10 +69,10 @@ module MakeTaggable
       tags = frozen? ? dup : self
       tags.send(:clean!)
 
+      delimiter = Regexp.union(Array(MakeTaggable.delimiter))
+
       tags.map { |name|
-        d = MakeTaggable.delimiter
-        d = Regexp.new d.join("|") if d.is_a? Array
-        name.index(d) ? "\"#{name}\"" : name
+        name.index(delimiter) ? "\"#{name}\"" : name
       }.join(MakeTaggable.glue)
     end
 
@@ -81,7 +83,7 @@ module MakeTaggable
       reject!(&:blank?)
       map!(&:to_s)
       map!(&:strip)
-      map! { |tag| tag.mb_chars.downcase.to_s } if MakeTaggable.force_lowercase
+      map!(&:downcase) if MakeTaggable.force_lowercase
       map!(&:parameterize) if MakeTaggable.force_parameterize
 
       MakeTaggable.strict_case_match ? uniq! : uniq! { |tag| tag.downcase }

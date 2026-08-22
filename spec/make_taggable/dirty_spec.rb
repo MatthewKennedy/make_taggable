@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe "Dirty behavior of taggable objects" do
+RSpec.describe "Dirty behavior of taggable objects" do
   context "with un-contexted tags" do
     before(:each) do
       @taggable = TaggableModel.create(tag_list: "awesome, epic")
@@ -22,10 +22,8 @@ describe "Dirty behavior of taggable objects" do
         expect(taggable.changes).to eq({"tag_list" => [["awesome", "epic"], ["one"]]})
       end
 
-      if Rails.version >= "5.1"
-        it "flags tag_list as changed" do
-          expect(@taggable.will_save_change_to_tag_list?).to be_truthy
-        end
+      it "flags tag_list as changed" do
+        expect(@taggable.will_save_change_to_tag_list?).to be_truthy
       end
 
       it "preserves original value" do

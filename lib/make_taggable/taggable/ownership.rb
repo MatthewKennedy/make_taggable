@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable
   module Ownership
     def self.included(base)
@@ -13,7 +15,7 @@ module MakeTaggable::Taggable
     module ClassMethods
       def make_taggable(*args)
         initialize_make_taggable_ownership
-        super(*args)
+        super
       end
 
       def initialize_make_taggable_ownership
@@ -82,7 +84,7 @@ module MakeTaggable::Taggable
         instance_variable_set("@owned_#{context}_list", nil)
       end
 
-      super(*args)
+      super
     end
 
     def save_owned_tags
@@ -120,8 +122,8 @@ module MakeTaggable::Taggable
           # have the correct context, and are removed from the list.
           if old_tags.present?
             MakeTaggable::Tagging.where(taggable_id: id, taggable_type: self.class.base_class.to_s,
-                                        tagger_type: owner.class.base_class.to_s, tagger_id: owner.id,
-                                        tag_id: old_tags, context: context).destroy_all
+              tagger_type: owner.class.base_class.to_s, tagger_id: owner.id,
+              tag_id: old_tags, context: context).destroy_all
           end
 
           # Create new taggings:

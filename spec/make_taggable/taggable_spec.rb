@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe "Taggable To Preserve Order" do
+RSpec.describe "Taggable To Preserve Order" do
   before(:each) do
     @taggable = OrderedTaggableModel.new(name: "Bob Jones")
   end
@@ -23,7 +23,7 @@ describe "Taggable To Preserve Order" do
   it "should return tag list in the order the tags were created" do
     # create
     @taggable.tag_list = "rails, ruby, css"
-    expect(@taggable.instance_variable_get("@tag_list").instance_of?(MakeTaggable::TagList)).to be_truthy
+    expect(@taggable.instance_variable_get(:@tag_list).instance_of?(MakeTaggable::TagList)).to be_truthy
 
     expect(-> {
       @taggable.save
@@ -57,7 +57,7 @@ describe "Taggable To Preserve Order" do
   it "should return tag objects in the order the tags were created" do
     # create
     @taggable.tag_list = "pow, ruby, rails"
-    expect(@taggable.instance_variable_get("@tag_list").instance_of?(MakeTaggable::TagList)).to be_truthy
+    expect(@taggable.instance_variable_get(:@tag_list).instance_of?(MakeTaggable::TagList)).to be_truthy
 
     expect(-> {
       @taggable.save
@@ -93,7 +93,7 @@ describe "Taggable To Preserve Order" do
   end
 end
 
-describe "Taggable" do
+RSpec.describe "Taggable" do
   before(:each) do
     @taggable = TaggableModel.new(name: "Bob Jones")
     @taggables = [@taggable, TaggableModel.new(name: "John Doe")]
@@ -149,7 +149,7 @@ describe "Taggable" do
 
   it "should be able to create tags" do
     @taggable.skill_list = "ruby, rails, css"
-    expect(@taggable.instance_variable_get("@skill_list").instance_of?(MakeTaggable::TagList)).to be_truthy
+    expect(@taggable.instance_variable_get(:@skill_list).instance_of?(MakeTaggable::TagList)).to be_truthy
 
     expect(-> {
       @taggable.save
@@ -707,7 +707,7 @@ describe "Taggable" do
 
     it "should be able to create tags" do
       @taggable.skill_list = "ruby, rails, css"
-      expect(@taggable.instance_variable_get("@skill_list").instance_of?(MakeTaggable::TagList)).to be_truthy
+      expect(@taggable.instance_variable_get(:@skill_list).instance_of?(MakeTaggable::TagList)).to be_truthy
 
       expect(-> {
         @taggable.save
@@ -775,7 +775,7 @@ describe "Taggable" do
   end
 end
 
-describe "Taggable model with json columns", if: postgresql_support_json? do
+RSpec.describe "Taggable model with json columns", if: postgresql_support_json? do
   before(:each) do
     @taggable = TaggableModelWithJson.new(name: "Bob Jones")
     @taggables = [@taggable, TaggableModelWithJson.new(name: "John Doe")]

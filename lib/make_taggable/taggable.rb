@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable
   module Taggable
     def taggable?
@@ -5,51 +7,46 @@ module MakeTaggable
     end
 
     ##
-    # This is an alias for calling <tt>make_taggable :tags</tt>.
+    # Make a model taggable on the given contexts.
     #
-    # Example:
+    # Called without arguments it makes the model taggable on `:tags`, which is the context every
+    # other part of the library treats as the default.
+    #
+    # @param tag_types [Array<Symbol, String>] the contexts to tag on
+    # @return [void]
+    #
+    # @example A single, default context
     #   class Book < ActiveRecord::Base
-    #     acts_as_taggable
+    #     make_taggable
     #   end
-    def acts_as_taggable
-      make_taggable :tags
-    end
-
-    ##
-    # This is an alias for calling <tt>acts_as_ordered_taggable_on :tags</tt>.
     #
-    # Example:
-    #   class Book < ActiveRecord::Base
-    #     acts_as_ordered_taggable
-    #   end
-    def acts_as_ordered_taggable
-      acts_as_ordered_taggable_on :tags
-    end
-
-    ##
-    # Make a model taggable on specified contexts.
-    #
-    # @param [Array] tag_types An array of taggable contexts
-    #
-    # Example:
+    # @example Several named contexts
     #   class User < ActiveRecord::Base
     #     make_taggable :languages, :skills
     #   end
+    #
     def make_taggable(*tag_types)
+      tag_types = [:tags] if tag_types.flatten.compact.empty?
+
       taggable_on(false, tag_types)
     end
 
     ##
-    # Make a model taggable on specified contexts
-    # and preserves the order in which tags are created
+    # Make a model taggable on the given contexts, preserving the order in which tags were added.
     #
-    # @param [Array] tag_types An array of taggable contexts
+    # Called without arguments it makes the model taggable on `:tags`.
     #
-    # Example:
+    # @param tag_types [Array<Symbol, String>] the contexts to tag on
+    # @return [void]
+    #
+    # @example
     #   class User < ActiveRecord::Base
-    #     acts_as_ordered_taggable_on :languages, :skills
+    #     make_ordered_taggable :languages, :skills
     #   end
-    def acts_as_ordered_taggable_on(*tag_types)
+    #
+    def make_ordered_taggable(*tag_types)
+      tag_types = [:tags] if tag_types.flatten.compact.empty?
+
       taggable_on(true, tag_types)
     end
 
@@ -57,11 +54,6 @@ module MakeTaggable
 
     # Make a model taggable on specified contexts
     # and optionally preserves the order in which tags are created
-    #
-    # Separate methods used above for backwards compatibility
-    # so that the original make_taggable method is unaffected
-    # as it's not possible to add another argument to the method
-    # without the tag_types being enclosed in square brackets
     #
     # NB: method overridden in core module in order to create tag type
     #     associations and methods after this logic has executed

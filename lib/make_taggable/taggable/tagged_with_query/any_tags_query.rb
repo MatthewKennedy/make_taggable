@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable::TaggedWithQuery
   class AnyTagsQuery < QueryBase
     def build

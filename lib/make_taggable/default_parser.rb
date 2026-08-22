@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable
   ##
   # Returns a new TagList using the given tag string.
@@ -35,11 +37,11 @@ module MakeTaggable
 
     # private
     def delimiter
-      # Parse the quoted tags
-      d = MakeTaggable.delimiter
-      # Separate multiple delimiters by bitwise operator
-      d = d.join("|") if d.is_a?(Array)
-      d
+      # Delimiters are literal strings, so any regular expression metacharacter
+      # they contain has to be escaped before it reaches a pattern. Regexp.union
+      # handles both the escaping and the alternation between multiple
+      # delimiters.
+      Regexp.union(Array(MakeTaggable.delimiter)).source
     end
 
     # (             # Tag start delimiter ($1)

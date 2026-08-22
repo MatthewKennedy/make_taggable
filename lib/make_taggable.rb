@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "make_taggable/version"
 require "active_record"
 require "active_record/version"
@@ -28,14 +30,12 @@ module MakeTaggable
     autoload :Cache
     autoload :Collection
     autoload :Core
-    autoload :Dirty
     autoload :Ownership
     autoload :Related
     autoload :TagListType
   end
 
   autoload :Utils
-  autoload :Compatibility
 
   class DuplicateTagError < StandardError
   end
@@ -88,11 +88,13 @@ module MakeTaggable
     end
 
     def delimiter=(string)
-      ActiveRecord::Base.logger.warn <<~WARNING
-        MakeTaggable.delimiter is deprecated \
-        and will be removed from v4.0+, use  \
-        a MakeTaggable.default_parser instead
-      WARNING
+      # Active Record does not always have a logger -- a plain Active Record
+      # process, or an initializer running before the logger is assigned, will
+      # both leave it nil.
+      ActiveRecord::Base.logger&.warn(
+        "MakeTaggable.delimiter is deprecated and will be removed in a future " \
+        "release. Configure a MakeTaggable.default_parser instead."
+      )
       @delimiter = string
     end
 

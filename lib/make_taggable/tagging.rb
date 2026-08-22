@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable
   class Tagging < ::ActiveRecord::Base #:nodoc:
     self.table_name = MakeTaggable.taggings_table
@@ -11,7 +13,7 @@ module MakeTaggable
     scope :owned_by, ->(owner) { where(tagger: owner) }
     scope :not_owned, -> { where(tagger_id: nil, tagger_type: nil) }
 
-    scope :by_contexts, ->(contexts) { where(context: (contexts || DEFAULT_CONTEXT)) }
+    scope :by_contexts, ->(contexts) { where(context: contexts || DEFAULT_CONTEXT) }
     scope :by_context, ->(context = DEFAULT_CONTEXT) { by_contexts(context.to_s) }
 
     validates_presence_of :context

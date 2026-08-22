@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable
   module TagsHelper
     # See the wiki for an example using tag_cloud.

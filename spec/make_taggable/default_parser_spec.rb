@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe MakeTaggable::DefaultParser do
+RSpec.describe MakeTaggable::DefaultParser do
   it "#parse should return empty array if empty array is passed" do
     parser = MakeTaggable::DefaultParser.new([])
     expect(parser.parse).to be_empty
@@ -16,13 +16,13 @@ describe MakeTaggable::DefaultParser do
     end
 
     it "should separate tags by delimiters" do
-      MakeTaggable.delimiter = [",", " ", '\|']
+      MakeTaggable.delimiter = [",", " ", "|"]
       parser = MakeTaggable::DefaultParser.new("cool, data|I have")
       expect(parser.parse.to_s).to eq("cool, data, I, have")
     end
 
     it "should escape quote" do
-      MakeTaggable.delimiter = [",", " ", '\|']
+      MakeTaggable.delimiter = [",", " ", "|"]
       parser = MakeTaggable::DefaultParser.new("'I have'|cool, data")
       expect(parser.parse.to_s).to eq('"I have", cool, data')
 
@@ -34,6 +34,18 @@ describe MakeTaggable::DefaultParser do
       MakeTaggable.delimiter = ["，", "的", "可能是"]
       parser = MakeTaggable::DefaultParser.new("我的东西可能是不见了，还好有备份")
       expect(parser.parse.to_s).to eq("我， 东西， 不见了， 还好有备份")
+    end
+
+    it "treats a regular expression metacharacter as a literal delimiter" do
+      MakeTaggable.delimiter = [",", "|"]
+      parser = MakeTaggable::DefaultParser.new("a|b,c")
+      expect(parser.parse).to eq(%w[a b c])
+    end
+
+    it "does not let a full stop delimiter match every character" do
+      MakeTaggable.delimiter = [",", "."]
+      parser = MakeTaggable::DefaultParser.new("a.b,c")
+      expect(parser.parse).to eq(%w[a b c])
     end
 
     it "should work for multiple quoted tags" do

@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe "Acts As Taggable On" do
+RSpec.describe "Acts As Taggable On" do
   describe "Related Objects" do
     # TODO, shared example
     it "should find related objects based on tag names on context" do

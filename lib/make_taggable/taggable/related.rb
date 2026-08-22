@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable
   module Related
     def self.included(base)
@@ -22,7 +24,7 @@ module MakeTaggable::Taggable
       end
 
       def make_taggable(*args)
-        super(*args)
+        super
         initialize_make_taggable_related
       end
     end
@@ -37,13 +39,13 @@ module MakeTaggable::Taggable
 
     def matching_contexts_for(search_context, result_context, klass, options = {})
       tags_to_find = tags_on(search_context).map { |t| t.name }
-      related_where(klass, ["#{exclude_self(klass, id)} #{klass.table_name}.#{klass.primary_key} = #{MakeTaggable::Tagging.table_name}.taggable_id AND #{MakeTaggable::Tagging.table_name}.taggable_type = '#{klass.base_class}' AND #{MakeTaggable::Tagging.table_name}.tag_id = #{MakeTaggable::Tag.table_name}.#{MakeTaggable::Tag.primary_key} AND #{MakeTaggable::Tag.table_name}.name IN (?) AND #{MakeTaggable::Tagging.table_name}.context = ?", tags_to_find, result_context])
+      related_where(klass, ["#{exclude_self(klass, id)} #{klass.table_name}.#{klass.primary_key} = #{MakeTaggable::Tagging.table_name}.taggable_id AND #{MakeTaggable::Tagging.table_name}.taggable_type = ? AND #{MakeTaggable::Tagging.table_name}.tag_id = #{MakeTaggable::Tag.table_name}.#{MakeTaggable::Tag.primary_key} AND #{MakeTaggable::Tag.table_name}.name IN (?) AND #{MakeTaggable::Tagging.table_name}.context = ?", klass.base_class.to_s, tags_to_find, result_context])
     end
 
     def related_tags_for(context, klass, options = {})
       tags_to_ignore = Array.wrap(options[:ignore]).map(&:to_s) || []
       tags_to_find = tags_on(context).map { |t| t.name }.reject { |t| tags_to_ignore.include? t }
-      related_where(klass, ["#{exclude_self(klass, id)} #{klass.table_name}.#{klass.primary_key} = #{MakeTaggable::Tagging.table_name}.taggable_id AND #{MakeTaggable::Tagging.table_name}.taggable_type = '#{klass.base_class}' AND #{MakeTaggable::Tagging.table_name}.tag_id = #{MakeTaggable::Tag.table_name}.#{MakeTaggable::Tag.primary_key} AND #{MakeTaggable::Tag.table_name}.name IN (?) AND #{MakeTaggable::Tagging.table_name}.context = ?", tags_to_find, context])
+      related_where(klass, ["#{exclude_self(klass, id)} #{klass.table_name}.#{klass.primary_key} = #{MakeTaggable::Tagging.table_name}.taggable_id AND #{MakeTaggable::Tagging.table_name}.taggable_type = ? AND #{MakeTaggable::Tagging.table_name}.tag_id = #{MakeTaggable::Tag.table_name}.#{MakeTaggable::Tag.primary_key} AND #{MakeTaggable::Tag.table_name}.name IN (?) AND #{MakeTaggable::Tagging.table_name}.context = ?", klass.base_class.to_s, tags_to_find, context])
     end
 
     private

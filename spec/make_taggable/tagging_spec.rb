@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe MakeTaggable::Tagging do
+RSpec.describe MakeTaggable::Tagging do
   before(:each) do
     @tagging = MakeTaggable::Tagging.new
   end

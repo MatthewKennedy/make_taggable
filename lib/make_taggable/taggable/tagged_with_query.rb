@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "tagged_with_query/query_base"
 require_relative "tagged_with_query/exclude_tags_query"
 require_relative "tagged_with_query/any_tags_query"

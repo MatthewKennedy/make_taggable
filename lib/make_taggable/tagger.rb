@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MakeTaggable
   module Tagger
     def self.included(base)
@@ -6,14 +8,18 @@ module MakeTaggable
 
     module ClassMethods
       ##
-      # Make a model a tagger. This allows an instance of a model to claim ownership
-      # of tags.
+      # Make a model a tagger, allowing its instances to claim ownership of the tags they apply.
       #
-      # Example:
+      # @param opts [Hash] options forwarded to the generated `owned_taggings` association
+      # @option opts [Proc] :scope a scope applied to the `owned_taggings` association
+      # @return [void]
+      #
+      # @example
       #   class User < ActiveRecord::Base
-      #     acts_as_tagger
+      #     make_tagger
       #   end
-      def acts_as_tagger(opts = {})
+      #
+      def make_tagger(opts = {})
         class_eval do
           owned_taggings_scope = opts.delete(:scope)
 
