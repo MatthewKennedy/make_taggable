@@ -17,6 +17,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
+    # Must match the Environment field on the RubyGems trusted publisher, or
+    # the OIDC exchange is rejected. Add required reviewers to this environment
+    # in Settings -> Environments to gate publishing on a manual approval.
+    environment: release
+
     permissions:
       contents: write
       id-token: write
