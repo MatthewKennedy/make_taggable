@@ -7,7 +7,15 @@ require "spec_helper"
 module Documentation
   ROOT = Pathname.new(File.expand_path("..", __dir__))
 
-  FILES = (ROOT.glob("*.md") + ROOT.glob("docs/*.md")).sort.freeze
+  # The changelog is a record of what the code used to do, so it quotes calls
+  # that were wrong on purpose -- including the two these checks exist to catch.
+  # Only documentation that instructs the reader is held to the floor.
+  HISTORICAL = ["CHANGELOG.md"].freeze
+
+  FILES = (ROOT.glob("*.md") + ROOT.glob("docs/*.md"))
+    .reject { |path| HISTORICAL.include?(path.basename.to_s) }
+    .sort
+    .freeze
 
   # The floor comes from the gemspec, so raising the minimum cannot silently
   # leave these checks testing the wrong version.
