@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe MakeTaggable::TagList do
+RSpec.describe MakeTaggable::TagList do
   let(:tag_list) { MakeTaggable::TagList.new("awesome", "radical") }
   let(:another_tag_list) { MakeTaggable::TagList.new("awesome", "crazy", "alien") }
 

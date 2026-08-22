@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe "Acts As Taggable On" do
+RSpec.describe "Acts As Taggable On" do
   it "should provide a class method 'taggable?' that is false for untaggable models" do
     expect(UntaggableModel).to_not be_taggable
   end
@@ -9,7 +9,7 @@ describe "Acts As Taggable On" do
     before(:each) do
       TaggableModel.tag_types = []
       TaggableModel.preserve_tag_order = false
-      TaggableModel.acts_as_ordered_taggable_on(:ordered_tags)
+      TaggableModel.make_ordered_taggable(:ordered_tags)
       @taggable = TaggableModel.new(name: "Bob Jones")
     end
 
@@ -162,6 +162,24 @@ describe "Acts As Taggable On" do
       }).to_not raise_error
     end
 
+    it "tags on :tags when called without a context" do
+      model = Class.new(ActiveRecord::Base) do
+        self.table_name = "taggable_models"
+        make_taggable
+      end
+
+      expect(model.tag_types).to eq([:tags])
+    end
+
+    it "exposes a tag_list when called without a context" do
+      model = Class.new(ActiveRecord::Base) do
+        self.table_name = "taggable_models"
+        make_taggable
+      end
+
+      expect(model.new).to respond_to(:tag_list)
+    end
+
     it "should not raise an error when passed [nil]" do
       expect(-> {
         TaggableModel.make_taggable([nil])
@@ -169,6 +187,10 @@ describe "Acts As Taggable On" do
     end
 
     it "should include dynamic contexts in tagging_contexts" do
+      # Declared up front rather than inherited from a sibling example, so this
+      # passes whatever order the suite runs in.
+      TaggableModel.make_taggable :array
+
       taggable = TaggableModel.create!(name: "Dynamic Taggable")
       taggable.set_tag_list_on :colors, "tag1, tag2, tag3"
       expect(taggable.tagging_contexts).to eq(%w[tags languages skills needs offerings array colors])

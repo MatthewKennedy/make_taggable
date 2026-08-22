@@ -1,0 +1,8 @@
+--markup markdown
+--readme README.md
+--output-dir doc
+--no-private
+lib/**/*.rb
+-
+docs/*.md
+CHANGELOG.md

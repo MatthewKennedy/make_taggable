@@ -1,0 +1,147 @@
+# Tag contexts
+
+A context is a named group of tags on a model. One model can tag in as many contexts as you like,
+and the tags in each are kept apart: adding `"ruby"` to `skill_list` says nothing about
+`interest_list`.
+
+```ruby
+class User < ApplicationRecord
+  make_taggable                        # the :tags context
+  make_taggable :skills, :interests
+end
+```
+
+## What each context generates
+
+Given `make_taggable :skills`, these appear on the model. Singular and plural forms are worked out
+with Active Support's inflector, so `:skills` gives `skill_list` and `skills`.
+
+| Method | Kind | What it gives you |
+|---|---|---|
+| `skill_list` | instance | The tag names, as a `MakeTaggable::TagList` |
+| `skill_list=` | instance | Replaces the whole list |
+| `all_skills_list` | instance | The names including tags applied by an owner |
+| `skills` | instance | The `MakeTaggable::Tag` records, through the association |
+| `skill_taggings` | instance | The `MakeTaggable::Tagging` join records |
+| `skill_counts` | class and instance | Tags used, each carrying a `count` |
+| `top_skills(limit = 10)` | class and instance | The most used tags, most first |
+| `skills_from(owner)` | instance | Only the tags that owner applied |
+| `find_related_skills` | instance | Other records sharing these tags |
+| `find_related_skills_for(klass)` | instance | The same, against another model |
+| `caching_skill_list?` | class | Whether this context is cached in a column |
+
+`skill_list` takes part in dirty tracking like any other attribute:
+
+```ruby
+user.skill_list = "diving"
+user.skill_list_changed?          # => true
+user.skill_list_was               # => ["jogging"]
+user.skill_list_change            # => [["jogging"], ["diving"]]
+user.will_save_change_to_skill_list?
+```
+
+## Adding contexts later
+
+Calling `make_taggable` again adds contexts rather than replacing them, which is what lets a
+subclass extend its parent:
+
+```ruby
+class Manual < Book
+  make_taggable :audiences
+end
+
+Manual.tag_types # => [:tags, :audiences]
+```
+
+## Preserving tag order
+
+By default tags come back in whatever order the database returns. To keep them in the order they
+were added, declare the model with `make_ordered_taggable`:
+
+```ruby
+class Route < ApplicationRecord
+  make_ordered_taggable            # the :tags context, ordered
+  make_ordered_taggable :stops
+end
+
+route.tag_list = "east, south"
+route.save
+route.tag_list = "north, east, south, west"
+route.save
+
+route.reload.tag_list # => ["north", "east", "south", "west"]
+```
+
+Ordering is a property of the model, not of a single context: the last call wins for every context
+on that model. It also changes what counts as a change — reordering the same tags marks the list
+dirty on an ordered model, and does not on an unordered one.
+
+## Contexts created at runtime
+
+You do not have to declare a context up front. Anything you write through `set_tag_list_on` is
+saved and read back, which is how user-defined tag groups are built:
+
+```ruby
+user = User.new(name: "Bobby")
+
+user.set_tag_list_on(:customs, "same, as, tag, list")
+user.tag_list_on(:customs)   # => ["same", "as", "tag", "list"]
+user.save
+
+user.tags_on(:customs)       # => [#<MakeTaggable::Tag name: "same">, ...]
+user.tag_counts_on(:customs)
+
+User.tagged_with("same", on: :customs) # => [user]
+```
+
+`tagging_contexts` lists everything the record tags in, declared and dynamic together:
+
+```ruby
+user.tagging_contexts # => ["tags", "skills", "interests", "customs"]
+```
+
+Dynamic contexts get none of the generated methods in the table above — there is no
+`custom_list` — so reach them through `tag_list_on`, `set_tag_list_on` and `tags_on`.
+
+## A separate vocabulary for one context
+
+Tags are shared across contexts and models by default: one `tags` row named `"ruby"` serves
+everything. To keep a context's tags separate, subclass `MakeTaggable::Tag` and override the hook
+that resolves names to records:
+
+```ruby
+class Market < MakeTaggable::Tag
+end
+
+class Company < ApplicationRecord
+  make_taggable :markets, :locations
+
+  private
+
+  def find_or_create_tags_from_list_with_context(tag_list, context)
+    if context.to_sym == :markets
+      Market.find_or_create_all_with_like_by_name(tag_list)
+    else
+      super
+    end
+  end
+end
+```
+
+This only genuinely separates the vocabularies if the tags table has a `type` column. Without one,
+Active Record has nowhere to record the subclass: rows created through `Market` are saved as plain
+tags, `Market.count` returns every tag in the table, and reloading a record gives you a
+`MakeTaggable::Tag` back. Add the column to get real separation:
+
+```ruby
+class AddTypeToTags < ActiveRecord::Migration[8.0]
+  def change
+    add_column MakeTaggable.tags_table, :type, :string
+    add_index MakeTaggable.tags_table, :type
+  end
+end
+```
+
+Note that the shipped migrations put a unique index on `tags.name`, so two tags cannot share a name
+even across subclasses. If a market and a genre both need to be called "Energy", widen that index to
+cover `[:name, :type]`.

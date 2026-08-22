@@ -8,133 +8,83 @@ on:
   push:
     branches:
       - master
+
 jobs:
-  # SQLITE
   sqlite:
+    name: sqlite / ruby ${{ matrix.ruby }} / ${{ matrix.gemfile }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        ruby: ['2.6', '2.7', '3.0']
-        gemfile:
-          - rails_5
-          - rails_6
-          - rails_6_1
-          - rails_master
-        exclude:
-          - ruby: '3.0'
-            gemfile: rails_5
-          # Rails 7 requires Ruby 2.7 or higher
-          - ruby: '2.6'
-            gemfile: rails_master
+        include:
+          - {ruby: '3.2', gemfile: rails_7_2}
+          - {ruby: '3.2', gemfile: rails_8_0}
+          - {ruby: '3.3', gemfile: rails_8_0}
+          - {ruby: '3.3', gemfile: rails_8_1}
+          - {ruby: '3.4', gemfile: rails_8_1}
+          - {ruby: '4.0', gemfile: rails_8_1}
+          - {ruby: '4.0', gemfile: rails_main}
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
-      BUNDLE_PATH_RELATIVE_TO_CWD: true
-
+      DATABASE_ADAPTER: sqlite3
+    continue-on-error: ${{ matrix.gemfile == 'rails_main' }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Ruby ${{ matrix.ruby }}
-        uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+      - run: bundle exec rake
 
-      - name: Run tests
-        env:
-          RAILS_ENV: test
-        run: |
-          bundle exec rake create_test_app
-          bundle exec rake
-
-
-  # MYSQL
   mysql:
+    name: mysql / ruby 3.4
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ruby: ['2.6', '2.7', '3.0']
-        gemfile:
-          - rails_5
-          - rails_6
-          - rails_6_1
-          - rails_master
-        exclude:
-          - ruby: '3.0'
-            gemfile: rails_5
-          # Rails 7 requires Ruby 2.7 or higher
-          - ruby: '2.6'
-            gemfile: rails_master
-    env:
-      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
-      BUNDLE_PATH_RELATIVE_TO_CWD: true
-
     services:
       mysql:
         image: mysql:8
         env:
           MYSQL_ROOT_PASSWORD: password
-          MSQL_DATABASE: test
+          MYSQL_DATABASE: make_taggable_test
         ports: ['3306:3306']
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Ruby ${{ matrix.ruby }}
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
-
-      - name: Run tests
-        env:
-          DATABASE_URL: mysql2://root:password@127.0.0.1:3306/test
-          RAILS_ENV: test
-        run: |
-          bundle exec rake create_test_app
-          bundle exec rake
-
-
-  # POSTGRES
-  postgres:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ruby: ['2.6', '2.7', '3.0']
-        gemfile:
-          - rails_5
-          - rails_6
-          - rails_6_1
-          - rails_master
-        exclude:
-          - ruby: '3.0'
-            gemfile: rails_5
-          # Rails 7 requires Ruby 2.7 or higher
-          - ruby: '2.6'
-            gemfile: rails_master
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     env:
-      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
-      BUNDLE_PATH_RELATIVE_TO_CWD: true
+      DATABASE_ADAPTER: mysql2
+      DATABASE_URL: mysql2://root:password@127.0.0.1:3306/make_taggable_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - run: bundle exec rake
 
+  postgres:
+    name: postgres / ruby 3.4
+    runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:12
+        image: postgres:17
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: test
+          POSTGRES_DB: make_taggable_test
         ports: ['5432:5432']
-
+        options: >-
+          --health-cmd=pg_isready
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_ADAPTER: postgresql
+      DATABASE_URL: postgres://postgres:password@localhost:5432/make_taggable_test
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Ruby ${{ matrix.ruby }}
-        uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
+          ruby-version: '3.4'
           bundler-cache: true
-
-      - name: Run tests
-        env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/test
-          RAILS_ENV: test
-        run: |
-          bundle exec rake create_test_app
-          bundle exec rake
+      - run: bundle exec rake

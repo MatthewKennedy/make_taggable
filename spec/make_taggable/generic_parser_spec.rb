@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe MakeTaggable::GenericParser do
+RSpec.describe MakeTaggable::GenericParser do
   it "#parse should return empty array if empty tag string is passed" do
     tag_list = MakeTaggable::GenericParser.new("")
     expect(tag_list.parse).to be_empty

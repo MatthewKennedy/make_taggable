@@ -1,0 +1,53 @@
+---
+name: Release
+
+# Publishes the gem when a version tag is pushed:
+#
+#   git tag v1.0.0 && git push origin v1.0.0
+#
+# Authentication uses RubyGems trusted publishing (OIDC), so no API key is
+# stored here. Configure make_taggable's trusted publisher on rubygems.org
+# first, pointing at this repository and this workflow file.
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    # Must match the Environment field on the RubyGems trusted publisher, or
+    # the OIDC exchange is rejected. Add required reviewers to this environment
+    # in Settings -> Environments to gate publishing on a manual approval.
+    environment: release
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+
+      - name: Run the test suite
+        run: bundle exec rake
+
+      - name: Check formatting
+        run: bundle exec standardrb --format progress
+
+      - name: Check documentation coverage
+        run: |
+          undocumented=$(bundle exec yard stats --list-undoc | grep -c '^MakeTaggable' || true)
+          if [ "$undocumented" -ne 0 ]; then
+            echo "::error::$undocumented public objects are undocumented"
+            bundle exec yard stats --list-undoc
+            exit 1
+          fi
+
+      - name: Publish to RubyGems
+        uses: rubygems/release-gem@v1

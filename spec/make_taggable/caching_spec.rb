@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe "Acts As Taggable On" do
+RSpec.describe "Acts As Taggable On" do
   describe "Caching" do
     before(:each) do
       @taggable = CachedModel.new(name: "Bob Jones")
@@ -76,7 +76,7 @@ describe "Acts As Taggable On" do
 
     it "should not override a user-defined columns method" do
       expect(ColumnsOverrideModel.columns.map(&:name)).not_to include("ignored_column")
-      ColumnsOverrideModel.acts_as_taggable
+      ColumnsOverrideModel.make_taggable
       expect(ColumnsOverrideModel.columns.map(&:name)).not_to include("ignored_column")
     end
   end

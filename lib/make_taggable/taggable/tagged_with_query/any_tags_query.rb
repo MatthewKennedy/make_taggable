@@ -1,5 +1,15 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable::TaggedWithQuery
+  ##
+  # Records carrying at least one tag in the list.
+  #
+  # @api private
+  #
   class AnyTagsQuery < QueryBase
+    ##
+    # @return [ActiveRecord::Relation]
+    #
     def build
       taggable_model.select(all_fields)
         .where(model_has_at_least_one_tag)

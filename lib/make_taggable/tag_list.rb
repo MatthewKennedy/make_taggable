@@ -1,22 +1,55 @@
+# frozen_string_literal: true
+
 require "active_support/core_ext/module/delegation"
 
 module MakeTaggable
+  ##
+  # The list of tag names held against one context of one record.
+  #
+  # A tag list is an Array, so everything Array offers works on it. What it adds is parsing, and
+  # cleaning: blank entries are dropped, entries are converted to strings and stripped, and
+  # duplicates are removed according to the configured case sensitivity.
+  #
+  # @example
+  #   list = MakeTaggable::TagList.new("Fun", "Happy")
+  #   list.add("Sad, Lonely", parse: true)
+  #   list # => ["Fun", "Happy", "Sad", "Lonely"]
+  #
+  # @!attribute [rw] owner
+  #   The tagger whose tags these are, when the list belongs to an owner.
+  #   @return [ActiveRecord::Base, NilClass]
+  # @!attribute [rw] parser
+  #   The parser used when this list is asked to parse a string.
+  #   @return [Class]
+  #
   class TagList < Array
     attr_accessor :owner
     attr_accessor :parser
 
+    ##
+    # Builds a tag list from the given names.
+    #
+    # @param args [Array<String, Symbol>] the tag names, optionally followed by an options hash
+    #   accepted by {#add}
+    # @return [MakeTaggable::TagList]
+    #
     def initialize(*args)
       @parser = MakeTaggable.default_parser
       add(*args)
     end
 
     ##
-    # Add tags to the tag_list. Duplicate or blank tags will be ignored.
-    # Use the <tt>:parse</tt> option to add an unparsed tag string.
+    # Adds tags to the list, ignoring duplicates and blanks.
     #
-    # Example:
+    # @param names [Array<String, Symbol>] the tags to add, optionally followed by an options hash
+    # @option names [TrueClass, FalseClass] :parse whether to parse the input as a delimited string
+    # @option names [Class] :parser a parser to use for this call only
+    # @return [MakeTaggable::TagList] self, so calls can be chained
+    #
+    # @example
     #   tag_list.add("Fun", "Happy")
-    #   tag_list.add("Fun, Happy", :parse => true)
+    #   tag_list.add("Fun, Happy", parse: true)
+    #
     def add(*names)
       extract_and_apply_options!(names)
       concat(names)
@@ -24,32 +57,48 @@ module MakeTaggable
       self
     end
 
-    # Append---Add the tag to the tag_list. This
-    # expression returns the tag_list itself, so several appends
-    # may be chained together.
+    ##
+    # Adds one tag to the list.
+    #
+    # @param obj [String, Symbol] the tag to add
+    # @return [MakeTaggable::TagList] self, so appends can be chained
+    #
     def <<(obj)
       add(obj)
     end
 
-    # Concatenation --- Returns a new tag list built by concatenating the
-    # two tag lists together to produce a third tag list.
+    ##
+    # Joins two tag lists into a third, leaving both untouched.
+    #
+    # @param other [Array<String>] the tags to append
+    # @return [MakeTaggable::TagList] a new list
+    #
     def +(other)
       TagList.new.add(self).add(other)
     end
 
-    # Appends the elements of +other_tag_list+ to +self+.
+    ##
+    # Appends another list's tags to this one.
+    #
+    # @param other_tag_list [Array<String>] the tags to append
+    # @return [MakeTaggable::TagList] self
+    #
     def concat(other_tag_list)
-      super(other_tag_list).send(:clean!)
+      super.send(:clean!)
       self
     end
 
     ##
-    # Remove specific tags from the tag_list.
-    # Use the <tt>:parse</tt> option to add an unparsed tag string.
+    # Removes tags from the list.
     #
-    # Example:
+    # @param names [Array<String, Symbol>] the tags to remove, optionally followed by an options
+    #   hash accepted by {#add}
+    # @return [MakeTaggable::TagList] self
+    #
+    # @example
     #   tag_list.remove("Sad", "Lonely")
-    #   tag_list.remove("Sad, Lonely", :parse => true)
+    #   tag_list.remove("Sad, Lonely", parse: true)
+    #
     def remove(*names)
       extract_and_apply_options!(names)
       delete_if { |name| names.include?(name) }
@@ -57,20 +106,24 @@ module MakeTaggable
     end
 
     ##
-    # Transform the tag_list into a tag string suitable for editing in a form.
-    # The tags are joined with <tt>TagList.delimiter</tt> and quoted if necessary.
+    # Renders the list as a delimited string, suitable for a form field.
     #
-    # Example:
-    #   tag_list = TagList.new("Round", "Square,Cube")
-    #   tag_list.to_s # 'Round, "Square,Cube"'
+    # Tags containing the delimiter are quoted, so the string parses back into the same list.
+    #
+    # @return [String]
+    #
+    # @example
+    #   MakeTaggable::TagList.new("Round", "Square,Cube").to_s
+    #   # => 'Round, "Square,Cube"'
+    #
     def to_s
       tags = frozen? ? dup : self
       tags.send(:clean!)
 
+      delimiter = Regexp.union(Array(MakeTaggable.delimiter))
+
       tags.map { |name|
-        d = MakeTaggable.delimiter
-        d = Regexp.new d.join("|") if d.is_a? Array
-        name.index(d) ? "\"#{name}\"" : name
+        name.index(delimiter) ? "\"#{name}\"" : name
       }.join(MakeTaggable.glue)
     end
 
@@ -81,7 +134,7 @@ module MakeTaggable
       reject!(&:blank?)
       map!(&:to_s)
       map!(&:strip)
-      map! { |tag| tag.mb_chars.downcase.to_s } if MakeTaggable.force_lowercase
+      map!(&:downcase) if MakeTaggable.force_lowercase
       map!(&:parameterize) if MakeTaggable.force_parameterize
 
       MakeTaggable.strict_case_match ? uniq! : uniq! { |tag| tag.downcase }

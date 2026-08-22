@@ -1,5 +1,15 @@
+# frozen_string_literal: true
+
 module MakeTaggable::Taggable::TaggedWithQuery
+  ##
+  # Records carrying none of the tags in the list.
+  #
+  # @api private
+  #
   class ExcludeTagsQuery < QueryBase
+    ##
+    # @return [ActiveRecord::Relation]
+    #
     def build
       taggable_model.joins(owning_to_tagger)
         .where(tags_not_in_list)
