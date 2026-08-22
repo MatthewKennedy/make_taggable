@@ -36,32 +36,60 @@ rails db:migrate
 
 ```ruby
 class Book < ApplicationRecord
-  make_taggable            # the :tags context
-  make_taggable :genres    # and one of your own
+  make_taggable            # the :tags context, for free-form tags
+  make_taggable :genres    # a context of your own, for a curated set
 end
 ```
 
+Each context is a separate set of tags, with its own list:
+
 ```ruby
-book = Book.create!(title: "Dune", tag_list: "sci-fi, classic")
+book = Book.create!(title: "Dune", genre_list: "sci-fi, classic")
 
-book.tag_list                    # => ["sci-fi", "classic"]
-book.tag_list.add("desert")
-book.tag_list.remove("classic")
+book.genre_list                  # => ["sci-fi", "classic"]
+```
+
+Add and remove individual tags. Nothing is written until you save:
+
+```ruby
+book.genre_list.add("space opera")
+book.genre_list.remove("classic")
 book.save
 
-book.genre_list = "science fiction"
+book.genre_list                  # => ["sci-fi", "space opera"]
+book.genres                      # => [#<MakeTaggable::Tag name: "sci-fi">, #<MakeTaggable::Tag name: "space opera">]
+```
+
+Assigning replaces the whole list, and the two contexts never touch each other:
+
+```ruby
+book.tag_list = "desert, chosen-one, re-read"
 book.save
+
+book.tag_list                    # => ["desert", "chosen-one", "re-read"]
+book.genre_list                  # => ["sci-fi", "space opera"]
 ```
 
 Find them again:
 
 ```ruby
 Book.tagged_with("sci-fi")                             # carries this tag
-Book.tagged_with(["sci-fi", "desert"])                 # carries both
+Book.tagged_with(["sci-fi", "space opera"])            # carries both
 Book.tagged_with(["sci-fi", "fantasy"], any: true)     # carries either
-Book.tagged_with(["sci-fi"], exclude: true)            # carries neither
+Book.tagged_with(["fantasy"], exclude: true)           # carries neither
+```
 
-Book.tag_counts_on(:genres)                            # tags with usage counts
+Scope a query to one context, and tags in the others stop counting:
+
+```ruby
+Book.tagged_with("sci-fi", on: :genres)                # => [#<Book title: "Dune">]
+Book.tagged_with("sci-fi", on: :tags)                  # => []
+```
+
+Counts, for tag clouds and "most used" lists:
+
+```ruby
+Book.tag_counts_on(:genres)                            # tags carrying a `count`
 Book.top_genres(10)
 ```
 
