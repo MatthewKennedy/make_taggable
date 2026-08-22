@@ -6,18 +6,18 @@
 pagination.
 
 ```ruby
-User.tagged_with("awesome").by_join_date.limit(20)
+Book.tagged_with("sci-fi").order(published_at: :desc).limit(20)
 ```
 
 By default every tag given must be present:
 
 ```ruby
-User.tagged_with(["awesome", "cool"])              # carries awesome AND cool
-User.tagged_with(["awesome", "cool"], any: true)   # carries awesome OR cool
-User.tagged_with(["awesome", "cool"], exclude: true) # carries NEITHER
+Book.tagged_with(["sci-fi", "classic"])                # carries sci-fi AND classic
+Book.tagged_with(["sci-fi", "classic"], any: true)     # carries sci-fi OR classic
+Book.tagged_with(["sci-fi", "classic"], exclude: true) # carries NEITHER
 ```
 
-Passing nothing matches nothing. `User.tagged_with([])` and `User.tagged_with("")` both return an
+Passing nothing matches nothing. `Book.tagged_with([])` and `Book.tagged_with("")` both return an
 empty relation rather than every record — worth knowing when the tags come from user input.
 
 ### Options
@@ -27,7 +27,7 @@ empty relation rather than every record — worth knowing when the tags come fro
 | `:any` | Match records carrying at least one of the tags |
 | `:exclude` | Match records carrying none of the tags |
 | `:match_all` | Match records carrying only these tags and no others |
-| `:wild` | Match tags *containing* the given text, i.e. `%awesome%` |
+| `:wild` | Match tags *containing* the given text, i.e. `%sci%` |
 | `:on` | Restrict to one context |
 | `:owned_by` | Restrict to tags applied by one tagger |
 | `:order_by_matching_tag_count` | With `:any`, order by how many tags matched, most first |
@@ -37,15 +37,15 @@ empty relation rather than every record — worth knowing when the tags come fro
 `:wild` combines with `:any` or `:exclude`:
 
 ```ruby
-User.tagged_with(["awe", "co"], any: true, wild: true)
+Book.tagged_with(["sci", "clas"], any: true, wild: true)
 ```
 
 Contexts are matched one call at a time, so chain to combine them:
 
 ```ruby
-User
-  .tagged_with(["awesome", "cool"], on: :tags, any: true)
-  .tagged_with(["smart", "shy"], on: :skills, any: true)
+Book
+  .tagged_with(["sci-fi", "fantasy"], on: :genres, any: true)
+  .tagged_with(["desert", "space"], on: :tags, any: true)
 ```
 
 ### Case sensitivity
@@ -104,6 +104,9 @@ Use `all_tags` when you only need the names: it skips the join onto the taggable
 noticeably cheaper on a large table.
 
 ## Related records
+
+These examples switch to a `User` model tagged on `:skills` — sharing tags is easiest to picture
+with people.
 
 Records sharing tags with this one, ordered by how many tags matched:
 

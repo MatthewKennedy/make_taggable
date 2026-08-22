@@ -96,7 +96,8 @@ Book.top_genres(10)
 Tags are ordinary attributes as far as your controller is concerned:
 
 ```ruby
-params.expect(book: [:title, :tag_list])
+params.expect(book: [:title, :tag_list])            # Rails 8
+params.require(:book).permit(:title, :tag_list)     # Rails 7.2
 ```
 
 ## Documentation

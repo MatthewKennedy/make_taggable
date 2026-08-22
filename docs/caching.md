@@ -10,7 +10,7 @@ There is no setting. Add a column named `cached_<singular context>_list` and cac
 itself on for that context:
 
 ```ruby
-class AddCachedTagListToBooks < ActiveRecord::Migration[8.0]
+class AddCachedTagListToBooks < ActiveRecord::Migration[7.2]
   def change
     add_column :books, :cached_tag_list, :string
     add_column :books, :cached_genre_list, :string

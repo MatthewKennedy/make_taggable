@@ -46,10 +46,15 @@ Calling `make_taggable` again adds contexts rather than replacing them, which is
 subclass extend its parent:
 
 ```ruby
+class Book < ApplicationRecord
+  make_taggable
+end
+
 class Manual < Book
   make_taggable :audiences
 end
 
+Book.tag_types   # => [:tags]
 Manual.tag_types # => [:tags, :audiences]
 ```
 
@@ -134,7 +139,7 @@ tags, `Market.count` returns every tag in the table, and reloading a record give
 `MakeTaggable::Tag` back. Add the column to get real separation:
 
 ```ruby
-class AddTypeToTags < ActiveRecord::Migration[8.0]
+class AddTypeToTags < ActiveRecord::Migration[7.2]
   def change
     add_column MakeTaggable.tags_table, :type, :string
     add_index MakeTaggable.tags_table, :type

@@ -83,15 +83,19 @@ class BooksController < ApplicationController
   private
 
   def book_params
-    params.expect(book: [:title, :tag_list])
+    params.expect(book: [:title, :tag_list])       # Rails 8
+    # params.require(:book).permit(:title, :tag_list)   # Rails 7.2
   end
 end
 ```
 
+`params.expect` arrived in Rails 8. On Rails 7.2 use `require` and `permit`, as commented above.
+
 To accept an array of tags from a multi-select, permit it as one:
 
 ```ruby
-params.expect(book: [:title, {tag_list: []}])
+params.expect(book: [:title, {tag_list: []}])      # Rails 8
+params.require(:book).permit(:title, tag_list: []) # Rails 7.2
 ```
 
 ## Find tagged records
