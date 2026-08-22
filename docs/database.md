@@ -26,13 +26,27 @@ Both table names are configurable — see [configuration.md](configuration.md).
 
 ## Indexes
 
-The shipped migrations index `taggings` heavily: the polymorphic references index themselves, and
-migration 5 adds standalone indexes on `taggable_id`, `tagger_id`, `taggable_type` and `context`,
-plus four composites.
+Migrations 2 and 5 between them put twelve indexes on `taggings`. Migration 7 drops five of them,
+leaving seven:
 
-That suits read-heavy tagging. If your application writes taggings in bulk, the write cost is worth
-looking at — every index is maintained on insert, and several of the standalone ones are prefixes of
-composites that already exist. Drop what your queries do not use.
+| Index | Columns | Why it is there |
+|---|---|---|
+| `taggings_idx` | `tag_id, taggable_id, taggable_type, context, tagger_id, tagger_type` | Unique. Stops a tag being applied twice in the same context by the same tagger |
+| `taggings_unowned_idx` | `tag_id, taggable_id, taggable_type, context` where `tagger_id IS NULL` | Unique, partial. See below. Not created on MySQL |
+| `taggings_taggable_context_idx` | `taggable_id, taggable_type, context` | Reading one record's tags in one context |
+| `taggings_idy` | `taggable_id, taggable_type, tagger_id, context` | Reading one record's owned tags |
+| — | `taggable_type, taggable_id` | The polymorphic association lookup |
+| — | `tagger_id, tagger_type` | `Tagging.owned_by`, and `tagged_with(owned_by:)` |
+| — | `context` | Filtering taggings by context alone |
+
+The five migration 7 removes were `tag_id`, `taggable_id`, `taggable_type` and `tagger_id` on their
+own, plus a second copy of the tagger pair in the opposite column order. A B-tree index already
+answers any query filtering on a leading subset of its columns, so a single-column index earns
+nothing when another index starts with that same column — and every index is maintained on insert.
+
+If you installed the migrations before version 1.2.0, running
+`rails make_taggable_engine:install:migrations` again copies migration 7 across. It is reversible,
+and nothing it drops is load-bearing: each one is a prefix of an index that remains.
 
 ### Concurrent tag creation
 
