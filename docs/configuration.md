@@ -51,14 +51,18 @@ The library avoids creating both, but data loaded another way can still contain 
 
 ### `remove_unused_tags`
 
-When the last tagging referencing a tag is destroyed, the tag row is destroyed too. Requires
-`tags_counter`, since it reads the counter cache to decide.
+When the last tagging referencing a tag is destroyed, the tag row is destroyed too.
+
+This works whether or not `tags_counter` is on. With the counter cache the tag row already carries
+the count and is only re-read; without it the tag's remaining taggings are queried directly, which
+costs one extra query per destroyed tagging.
 
 ### `tags_counter`
 
 Keeps `tags.taggings_count` up to date. Turning it off avoids a write to the tags row on every
-tagging, at the cost of `Tag.most_used`, `Tag.least_used` and `remove_unused_tags`, all of which
-read that counter.
+tagging, at the cost of `Tag.most_used` and `Tag.least_used`, both of which read that counter.
+
+`remove_unused_tags` is unaffected -- it falls back to querying the tag's taggings.
 
 Changing this on an existing application leaves the existing counts frozen at their current values
 rather than resetting them.

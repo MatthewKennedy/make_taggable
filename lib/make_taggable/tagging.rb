@@ -50,8 +50,21 @@ module MakeTaggable
 
     private
 
+    # Destroys the tag this tagging pointed at, if nothing else references it and the library is
+    # configured to clean up after itself. Runs after destroy.
+    #
+    # How "nothing else references it" is established depends on the counter cache. With
+    # `tags_counter` on, the count is already on the row and only needs re-reading. With it off
+    # there is no count to read, so the taggings are asked directly -- `none?` stops at the first
+    # row rather than counting them all.
+    #
+    # @return [void]
     def remove_unused_tags
-      if MakeTaggable.remove_unused_tags && MakeTaggable.tags_counter && tag.reload.taggings_count.zero?
+      return unless MakeTaggable.remove_unused_tags
+
+      if MakeTaggable.tags_counter
+        tag.destroy if tag.reload.taggings_count.zero?
+      elsif tag.taggings.reload.none?
         tag.destroy
       end
     end
