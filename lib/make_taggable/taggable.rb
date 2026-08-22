@@ -1,7 +1,16 @@
 # frozen_string_literal: true
 
 module MakeTaggable
+  ##
+  # Declaring a model taggable. Mixed into Active Record automatically, which is what puts
+  # {#make_taggable} on every model.
+  #
   module Taggable
+    ##
+    # Whether this model has been made taggable.
+    #
+    # @return [TrueClass, FalseClass] `false` until {#make_taggable} is called
+    #
     def taggable?
       false
     end

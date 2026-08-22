@@ -1,7 +1,21 @@
 # frozen_string_literal: true
 
 module MakeTaggable::Taggable
+  ##
+  # Tags applied by a tagger, kept separate from the record's own tags.
+  #
+  # Owned tags do not appear in `tag_list`, which only ever returns unowned tags. Use
+  # `all_tags_list` to see both together.
+  #
+  # @see MakeTaggable::Tagger
+  #
   module Ownership
+    ##
+    # @param base [Class] the model being made taggable
+    # @return [void]
+    #
+    # @api private
+    #
     def self.included(base)
       base.extend MakeTaggable::Taggable::Ownership::ClassMethods
 
@@ -12,12 +26,26 @@ module MakeTaggable::Taggable
       base.initialize_make_taggable_ownership
     end
 
+    ##
+    # Added to every taggable model.
+    #
     module ClassMethods
+      ##
+      # Adds contexts and refreshes the ownership readers.
+      #
+      # @param args [Array<Symbol, String>] the contexts to add
+      # @return [void]
+      #
       def make_taggable(*args)
         initialize_make_taggable_ownership
         super
       end
 
+      ##
+      # Defines a `<context>_from(owner)` reader for each context.
+      #
+      # @return [void]
+      #
       def initialize_make_taggable_ownership
         tag_types.map(&:to_s).each do |tag_type|
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
@@ -29,6 +57,12 @@ module MakeTaggable::Taggable
       end
     end
 
+    ##
+    # This record's tags belonging to one owner, across every context.
+    #
+    # @param owner [ActiveRecord::Base, NilClass] the tagger, or `nil` for every tag on the record
+    # @return [ActiveRecord::Relation]
+    #
     def owner_tags(owner)
       scope = if owner.nil?
         base_tags
@@ -50,6 +84,16 @@ module MakeTaggable::Taggable
       end
     end
 
+    ##
+    # This record's tags belonging to one owner, in one context.
+    #
+    # @param owner [ActiveRecord::Base, NilClass] the tagger, or `nil` for every tag on the record
+    # @param context [Symbol, String] the tagging context
+    # @return [ActiveRecord::Relation]
+    #
+    # @example
+    #   @photo.owner_tags_on(@user, :locations)
+    #
     def owner_tags_on(owner, context)
       owner_tags(owner).where(
         MakeTaggable::Tagging.table_name.to_s => {
@@ -58,11 +102,24 @@ module MakeTaggable::Taggable
       )
     end
 
+    ##
+    # The per-owner tag lists held in memory for a context, keyed by owner.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [Hash{ActiveRecord::Base => MakeTaggable::TagList}]
+    #
     def cached_owned_tag_list_on(context)
       variable_name = "@owned_#{context}_list"
       (instance_variable_defined?(variable_name) && instance_variable_get(variable_name)) || instance_variable_set(variable_name, {})
     end
 
+    ##
+    # One owner's tag list for a context.
+    #
+    # @param owner [ActiveRecord::Base] the tagger
+    # @param context [Symbol, String] the tagging context
+    # @return [MakeTaggable::TagList]
+    #
     def owner_tag_list_on(owner, context)
       add_custom_context(context)
 
@@ -71,6 +128,14 @@ module MakeTaggable::Taggable
       cache[owner] ||= MakeTaggable::TagList.new(*owner_tags_on(owner, context).map(&:name))
     end
 
+    ##
+    # Replaces one owner's tag list for a context. Saved with the record.
+    #
+    # @param owner [ActiveRecord::Base] the tagger
+    # @param context [Symbol, String] the tagging context
+    # @param new_list [String, Array<String>] the tags to apply
+    # @return [MakeTaggable::TagList]
+    #
     def set_owner_tag_list_on(owner, context, new_list)
       add_custom_context(context)
 
@@ -79,6 +144,12 @@ module MakeTaggable::Taggable
       cache[owner] = MakeTaggable.default_parser.new(new_list).parse
     end
 
+    ##
+    # Reloads the record, discarding the owned tag lists held in memory.
+    #
+    # @param args [Array<Object>] arguments forwarded to Active Record
+    # @return [ActiveRecord::Base] self
+    #
     def reload(*args)
       self.class.tag_types.each do |context|
         instance_variable_set("@owned_#{context}_list", nil)
@@ -87,6 +158,11 @@ module MakeTaggable::Taggable
       super
     end
 
+    ##
+    # Writes every owner's tag lists to the database. Runs after save.
+    #
+    # @return [TrueClass]
+    #
     def save_owned_tags
       tagging_contexts.each do |context|
         cached_owned_tag_list_on(context).each do |owner, tag_list|

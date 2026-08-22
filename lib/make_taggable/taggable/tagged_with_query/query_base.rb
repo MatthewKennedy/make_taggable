@@ -1,7 +1,20 @@
 # frozen_string_literal: true
 
 module MakeTaggable::Taggable::TaggedWithQuery
+  ##
+  # Shared Arel plumbing for the three query strategies.
+  #
+  # @api private
+  #
   class QueryBase
+    ##
+    # @param taggable_model [Class] the model being queried
+    # @param tag_model [Class] the tag model
+    # @param tagging_model [Class] the tagging model
+    # @param tag_list [MakeTaggable::TagList] the tags to match
+    # @param options [Hash] the options given to `tagged_with`
+    # @return [MakeTaggable::Taggable::TaggedWithQuery::QueryBase]
+    #
     def initialize(taggable_model, tag_model, tagging_model, tag_list, options)
       @taggable_model = taggable_model
       @tag_model = tag_model

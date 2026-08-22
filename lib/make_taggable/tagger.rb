@@ -1,14 +1,29 @@
 # frozen_string_literal: true
 
 module MakeTaggable
+  ##
+  # Ownership of tags. Mixed into Active Record automatically, which is what puts {ClassMethods#make_tagger}
+  # on every model.
+  #
   module Tagger
+    ##
+    # @param base [Class] the class being extended
+    # @return [void]
+    #
+    # @api private
+    #
     def self.included(base)
       base.extend ClassMethods
     end
 
+    ##
+    # Added to every Active Record model.
+    #
     module ClassMethods
       ##
       # Make a model a tagger, allowing its instances to claim ownership of the tags they apply.
+      #
+      # Adds an `owned_taggings` association and an `owned_tags` association to the model.
       #
       # @param opts [Hash] options forwarded to the generated `owned_taggings` association
       # @option opts [Proc] :scope a scope applied to the `owned_taggings` association
@@ -40,26 +55,47 @@ module MakeTaggable
         extend MakeTaggable::Tagger::SingletonMethods
       end
 
+      ##
+      # Whether this model claims ownership of the tags it applies.
+      #
+      # @return [TrueClass, FalseClass] `false` until {#make_tagger} is called
+      #
       def tagger?
         false
       end
 
+      ##
+      # @return [TrueClass, FalseClass]
+      # @see #tagger?
+      #
       def is_tagger?
         tagger?
       end
     end
 
+    ##
+    # Added to a model once it is a tagger.
+    #
     module InstanceMethods
       ##
-      # Tag a taggable model with tags that are owned by the tagger.
+      # Tags a record, with this tagger as the owner of the tags.
       #
-      # @param taggable The object that will be tagged
-      # @param [Hash] options An hash with options. Available options are:
-      #               * <tt>:with</tt> - The tags that you want to
-      #               * <tt>:on</tt>   - The context on which you want to tag
+      # The taggable is saved unless `:skip_save` is given, so the tags are persisted immediately.
       #
-      # Example:
-      #   @user.tag(@photo, :with => "paris, normandy", :on => :locations)
+      # @param taggable [ActiveRecord::Base] the record to tag
+      # @param opts [Hash] the tagging options
+      # @option opts [String, Array<String>] :with the tags to apply
+      # @option opts [Symbol, String] :on the context to apply them in
+      # @option opts [TrueClass, FalseClass] :skip_save whether to leave the taggable unsaved
+      # @option opts [TrueClass, FalseClass] :force whether to allow a context the model does not
+      #   declare, on by default
+      # @return [TrueClass, FalseClass] whether the taggable saved, or `false` when it is not taggable
+      # @raise [RuntimeError] when `:on` or `:with` is missing, or the context is undeclared and
+      #   `:force` is off
+      #
+      # @example
+      #   @user.tag(@photo, with: "paris, normandy", on: :locations)
+      #
       def tag(taggable, opts = {})
         opts.reverse_merge!(force: true)
         skip_save = opts.delete(:skip_save)
@@ -73,20 +109,39 @@ module MakeTaggable
         taggable.save unless skip_save
       end
 
+      ##
+      # Whether this record claims ownership of the tags it applies.
+      #
+      # @return [TrueClass, FalseClass]
+      #
       def tagger?
         self.class.is_tagger?
       end
 
+      ##
+      # @return [TrueClass, FalseClass]
+      # @see #tagger?
+      #
       def is_tagger?
         tagger?
       end
     end
 
+    ##
+    # Replaces {ClassMethods#tagger?} once a model is a tagger.
+    #
     module SingletonMethods
+      ##
+      # @return [TrueClass, FalseClass] always `true`
+      #
       def tagger?
         true
       end
 
+      ##
+      # @return [TrueClass, FalseClass]
+      # @see #tagger?
+      #
       def is_tagger?
         tagger?
       end

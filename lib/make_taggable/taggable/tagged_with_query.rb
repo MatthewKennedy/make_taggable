@@ -5,7 +5,22 @@ require_relative "tagged_with_query/exclude_tags_query"
 require_relative "tagged_with_query/any_tags_query"
 require_relative "tagged_with_query/all_tags_query"
 
+##
+# Builds the relation behind {MakeTaggable::Taggable::Core::ClassMethods#tagged_with}.
+#
+# @api private
+#
 module MakeTaggable::Taggable::TaggedWithQuery
+  ##
+  # Picks the query strategy the options call for and builds the relation.
+  #
+  # @param taggable_model [Class] the model being queried
+  # @param tag_model [Class] the tag model
+  # @param tagging_model [Class] the tagging model
+  # @param tag_list [MakeTaggable::TagList] the tags to match
+  # @param options [Hash] the options given to `tagged_with`
+  # @return [ActiveRecord::Relation]
+  #
   def self.build(taggable_model, tag_model, tagging_model, tag_list, options)
     if options[:exclude].present?
       ExcludeTagsQuery.new(taggable_model, tag_model, tagging_model, tag_list, options).build

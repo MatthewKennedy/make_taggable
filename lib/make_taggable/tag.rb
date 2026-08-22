@@ -1,6 +1,21 @@
 # frozen_string_literal: true
 
 module MakeTaggable
+  ##
+  # A tag name, shared by every record tagged with it.
+  #
+  # Tags are found and created through the class methods here rather than directly, so that the
+  # configured case sensitivity is applied consistently. Subclass it to keep a separate vocabulary
+  # for one context, and point at the subclass from
+  # {MakeTaggable::Taggable::Core#find_or_create_tags_from_list_with_context}.
+  #
+  # @!attribute [rw] name
+  #   The tag itself.
+  #   @return [String]
+  # @!attribute [rw] taggings_count
+  #   How many taggings reference this tag, maintained as a counter cache.
+  #   @return [Integer]
+  #
   class Tag < ::ActiveRecord::Base
     self.table_name = MakeTaggable.tags_table
 
@@ -12,7 +27,13 @@ module MakeTaggable
     validates_uniqueness_of :name, if: :validates_name_uniqueness?, case_sensitive: true
     validates_length_of :name, maximum: 255
 
-    # Monkey patch this method if don't need name uniqueness validation
+    ##
+    # Whether the uniqueness validation on `name` runs.
+    #
+    # Override this in a subclass to allow tag names to repeat.
+    #
+    # @return [TrueClass, FalseClass] always `true` here
+    #
     def validates_name_uniqueness?
       true
     end
@@ -21,6 +42,12 @@ module MakeTaggable
     scope :most_used, ->(limit = 20) { order("taggings_count desc").limit(limit) }
     scope :least_used, ->(limit = 20) { order("taggings_count asc").limit(limit) }
 
+    ##
+    # Tags matching a name exactly, honouring the configured case sensitivity.
+    #
+    # @param name [String] the name to match
+    # @return [ActiveRecord::Relation]
+    #
     def self.named(name)
       if MakeTaggable.strict_case_match
         where(["name = #{binary}?", name.to_s])
@@ -29,6 +56,12 @@ module MakeTaggable
       end
     end
 
+    ##
+    # Tags matching any of the given names exactly.
+    #
+    # @param list [Array<String>] the names to match
+    # @return [ActiveRecord::Relation]
+    #
     def self.named_any(list)
       clause = list.map { |tag|
         sanitize_sql_for_named_any(tag)
@@ -36,11 +69,26 @@ module MakeTaggable
       where(clause)
     end
 
+    ##
+    # Tags whose name contains the given fragment.
+    #
+    # Case insensitive on PostgreSQL, which uses `ILIKE`; otherwise it follows the column's
+    # collation.
+    #
+    # @param name [String] the fragment to look for
+    # @return [ActiveRecord::Relation]
+    #
     def self.named_like(name)
       clause = ["name #{MakeTaggable::Utils.like_operator} ? ESCAPE '!'", "%#{MakeTaggable::Utils.escape_like(name)}%"]
       where(clause)
     end
 
+    ##
+    # Tags whose name contains any of the given fragments.
+    #
+    # @param list [Array<String>] the fragments to look for
+    # @return [ActiveRecord::Relation]
+    #
     def self.named_like_any(list)
       clause = list.map { |tag|
         sanitize_sql(["name #{MakeTaggable::Utils.like_operator} ? ESCAPE '!'", "%#{MakeTaggable::Utils.escape_like(tag.to_s)}%"])
@@ -48,6 +96,15 @@ module MakeTaggable
       where(clause)
     end
 
+    ##
+    # Tags used in a given context, whatever the record they were applied to.
+    #
+    # @param context [String, Symbol] the tagging context
+    # @return [ActiveRecord::Relation]
+    #
+    # @example
+    #   MakeTaggable::Tag.for_context(:skills)
+    #
     def self.for_context(context)
       joins(:taggings)
         .where(["#{MakeTaggable.taggings_table}.context = ?", context])
@@ -55,6 +112,13 @@ module MakeTaggable
     end
 
     ### CLASS METHODS:
+
+    ##
+    # Finds a tag by name, creating it when it does not exist yet.
+    #
+    # @param name [String] the tag name
+    # @return [MakeTaggable::Tag]
+    #
     def self.find_or_create_with_like_by_name(name)
       if MakeTaggable.strict_case_match
         find_or_create_all_with_like_by_name([name]).first
@@ -63,6 +127,18 @@ module MakeTaggable
       end
     end
 
+    ##
+    # Finds every tag in a list by name, creating those that do not exist yet.
+    #
+    # A competing write that takes a name first is retried up to three times before giving up.
+    #
+    # @param list [Array<String>] the tag names
+    # @return [Array<MakeTaggable::Tag>] in the order the names were given
+    # @raise [MakeTaggable::DuplicateTagError] when a name stays taken after three attempts
+    #
+    # @example
+    #   MakeTaggable::Tag.find_or_create_all_with_like_by_name(%w[ruby rails])
+    #
     def self.find_or_create_all_with_like_by_name(*list)
       list = Array(list).flatten
 
@@ -86,14 +162,33 @@ module MakeTaggable
     end
 
     ### INSTANCE METHODS:
+
+    ##
+    # Compares tags by name, so a saved tag and an unsaved one with the same name are equal.
+    #
+    # @param other [Object] the object to compare against
+    # @return [TrueClass, FalseClass]
+    #
     def ==(other)
       super || (other.is_a?(Tag) && name == other.name)
     end
 
+    ##
+    # The tag's name, so a tag renders as itself in a view or a string.
+    #
+    # @return [String]
+    #
     def to_s
       name
     end
 
+    ##
+    # How many times this tag matched, on relations that select a count alongside the tag columns.
+    #
+    # Zero on a tag loaded without one.
+    #
+    # @return [Integer]
+    #
     def count
       read_attribute(:count).to_i
     end

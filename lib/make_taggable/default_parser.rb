@@ -2,12 +2,25 @@
 
 module MakeTaggable
   ##
-  # Returns a new TagList using the given tag string.
+  # The parser the library uses unless told otherwise.
   #
-  # Example:
-  #   tag_list = MakeTaggable::DefaultParser.parse("One , Two,  Three")
-  #   tag_list # ["One", "Two", "Three"]
+  # It splits on the configured delimiter, or delimiters, and understands quoting: a tag wrapped in
+  # single or double quotes may contain the delimiter itself.
+  #
+  # @example
+  #   MakeTaggable::DefaultParser.new("One , Two,  Three").parse
+  #   # => ["One", "Two", "Three"]
+  #
+  # @example A tag containing the delimiter
+  #   MakeTaggable::DefaultParser.new('"Ruby, Rails", Hotwire').parse
+  #   # => ["Ruby, Rails", "Hotwire"]
+  #
   class DefaultParser < GenericParser
+    ##
+    # Splits the input into tags, honouring quotes and every configured delimiter.
+    #
+    # @return [MakeTaggable::TagList] the parsed tags
+    #
     def parse
       string = @tag_list
 
@@ -35,7 +48,13 @@ module MakeTaggable
       end
     end
 
-    # private
+    ##
+    # The configured delimiters as a regular expression source, ready to interpolate into a pattern.
+    #
+    # @return [String]
+    #
+    # @api private
+    #
     def delimiter
       # Delimiters are literal strings, so any regular expression metacharacter
       # they contain has to be escaped before it reaches a pattern. Regexp.union
@@ -44,32 +63,24 @@ module MakeTaggable
       Regexp.union(Array(MakeTaggable.delimiter)).source
     end
 
-    # (             # Tag start delimiter ($1)
-    # \A       |  # Either string start or
-    # #{delimiter}        # a delimiter
-    # )
-    # \s*"          # quote (") optionally preceded by whitespace
-    # (.*?)         # Tag ($2)
-    # "\s*          # quote (") optionally followed by whitespace
-    # (?=           # Tag end delimiter (not consumed; is zero-length lookahead)
-    # #{delimiter}\s*  |  # Either a delimiter optionally followed by whitespace or
-    # \z          # string end
-    # )
+    ##
+    # Matches a double-quoted tag, bounded by the start of the string or a delimiter.
+    #
+    # @return [Regexp]
+    #
+    # @api private
+    #
     def double_quote_pattern
       /(\A|#{delimiter})\s*"(.*?)"\s*(?=#{delimiter}\s*|\z)/
     end
 
-    # (             # Tag start delimiter ($1)
-    # \A       |  # Either string start or
-    # #{delimiter}        # a delimiter
-    # )
-    # \s*'          # quote (') optionally preceded by whitespace
-    # (.*?)         # Tag ($2)
-    # '\s*          # quote (') optionally followed by whitespace
-    # (?=           # Tag end delimiter (not consumed; is zero-length lookahead)
-    # #{delimiter}\s*  | d # Either a delimiter optionally followed by whitespace or
-    # \z          # string end
-    # )
+    ##
+    # Matches a single-quoted tag, bounded by the start of the string or a delimiter.
+    #
+    # @return [Regexp]
+    #
+    # @api private
+    #
     def single_quote_pattern
       /(\A|#{delimiter})\s*'(.*?)'\s*(?=#{delimiter}\s*|\z)/
     end

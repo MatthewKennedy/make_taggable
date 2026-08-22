@@ -4,7 +4,17 @@ require_relative "tagged_with_query"
 require_relative "tag_list_type"
 
 module MakeTaggable::Taggable
+  ##
+  # The heart of tagging: the associations, the generated `<context>_list` readers and writers, and
+  # the `tagged_with` query.
+  #
   module Core
+    ##
+    # @param base [Class] the model being made taggable
+    # @return [void]
+    #
+    # @api private
+    #
     def self.included(base)
       base.extend MakeTaggable::Taggable::Core::ClassMethods
 
@@ -16,7 +26,15 @@ module MakeTaggable::Taggable
       base.initialize_make_taggable_core
     end
 
+    ##
+    # Added to every taggable model.
+    #
     module ClassMethods
+      ##
+      # Builds the associations and the `<context>_list` methods for each context.
+      #
+      # @return [void]
+      #
       def initialize_make_taggable_core
         include taggable_mixin
 
@@ -74,6 +92,15 @@ module MakeTaggable::Taggable
         end
       end
 
+      ##
+      # Adds contexts and rebuilds the generated methods.
+      #
+      # @param preserve_tag_order [TrueClass, FalseClass] whether to keep tags in the order added
+      # @param tag_types [Array<Symbol, String>] the contexts to add
+      # @return [void]
+      #
+      # @api private
+      #
       def taggable_on(preserve_tag_order, *tag_types)
         super
         initialize_make_taggable_core
@@ -85,26 +112,34 @@ module MakeTaggable::Taggable
       end
 
       ##
-      # Return a scope of objects that are tagged with the specified tags.
+      # Records tagged with the given tags.
       #
-      # @param tags The tags that we want to query for
-      # @param [Hash] options A hash of options to alter you query:
-      #                       * <tt>:exclude</tt> - if set to true, return objects that are *NOT* tagged with the specified tags
-      #                       * <tt>:any</tt> - if set to true, return objects that are tagged with *ANY* of the specified tags
-      #                       * <tt>:order_by_matching_tag_count</tt> - if set to true and used with :any, sort by objects matching the most tags, descending
-      #                       * <tt>:match_all</tt> - if set to true, return objects that are *ONLY* tagged with the specified tags
-      #                       * <tt>:owned_by</tt> - return objects that are *ONLY* owned by the owner
-      #                       * <tt>:start_at</tt> - Restrict the tags to those created after a certain time
-      #                       * <tt>:end_at</tt> - Restrict the tags to those created before a certain time
+      # By default a record must carry every tag given. `:any` relaxes that to at least one, and
+      # `:exclude` inverts it to none.
       #
-      # Example:
-      #   User.tagged_with(["awesome", "cool"])                     # Users that are tagged with awesome and cool
-      #   User.tagged_with(["awesome", "cool"], :exclude => true)   # Users that are not tagged with awesome or cool
-      #   User.tagged_with(["awesome", "cool"], :any => true)       # Users that are tagged with awesome or cool
-      #   User.tagged_with(["awesome", "cool"], :any => true, :order_by_matching_tag_count => true)  # Sort by users who match the most tags, descending
-      #   User.tagged_with(["awesome", "cool"], :match_all => true) # Users that are tagged with just awesome and cool
-      #   User.tagged_with(["awesome", "cool"], :owned_by => foo ) # Users that are tagged with just awesome and cool by 'foo'
-      #   User.tagged_with(["awesome", "cool"], :owned_by => foo, :start_at => Date.today ) # Users that are tagged with just awesome, cool by 'foo' and starting today
+      # @param tags [String, Array<String>] the tags to match
+      # @param options [Hash] the query options
+      # @option options [TrueClass, FalseClass] :any match records carrying any of the tags
+      # @option options [TrueClass, FalseClass] :exclude match records carrying none of the tags
+      # @option options [TrueClass, FalseClass] :match_all match records carrying only these tags
+      # @option options [TrueClass, FalseClass] :wild match tags containing the given text
+      # @option options [TrueClass, FalseClass] :order_by_matching_tag_count with `:any`, order by
+      #   how many tags matched, most first
+      # @option options [ActiveRecord::Base] :owned_by only tags applied by this tagger
+      # @option options [Symbol, String] :on only tags applied in this context
+      # @option options [Time, Date] :start_at only tags applied after this time
+      # @option options [Time, Date] :end_at only tags applied before this time
+      # @return [ActiveRecord::Relation] empty when no tags are given
+      #
+      # @example Every tag
+      #   User.tagged_with(["awesome", "cool"])
+      #
+      # @example Any tag, most matches first
+      #   User.tagged_with(["awesome", "cool"], any: true, order_by_matching_tag_count: true)
+      #
+      # @example Scoped to a context and an owner
+      #   Photo.tagged_with("paris", on: :locations, owned_by: @user)
+      #
       def tagged_with(tags, options = {})
         tag_list = MakeTaggable.default_parser.new(tags).parse
         options = options.dup
@@ -118,6 +153,12 @@ module MakeTaggable::Taggable
         true
       end
 
+      ##
+      # The module the generated `<context>_list` methods are defined on, so a model can override
+      # one and call `super`.
+      #
+      # @return [Module]
+      #
       def taggable_mixin
         @taggable_mixin ||= Module.new
       end
@@ -128,6 +169,11 @@ module MakeTaggable::Taggable
       self.class.grouped_column_names_for(object)
     end
 
+    ##
+    # Contexts this record has been tagged in beyond those the model declares.
+    #
+    # @return [Array<String>]
+    #
     def custom_contexts
       @custom_contexts ||= taggings.map(&:context).uniq
     end
@@ -136,19 +182,43 @@ module MakeTaggable::Taggable
       self.class.is_taggable?
     end
 
+    ##
+    # Records a context the model does not declare, so it takes part in saving and reloading.
+    #
+    # @param value [Symbol, String] the context
+    # @return [Array<String>, NilClass]
+    #
     def add_custom_context(value)
       custom_contexts << value.to_s unless custom_contexts.include?(value.to_s) || self.class.tag_types.map(&:to_s).include?(value.to_s)
     end
 
+    ##
+    # The rendered tag list held in this context's caching column, if the model has one.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [String, NilClass]
+    #
     def cached_tag_list_on(context)
       self["cached_#{context.to_s.singularize}_list"]
     end
 
+    ##
+    # Whether a context's tag list has been loaded or assigned on this record.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [TrueClass, FalseClass, MakeTaggable::TagList]
+    #
     def tag_list_cache_set_on(context)
       variable_name = "@#{context.to_s.singularize}_list"
       instance_variable_defined?(variable_name) && instance_variable_get(variable_name)
     end
 
+    ##
+    # A context's tag list, loading it from the caching column or the database as needed.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [MakeTaggable::TagList]
+    #
     def tag_list_cache_on(context)
       variable_name = "@#{context.to_s.singularize}_list"
       if instance_variable_get(variable_name)
@@ -160,11 +230,28 @@ module MakeTaggable::Taggable
       end
     end
 
+    ##
+    # A context's tag list, covering contexts the model does not declare.
+    #
+    # Only unowned tags appear here. Use {#all_tags_list_on} to include tags applied by a tagger.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [MakeTaggable::TagList]
+    #
+    # @example
+    #   @user.tag_list_on(:customs) # => ["one", "two"]
+    #
     def tag_list_on(context)
       add_custom_context(context)
       tag_list_cache_on(context)
     end
 
+    ##
+    # A context's tag list including tags applied by a tagger.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [MakeTaggable::TagList] frozen
+    #
     def all_tags_list_on(context)
       variable_name = "@all_#{context.to_s.singularize}_list"
       return instance_variable_get(variable_name) if instance_variable_defined?(variable_name) && instance_variable_get(variable_name)
@@ -198,6 +285,18 @@ module MakeTaggable::Taggable
       scope
     end
 
+    ##
+    # Replaces a context's tag list, covering contexts the model does not declare. Saved with the
+    # record.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @param new_list [String, Array<String>] the tags to apply
+    # @return [MakeTaggable::TagList]
+    #
+    # @example
+    #   @user.set_tag_list_on(:customs, "same, as, tag, list")
+    #   @user.save
+    #
     def set_tag_list_on(context, new_list)
       add_custom_context(context)
 
@@ -208,10 +307,21 @@ module MakeTaggable::Taggable
       instance_variable_set(variable_name, parsed_new_list)
     end
 
+    ##
+    # Every context this record tags in, declared and dynamic alike.
+    #
+    # @return [Array<String>]
+    #
     def tagging_contexts
       self.class.tag_types.map(&:to_s) + custom_contexts
     end
 
+    ##
+    # Reloads the record, discarding the tag lists held in memory.
+    #
+    # @param args [Array<Object>] arguments forwarded to Active Record
+    # @return [ActiveRecord::Base] self
+    #
     def reload(*args)
       self.class.tag_types.each do |context|
         instance_variable_set("@#{context.to_s.singularize}_list", nil)
@@ -227,6 +337,11 @@ module MakeTaggable::Taggable
       MakeTaggable::Tag.find_or_create_all_with_like_by_name(tag_list)
     end
 
+    ##
+    # Writes every assigned tag list to the database. Runs after save.
+    #
+    # @return [TrueClass]
+    #
     def save_tags
       tagging_contexts.each do |context|
         next unless tag_list_cache_set_on(context)
@@ -297,13 +412,16 @@ module MakeTaggable::Taggable
     end
 
     ##
-    # Override this hook if you wish to subclass {MakeTaggable::Tag} --
-    # context is provided so that you may conditionally use a Tag subclass
-    # only for some contexts.
+    # Finds or creates the tag records for a list, given the context they are being applied in.
     #
-    # @example Custom Tag class for one context
+    # Override it to keep a separate vocabulary for one context by returning tags from a
+    # {MakeTaggable::Tag} subclass.
+    #
+    # @example A separate Tag subclass for one context
     #   class Company < ActiveRecord::Base
     #     make_taggable :markets, :locations
+    #
+    #     private
     #
     #     def find_or_create_tags_from_list_with_context(tag_list, context)
     #       if context.to_sym == :markets
@@ -312,9 +430,12 @@ module MakeTaggable::Taggable
     #         super
     #       end
     #     end
+    #   end
     #
-    # @param [Array<String>] tag_list Tags to find or create
-    # @param [Symbol] context The tag context for the tag_list
+    # @param tag_list [Array<String>] the tags to find or create
+    # @param _context [Symbol] the context the tags are being applied in
+    # @return [Array<MakeTaggable::Tag>]
+    #
     def find_or_create_tags_from_list_with_context(tag_list, _context)
       load_tags(tag_list)
     end

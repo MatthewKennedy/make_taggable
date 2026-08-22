@@ -1,7 +1,15 @@
 # frozen_string_literal: true
 
 module MakeTaggable::Taggable::TaggedWithQuery
+  ##
+  # Records carrying every tag in the list.
+  #
+  # @api private
+  #
   class AllTagsQuery < QueryBase
+    ##
+    # @return [ActiveRecord::Relation]
+    #
     def build
       taggable_model.joins(each_tag_in_list)
         .group(by_taggable)
