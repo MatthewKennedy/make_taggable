@@ -144,16 +144,21 @@ module MakeTaggable
 
       return [] if list.empty?
 
-      existing_tags = named_any(list)
+      existing_tags = named_any(list).to_a
       list.map do |tag_name|
         tries ||= 3
         comparable_tag_name = comparable_name(tag_name)
         existing_tag = existing_tags.find { |tag| comparable_name(tag.name) == comparable_tag_name }
-        existing_tag || create(name: tag_name)
+        next existing_tag if existing_tag
+
+        # Tags created earlier in this call have to stay visible to the names
+        # that follow, or a list holding both "Ruby" and "ruby" resolves to two
+        # rows even though the two names compare equal.
+        create(name: tag_name).tap { |tag| existing_tags << tag }
       rescue ActiveRecord::RecordNotUnique
         if (tries -= 1).positive?
           ActiveRecord::Base.connection.execute "ROLLBACK"
-          existing_tags = named_any(list)
+          existing_tags = named_any(list).to_a
           retry
         end
 

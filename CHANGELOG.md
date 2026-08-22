@@ -33,6 +33,10 @@ See [UPGRADING.md](UPGRADING.md).
 - `MakeTaggable.delimiter=` no longer raises `NoMethodError` when Active Record has no logger,
   which is the case in a plain Active Record process or an initializer that runs early.
 - Class names are parameterised through `sanitize_sql` rather than interpolated into SQL.
+- `Tag.find_or_create_all_with_like_by_name` no longer creates two rows for a list holding two
+  spellings of one name, such as `["Ruby", "ruby"]`. Tags created during the call were invisible to
+  the names that followed. Tagging through a tag list was never affected, since the list dedupes
+  before the lookup.
 
 ### Changed
 
@@ -56,9 +60,11 @@ See [UPGRADING.md](UPGRADING.md).
 - Replaced the test harness. The suite runs against bare Active Record instead of a generated dummy
   application, dropping the `rails-dummy` dependency and the `create_test_app` step, and builds its
   schema from the gem's own migrations.
-- Removed `spec/make_taggable/tag_spec.rb`, which contained no tests. It was a stale copy of
-  `lib/make_taggable/tag.rb` that RSpec loaded, silently redefining `MakeTaggable::Tag` and
-  reverting it part way through the suite.
+- Replaced `spec/make_taggable/tag_spec.rb`. The file of that name contained no tests: it was a
+  stale copy of `lib/make_taggable/tag.rb` that RSpec loaded, silently redefining
+  `MakeTaggable::Tag` and reverting it part way through the suite. `MakeTaggable::Tag` now has 45
+  unit specs, covering validations, every lookup and creation method, comparison, the scopes, and
+  the taggings association.
 - CI covers Rails 7.2, 8.0, 8.1 and main on Ruby 3.2 through 4.0.
 
 ## [0.7.5] - 2021-03-17
