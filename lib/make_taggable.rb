@@ -141,7 +141,8 @@ module MakeTaggable
   #   Whether tag names are parameterized before they are saved.
   #   @return [TrueClass, FalseClass] defaults to `false`
   # @!attribute [rw] remove_unused_tags
-  #   Whether a tag row is destroyed once its last tagging goes away. Requires `tags_counter`.
+  #   Whether a tag row is destroyed once its last tagging goes away. Works with or without
+  #   `tags_counter`; without it the check costs one extra query per destroyed tagging.
   #   @return [TrueClass, FalseClass] defaults to `false`
   # @!attribute [rw] default_parser
   #   The class used to turn tag input into a {MakeTaggable::TagList}.

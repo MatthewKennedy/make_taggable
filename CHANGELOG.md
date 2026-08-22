@@ -5,6 +5,35 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `Tag.find_or_create_all_with_like_by_name` recovered from a lost race for a tag name by issuing a
+  raw `ROLLBACK`. That statement is not scoped to the failed insert -- it discarded whatever
+  transaction was open on the connection, which is nearly always one the caller opened, and on a
+  multi-database application it targeted whichever connection `ActiveRecord::Base` held rather than
+  the one the tags are on. Each insert now takes a savepoint of its own.
+
+- `remove_unused_tags` did nothing at all when `tags_counter` was off, because the check read the
+  counter cache. With the counter off it now asks the tag's taggings directly, at the cost of one
+  indexed lookup per destroyed tagging. The documentation said the setting required `tags_counter`;
+  it no longer does.
+
+- `Utils.using_postgresql?` matched only the adapter named `PostgreSQL`, so a PostGIS application
+  took the MySQL path -- `LIKE` in place of `ILIKE`, which quietly made tag matching
+  case-sensitive, and the wrong grouping strategy in `all_tags_on` and `find_related_*`.
+
+### Changed
+
+- A migration dropping five indexes from `taggings` that no query planner can reach: `tag_id`,
+  `taggable_id`, `taggable_type` and `tagger_id` on their own, each a leading column of an index
+  that remains, plus a second copy of the tagger pair in the opposite column order. Twelve indexes
+  become seven, and every one of them is maintained on insert.
+
+  Install it with `rails make_taggable_engine:install:migrations`. It is reversible -- see
+  [docs/database.md](docs/database.md).
+
 ## [1.1.1] - 2026-08-22
 
 ### Fixed

@@ -139,6 +139,9 @@ module MakeTaggable
     # Finds every tag in a list by name, creating those that do not exist yet.
     #
     # A competing write that takes a name first is retried up to three times before giving up.
+    # Each insert runs in a savepoint of its own, so a name lost to a race unwinds that insert
+    # alone -- an enclosing transaction the caller opened is left untouched, along with everything
+    # written into it.
     #
     # @param list [Array<String>] the tag names
     # @return [Array<MakeTaggable::Tag>] in the order the names were given
@@ -162,10 +165,13 @@ module MakeTaggable
         # Tags created earlier in this call have to stay visible to the names
         # that follow, or a list holding both "Ruby" and "ruby" resolves to two
         # rows even though the two names compare equal.
-        create(name: tag_name).tap { |tag| existing_tags << tag }
+        #
+        # The insert gets a savepoint of its own so that a RecordNotUnique
+        # unwinds only the failed insert. Without one the caller's transaction
+        # is left in an aborted state and everything it had done is lost.
+        transaction(requires_new: true) { create(name: tag_name) }.tap { |tag| existing_tags << tag }
       rescue ActiveRecord::RecordNotUnique
         if (tries -= 1).positive?
-          ActiveRecord::Base.connection.execute "ROLLBACK"
           existing_tags = named_any(list).to_a
           retry
         end

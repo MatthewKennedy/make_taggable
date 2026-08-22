@@ -48,6 +48,32 @@ RSpec.describe MakeTaggable::Tagging do
     MakeTaggable.remove_unused_tags = previous_setting
   end
 
+  describe "removing unused tags without the counter cache" do
+    it "destroys a tag nothing references any more" do
+      MakeTaggable.remove_unused_tags = true
+      MakeTaggable.tags_counter = false
+      MakeTaggable::Tag.destroy_all
+
+      taggable = TaggableModel.create!(name: "Bob Jones")
+      taggable.update_attribute :tag_list, "aaa,bbb,ccc"
+      taggable.update_attribute :tag_list, ""
+
+      expect(MakeTaggable::Tag.count).to eq(0)
+    end
+
+    it "keeps a tag another record still uses" do
+      MakeTaggable.remove_unused_tags = true
+      MakeTaggable.tags_counter = false
+      MakeTaggable::Tag.destroy_all
+
+      keeper = TaggableModel.create!(name: "Keeper", tag_list: "shared")
+      TaggableModel.create!(name: "Leaver", tag_list: "shared").update_attribute :tag_list, ""
+
+      expect(MakeTaggable::Tag.pluck(:name)).to eq(["shared"])
+      expect(keeper.reload.tag_list).to eq(["shared"])
+    end
+  end
+
   describe "context scopes" do
     before do
       @tagging_2 = MakeTaggable::Tagging.new

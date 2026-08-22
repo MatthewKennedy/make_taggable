@@ -238,6 +238,47 @@ RSpec.describe MakeTaggable::Tag do
         described_class.find_or_create_all_with_like_by_name(%w[Ruby ruby])
       }.to change(described_class, :count).by(2)
     end
+
+    describe "when a competing write takes a name mid-flight" do
+      # Active Record raises RecordNotUnique when the unique index on tags.name
+      # rejects an insert. The method retries, and the retry must not disturb
+      # whatever transaction the caller happened to have open.
+      def fail_the_first(attempts)
+        raised = 0
+
+        allow(described_class).to receive(:create).and_wrap_original do |original, *args, **kwargs|
+          raised += 1
+          raise ActiveRecord::RecordNotUnique, "tags.name is taken" if raised <= attempts
+
+          original.call(*args, **kwargs)
+        end
+      end
+
+      it "leaves the caller's transaction intact" do
+        marker = TaggableModel.create!(name: "written before the retry")
+        fail_the_first(1)
+
+        described_class.find_or_create_all_with_like_by_name(%w[fresh])
+
+        expect(TaggableModel.where(id: marker.id)).to exist
+      end
+
+      it "still returns the tag it was asked for" do
+        fail_the_first(1)
+
+        names = described_class.find_or_create_all_with_like_by_name(%w[fresh]).map(&:name)
+
+        expect(names).to eq(%w[fresh])
+      end
+
+      it "gives up with DuplicateTagError once the retries are spent" do
+        fail_the_first(5)
+
+        expect {
+          described_class.find_or_create_all_with_like_by_name(%w[fresh])
+        }.to raise_error(MakeTaggable::DuplicateTagError, /fresh/)
+      end
+    end
   end
 
   describe "tagging a record" do
