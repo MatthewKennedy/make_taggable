@@ -378,6 +378,13 @@ module MakeTaggable::Taggable
         # Find existing tags or create non-existing tags:
         tags = find_or_create_tags_from_list_with_context(tag_list, context)
 
+        # A tag that failed its own validation comes back unsaved, with a nil
+        # id. Left alone it reaches taggings.create! as `tag_id: nil`, and the
+        # caller is told "Tag can't be blank" -- the wrong attribute, and no
+        # sign of what was actually wrong. Report the tag itself instead.
+        unsaved = tags.reject(&:persisted?)
+        raise ActiveRecord::RecordInvalid.new(unsaved.first) if unsaved.any?
+
         # Tag objects for currently assigned tags
         current_tags = tags_on(context)
 

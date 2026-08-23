@@ -110,3 +110,22 @@ end
 # CacheMethodsInjectedModel is deliberately left out: one example asserts that
 # the injection still happens lazily, on first use.
 [CachedModel, OtherCachedModel, TaggableModel].each(&:columns)
+
+# A Tag subclass carrying its own validation, and a model that tags through it.
+# Used to check that a tag an application refuses to save is reported as such.
+class PickyTag < MakeTaggable::Tag
+  validate do
+    errors.add(:name, "must not be rude") if name.to_s.include?("rude")
+  end
+end
+
+class PickyTaggableModel < ActiveRecord::Base
+  self.table_name = "taggable_models"
+  make_taggable
+
+  private
+
+  def find_or_create_tags_from_list_with_context(tag_list, _context)
+    PickyTag.find_or_create_all_with_like_by_name(tag_list)
+  end
+end

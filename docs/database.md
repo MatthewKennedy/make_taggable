@@ -156,3 +156,20 @@ or set `MakeTaggable.strict_case_match = true` so the behaviour is at least cons
 
 `name` is validated at 255 characters, and the column is a `string`. Tags longer than that fail
 validation rather than being truncated.
+
+A tag that cannot be saved fails the save of the record being tagged. `save!` raises
+`ActiveRecord::RecordInvalid` carrying the **tag**, so the error says what was wrong with it and
+`error.record` is the tag itself; `save` returns `false` and writes nothing.
+
+The same applies to a `Tag` subclass with validations of its own:
+
+```ruby
+class PickyTag < MakeTaggable::Tag
+  validate { errors.add(:name, "must not be rude") if name.to_s.include?("rude") }
+end
+
+article.save!
+# => ActiveRecord::RecordInvalid: Validation failed: Name must not be rude
+```
+
+See [contexts.md](contexts.md) for wiring a `Tag` subclass to a context.
