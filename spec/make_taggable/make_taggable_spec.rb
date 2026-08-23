@@ -5,6 +5,53 @@ RSpec.describe "Acts As Taggable On" do
     expect(UntaggableModel).to_not be_taggable
   end
 
+  describe "force_binary_collation", if: using_mysql? do
+    def alter_statements_while
+      statements = []
+      subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |*, payload|
+        statements << payload[:sql] if payload[:sql].to_s.include?("ALTER TABLE")
+      end
+      yield
+      statements
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber)
+    end
+
+    # These examples change the collation of tags.name, and DDL commits
+    # implicitly on MySQL -- so the transaction each example runs in cannot undo
+    # it, and every later example would see a collation the migrations did not
+    # set. Put back exactly what was there.
+    around do |example|
+      original = MakeTaggable::Configuration.current_tag_name_collation
+      example.run
+    ensure
+      if original
+        ActiveRecord::Migration.execute(
+          "ALTER TABLE #{MakeTaggable::Tag.table_name} MODIFY name varchar(255) CHARACTER SET utf8mb4 COLLATE #{original};"
+        )
+      end
+    end
+
+    it "applies the collation when it is not already in force" do
+      MakeTaggable.force_binary_collation = false
+
+      expect(alter_statements_while { MakeTaggable.force_binary_collation = true }.size).to eq(1)
+    end
+
+    it "does not touch the table when the collation already matches" do
+      MakeTaggable.force_binary_collation = true
+
+      expect(alter_statements_while { MakeTaggable.force_binary_collation = true }).to be_empty
+    end
+
+    it "still reports the setting after a no-op assignment" do
+      MakeTaggable.force_binary_collation = true
+      MakeTaggable.force_binary_collation = true
+
+      expect(MakeTaggable.strict_case_match).to be(true)
+    end
+  end
+
   describe "a context name that cannot become a method name" do
     def taggable_class_on(context)
       Class.new(ActiveRecord::Base) do

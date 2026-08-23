@@ -40,8 +40,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
     end
 
     def tag_match_type(tag)
-      matches_attribute = tag_arel_table[:name]
-      matches_attribute = matches_attribute.lower unless MakeTaggable.strict_case_match
+      matches_attribute = folded_name_attribute
 
       if options[:wild].present?
         matches_attribute.matches("%#{escaped_tag(tag)}%", "!", MakeTaggable.strict_case_match)
@@ -51,8 +50,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
     end
 
     def tags_match_type
-      matches_attribute = tag_arel_table[:name]
-      matches_attribute = matches_attribute.lower unless MakeTaggable.strict_case_match
+      matches_attribute = folded_name_attribute
 
       if options[:wild].present?
         matches_attribute.matches_any(tag_list.map { |tag| "%#{escaped_tag(tag)}%" }, "!", MakeTaggable.strict_case_match)
@@ -109,6 +107,22 @@ module MakeTaggable::Taggable::TaggedWithQuery
       contexts = Array(options[:on]).map(&:to_s)
 
       contexts.one? ? tagging_table[:context].eq(contexts.first) : tagging_table[:context].in(contexts)
+    end
+
+    # The tag name attribute to match against, folded where the comparison will not fold it itself.
+    #
+    # PostgreSQL matches with ILIKE, which is already case-insensitive, so wrapping the column in
+    # LOWER() there changes nothing and costs everything -- the expression stops being sargable, so
+    # no index on tags.name can be used, including a trigram index built for wild searches.
+    #
+    # The other adapters do need it. The MySQL migration collates tags.name as utf8mb4_bin, which
+    # makes LIKE case-sensitive, and folding keeps SQLite consistent with the rest.
+    def folded_name_attribute
+      attribute = tag_arel_table[:name]
+
+      return attribute if MakeTaggable.strict_case_match || MakeTaggable::Utils.using_postgresql?
+
+      attribute.lower
     end
 
     def escaped_tag(tag)

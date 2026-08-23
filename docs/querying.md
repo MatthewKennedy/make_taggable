@@ -189,6 +189,14 @@ its own — add `.distinct` if you want records back rather than matches.
   is still worth reaching for `any: true` where the semantics allow it.
 - Saving a taggable reads nothing from the taggings table unless a tag list was actually assigned,
   so a save that touches no tags costs no extra query and works under `strict_loading`.
+- On PostgreSQL, tag names are matched with `ILIKE` against the column itself rather than through
+  `LOWER()`, so an index on `tags.name` can be used. A wild search is the case that most wants one:
+
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS pg_trgm;
+  CREATE INDEX index_tags_on_name_trgm ON tags USING gin (name gin_trgm_ops);
+  ```
+
 - `:order_by_matching_tag_count` adds a correlated subquery to the `ORDER BY`. It is fine for a
   page of results and expensive across a whole table.
 - `all_tag_counts` joins the taggables to count them. Reach for `all_tags` when the counts are not
