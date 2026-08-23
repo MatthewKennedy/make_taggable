@@ -524,6 +524,29 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
   end
 
+  it "orders by matching tag count without :any" do
+    one = TaggableModel.create!(name: "One", tag_list: "ruby")
+    two = TaggableModel.create!(name: "Two", tag_list: "ruby, rubygems")
+
+    # Both carry a tag matching %ruby%, so both satisfy the all-tags query.
+    # Two matches it with a second tagging as well, so it sorts first.
+    ordered = TaggableModel.tagged_with(["ruby"], wild: true, order_by_matching_tag_count: true).to_a
+
+    expect(ordered.first).to eq(two)
+    expect(ordered.uniq).to eq([two, one])
+    # Not asserting on ordered.size: a wild match joins once per matching
+    # tagging, so Two is returned twice. That duplication is its own bug, and
+    # fixing it is not what this example is about.
+  end
+
+  it "accepts order_by_matching_tag_count without :any and without raising" do
+    TaggableModel.create!(name: "One", tag_list: "ruby")
+
+    expect {
+      TaggableModel.tagged_with(["ruby"], order_by_matching_tag_count: true).to_a
+    }.not_to raise_error
+  end
+
   it "counts an any: true relation" do
     TaggableModel.create!(name: "Bob", tag_list: "ruby, rails")
     TaggableModel.create!(name: "Frank", tag_list: "ruby")
