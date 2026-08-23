@@ -5,6 +5,26 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `:on` accepts several contexts as well as one, so a query can search a subset:
+  `tagged_with("classic", on: [:genres, :moods], any: true)`. Passing an array previously raised
+  `TypeError` from inside Arel.
+
+### Fixed
+
+- `force_parameterize` discarded a tag outright when the name had no ASCII in it. `parameterize`
+  reduces such a name to an empty string, which was then rejected as blank, so a user tagging in
+  Japanese, Greek, Hebrew, Arabic or Cyrillic saved successfully and got back fewer tags than they
+  typed. The parameterized form is now kept only where there is one.
+
+- Taggings are created in tag id order. Each insert bumps the tag's counter cache, so two concurrent
+  saves touching the same tags took row locks in whatever order their lists happened to be in, which
+  invites deadlocks. Models using `make_ordered_taggable` are unaffected -- there the creation order
+  carries the meaning.
+
 ## [1.4.0] - 2026-08-23
 
 ### Fixed
