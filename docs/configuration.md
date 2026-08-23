@@ -102,6 +102,12 @@ Note that the shipped migrations already apply `utf8mb4_bin` to the column on My
 setting adds is `strict_case_match`, which is what actually makes the library's lookups case
 sensitive — see [database.md](database.md).
 
+Because the migrations have usually applied the collation already, assigning this in an initializer
+is normally a no-op: the current collation is read first and the `ALTER TABLE` is skipped when it
+already matches. That matters because an initializer runs once per process — every web worker,
+background worker, console and rake task — and each `ALTER TABLE` takes a metadata lock on the tags
+table.
+
 ```ruby
 MakeTaggable.force_binary_collation = true
 ```

@@ -254,16 +254,40 @@ module MakeTaggable
     #   `utf8mb4_general_ci`
     # @return [NilClass]
     #
+    ##
+    # Applies the collation `tags.name` should carry on MySQL, if it does not carry it already.
+    #
+    # This is a schema change, and the documented way to reach it is an initializer -- which runs
+    # once per process, so once per web worker, background worker, console and rake task. Issuing
+    # `ALTER TABLE` from each of those takes a metadata lock on the tags table every time. So the
+    # current collation is read first and the statement skipped when it already matches, which
+    # turns the common case into one cheap catalogue read.
+    #
+    # @param bincoll [TrueClass, FalseClass] whether to apply the binary collation
+    # @return [void]
+    #
     def self.apply_binary_collation(bincoll)
-      if Utils.using_mysql?
-        coll = "utf8mb4_general_ci"
-        coll = "utf8mb4_bin" if bincoll
-        begin
-          ActiveRecord::Migration.execute("ALTER TABLE #{Tag.table_name} MODIFY name varchar(255) CHARACTER SET utf8mb4 COLLATE #{coll};")
-        rescue => e
-          puts "Trapping #{e.class}: collation parameter ignored while migrating for the first time."
-        end
-      end
+      return unless Utils.using_mysql?
+
+      collation = bincoll ? "utf8mb4_bin" : "utf8mb4_general_ci"
+
+      # Nothing to apply to yet -- this runs during the first migration, before
+      # the table exists.
+      return unless Utils.connection.table_exists?(Tag.table_name)
+      return if current_tag_name_collation == collation
+
+      ActiveRecord::Migration.execute(
+        "ALTER TABLE #{Tag.table_name} MODIFY name varchar(255) CHARACTER SET utf8mb4 COLLATE #{collation};"
+      )
+    end
+
+    ##
+    # The collation `tags.name` currently carries, or `nil` where it cannot be read.
+    #
+    # @return [String, NilClass]
+    #
+    def self.current_tag_name_collation
+      Utils.connection.columns(Tag.table_name).find { |column| column.name == "name" }&.collation
     end
   end
   setup

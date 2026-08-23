@@ -587,6 +587,28 @@ RSpec.describe "Taggable" do
     end
   end
 
+  describe "the SQL a wild search generates", if: using_postgresql? do
+    it "matches the column directly, so an index on it can be used" do
+      sql = TaggableModel.tagged_with(["ruby"], wild: true, any: true).to_sql
+
+      expect(sql).to include("ILIKE")
+      expect(sql).not_to match(/LOWER\("tags"\."name"\)/)
+    end
+
+    it "matches the column directly for an exact search too" do
+      sql = TaggableModel.tagged_with(["ruby"], any: true).to_sql
+
+      expect(sql).not_to match(/LOWER\("tags"\."name"\)/)
+    end
+  end
+
+  it "still matches case-insensitively without the LOWER" do
+    TaggableModel.create!(name: "Bob", tag_list: "Ruby")
+
+    expect(TaggableModel.tagged_with(["ruby"], any: true).to_a.size).to eq(1)
+    expect(TaggableModel.tagged_with(["RUBY"], wild: true, any: true).to_a.size).to eq(1)
+  end
+
   it "finds records tagged in any of several contexts" do
     in_skills = TaggableModel.create!(name: "Skilled", skill_list: "nifty")
     in_tags = TaggableModel.create!(name: "Tagged", tag_list: "nifty")
