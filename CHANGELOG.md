@@ -5,6 +5,30 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `tag_class` names the class tags are read, written and returned as, so an application can give
+  tags its own validations, callbacks, associations and methods:
+
+  ```ruby
+  MakeTaggable.setup { |config| config.tag_class = "MyApp::Tag" }
+  ```
+
+  It takes a **String** and refuses a constant -- a model cannot be referenced while initializers
+  run. It must be set in an initializer, before models load, because `make_taggable` builds its
+  associations when a class body runs. See [docs/configuration.md](docs/configuration.md).
+
+  This is a global setting. Giving different contexts different vocabularies is a separate thing and
+  needs a `type` column -- see [docs/contexts.md](docs/contexts.md).
+
+### Fixed
+
+- The documentation for `find_or_create_tags_from_list_with_context` claimed overriding it keeps a
+  separate vocabulary for one context. It does not: it routes creation only, and without a `type`
+  column on the tags table nothing distinguishes a subclass's rows.
+
 ## [1.6.0] - 2026-08-23
 
 ### Fixed
