@@ -22,6 +22,13 @@ module MakeTaggable::Taggable::TaggedWithQuery
   # @return [ActiveRecord::Relation]
   #
   def self.build(taggable_model, tag_model, tagging_model, tag_list, options)
+    if options[:exclude].present? && options[:match_all].present?
+      raise ArgumentError,
+        ":match_all and :exclude cannot be combined. :match_all selects records carrying only the " \
+        "given tags and nothing else, :exclude selects records carrying none of them, and there is " \
+        "no set of records that satisfies both."
+    end
+
     if options[:exclude].present?
       ExcludeTagsQuery.new(taggable_model, tag_model, tagging_model, tag_list, options).build
     elsif options[:any].present?

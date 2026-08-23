@@ -36,6 +36,23 @@ jobs:
           bundler-cache: true
       - run: bundle exec rake
 
+  coverage:
+    name: coverage / ruby 3.4
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_ADAPTER: sqlite3
+      COVERAGE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      # SimpleCov fails the run when coverage drops below the floor set in
+      # spec_helper.rb. Raise the floor when coverage improves; never lower it
+      # to make a run pass.
+      - run: bundle exec rspec
+
   mysql:
     name: mysql / ruby 3.4
     runs-on: ubuntu-latest

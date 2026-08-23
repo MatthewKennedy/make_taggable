@@ -11,6 +11,8 @@ group :development, :test do
   gem "standard"
   gem "yard"
 
+  gem "simplecov", require: false
+
   gem "sqlite3"
   gem "mysql2"
   gem "pg"

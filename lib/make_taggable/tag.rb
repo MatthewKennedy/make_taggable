@@ -197,7 +197,11 @@ module MakeTaggable
         # unwinds only the failed insert. Without one the caller's transaction
         # is left in an aborted state and everything it had done is lost.
         transaction(requires_new: true) { create(name: tag_name) }.tap { |tag| existing_tags << tag }
-      rescue ActiveRecord::RecordNotUnique
+        # A deadlock counts as losing the race, the same as a duplicate key.
+        # MySQL reports one or the other depending on how two inserts of the
+        # same name interleave on the unique index, and both mean the work
+        # should be re-read and retried rather than abandoned.
+      rescue ActiveRecord::RecordNotUnique, ActiveRecord::Deadlocked
         if (tries -= 1).positive?
           existing_tags = named_any(list).to_a
           retry

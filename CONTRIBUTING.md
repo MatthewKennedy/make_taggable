@@ -17,7 +17,9 @@ smallest model and code that reproduce the problem.
 5. Format: `bundle exec standardrb --fix`.
 6. Document any public API you added: `bundle exec yard stats --list-undoc` should report 100%.
 7. Add an entry to [CHANGELOG.md](CHANGELOG.md) under "unreleased".
-8. Open a pull request explaining what changed and why.
+8. If it changes something an application would have to react to, add it to
+   [UPGRADING.md](UPGRADING.md) — that file is the gem's post-install message.
+9. Open a pull request explaining what changed and why.
 
 Keep commits small and well described, and link any relevant issues. Don't bump the version — that
 happens at release.
@@ -37,6 +39,26 @@ Against another adapter:
 DATABASE_ADAPTER=postgresql DATABASE_URL=postgres://localhost/make_taggable_test bundle exec rake
 DATABASE_ADAPTER=mysql2 DATABASE_URL=mysql2://root@127.0.0.1/make_taggable_test bundle exec rake
 ```
+
+Worth doing before opening a pull request if you touched anything that generates SQL. Several bugs
+in this gem only appeared on one adapter — SQLite in particular is forgiving enough to hide them,
+and one of them passed on SQLite only because it treats an unresolvable double-quoted identifier as
+a string literal.
+
+The concurrency example does not run on SQLite. It needs an adapter that supports real concurrent
+writes, so it is skipped there and runs on MySQL and PostgreSQL.
+
+## Coverage
+
+```shell
+COVERAGE=1 bundle exec rspec
+```
+
+The run fails if coverage drops below the floor set in `spec/spec_helper.rb`, and CI runs it on
+every pull request. Raise the floor when coverage improves; never lower it to make a run pass.
+
+Coverage is a way of finding untested paths, not a target. The last time it was measured it pointed
+straight at an untested option combination that turned out to be broken.
 
 Across every supported Rails version:
 

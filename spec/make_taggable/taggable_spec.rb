@@ -750,6 +750,37 @@ RSpec.describe "Taggable" do
     expect(NonStandardIdTaggableModel.tagged_with("lazy", exclude: true).to_a).to eq([frank])
   end
 
+  describe "excluding by owner" do
+    # :owned_by narrows the records considered to those the owner has tagged,
+    # then excludes the ones carrying the given tags. A record the owner never
+    # touched is not in scope at all, rather than being treated as not carrying
+    # the tag.
+    it "considers only records that owner has tagged" do
+      owner = User.create!(name: "owner")
+      other = User.create!(name: "other")
+      TaggableModel.create!(name: "Untouched", tag_list: "ruby")
+      kept = TaggableModel.create!(name: "Kept")
+      excluded_by_tag = TaggableModel.create!(name: "Tagged")
+      elsewhere = TaggableModel.create!(name: "Elsewhere")
+
+      owner.tag(kept, on: :tags, with: "keeper")
+      owner.tag(excluded_by_tag, on: :tags, with: "shared")
+      other.tag(elsewhere, on: :tags, with: "keeper")
+
+      excluded = TaggableModel.tagged_with("shared", exclude: true, owned_by: owner).to_a
+
+      expect(excluded).to eq([kept])
+    end
+  end
+
+  describe "excluding with :match_all" do
+    it "is rejected, since the two options contradict each other" do
+      expect {
+        TaggableModel.tagged_with("ruby", exclude: true, match_all: true).to_a
+      }.to raise_error(ArgumentError, /match_all.*exclude|exclude.*match_all/)
+    end
+  end
+
   it "excludes only within the time window asked for" do
     old = TaggableModel.create!(name: "Old", tag_list: "vintage")
     MakeTaggable::Tagging.where(taggable: old).update_all(created_at: 3.years.ago)
@@ -891,26 +922,33 @@ RSpec.describe "Taggable" do
       end
     end
 
-    xit "should not duplicate tags added on different threads", if: supports_concurrency?, skip: "FIXME, Deadlocks in travis" do
-      # TODO, try with more threads and fix deadlock
+    it "should not duplicate tags added on different threads", if: supports_concurrency?, without_transaction: true do
       thread_count = 4
-      barrier = Barrier.new thread_count
+      barrier = Barrier.new(thread_count)
+      taggable = TaggableModel.create!(name: "Connor")
 
       expect {
-        thread_count.times.map { |idx|
-          Thread.start do
-            connor = TaggableModel.first_or_create(name: "Connor")
-            connor.tag_list = "There, can, be, only, one"
-            barrier.wait
-            begin
-              connor.save
-            rescue MakeTaggable::DuplicateTagError
-              # second save should succeed
-              connor.save
+        thread_count.times.map {
+          Thread.new do
+            ActiveRecord::Base.connection_pool.with_connection do
+              record = TaggableModel.find(taggable.id)
+              record.tag_list = "There, can, be, only, one"
+              barrier.wait
+              begin
+                record.save!
+              rescue MakeTaggable::DuplicateTagError, ActiveRecord::RecordNotUnique
+                # Another thread won the race for a name. Re-reading picks up
+                # what it created.
+                TaggableModel.find(taggable.id).tap { |r| r.tag_list = "There, can, be, only, one" }.save!
+              end
             end
           end
-        }.map(&:join)
+        }.each(&:join)
       }.to change(MakeTaggable::Tag, :count).by(5)
+    ensure
+      MakeTaggable::Tagging.delete_all
+      MakeTaggable::Tag.delete_all
+      TaggableModel.delete_all
     end
   end
 
