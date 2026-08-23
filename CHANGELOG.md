@@ -5,7 +5,7 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.5.0] - 2026-08-23
 
 ### Added
 
@@ -19,6 +19,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   reduces such a name to an empty string, which was then rejected as blank, so a user tagging in
   Japanese, Greek, Hebrew, Arabic or Cyrillic saved successfully and got back fewer tags than they
   typed. The parameterized form is now kept only where there is one.
+
+- `force_binary_collation = true` ran an `ALTER TABLE` every time it was assigned, with no check for
+  whether the column already carried that collation. The documented home for it is an initializer,
+  which runs once per process, so a deployment issued a schema change against the `tags` table from
+  every web worker, background worker, console and rake task -- each one taking a metadata lock that
+  other queries queue behind. The current collation is now read first and the statement skipped when
+  it matches. The blanket `rescue`/`puts` around it is replaced by an explicit `table_exists?` check.
+
+- On PostgreSQL, tag names were matched as `LOWER(name) ILIKE ...`. `ILIKE` already folds case, so
+  the `LOWER()` changed nothing while making the expression non-sargable -- no index on `tags.name`
+  could be used, including a trigram index built for wild searches. It is skipped on PostgreSQL and
+  kept on the adapters that need it.
 
 - Taggings are created in tag id order. Each insert bumps the tag's counter cache, so two concurrent
   saves touching the same tags took row locks in whatever order their lists happened to be in, which
