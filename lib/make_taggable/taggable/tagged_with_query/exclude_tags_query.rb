@@ -13,7 +13,6 @@ module MakeTaggable::Taggable::TaggedWithQuery
     def build
       taggable_model.joins(owning_to_tagger)
         .where(tags_not_in_list)
-        .having(tags_that_matches_count)
         .readonly(false)
     end
 
@@ -61,44 +60,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
           .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
         )
 
-      if options[:match_all].present?
-        arel_join = arel_join
-          .join(tagging_arel_table, Arel::Nodes::OuterJoin)
-          .on(
-            match_all_on_conditions
-          )
-      end
-
       arel_join.join_sources
-    end
-
-    def match_all_on_conditions
-      on_condition = tagging_arel_table[:taggable_id].eq(taggable_arel_table[taggable_model.primary_key])
-        .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
-
-      if options[:start_at].present?
-        on_condition = on_condition.and(tagging_arel_table[:created_at].gteq(options[:start_at]))
-      end
-
-      if options[:end_at].present?
-        on_condition = on_condition.and(tagging_arel_table[:created_at].lteq(options[:end_at]))
-      end
-
-      if options[:on].present?
-        on_condition = on_condition.and(context_predicate)
-      end
-
-      on_condition
-    end
-
-    def tags_that_matches_count
-      return [] unless options[:match_all].present?
-
-      taggable_model.find_by_sql(tag_arel_table.project(Arel.star.count).where(tags_match_type).to_sql)
-
-      tagging_arel_table[:taggable_id].count.eq(
-        tag_arel_table.project(Arel.star.count).where(tags_match_type)
-      )
     end
   end
 end

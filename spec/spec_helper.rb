@@ -1,3 +1,16 @@
+# Coverage runs when asked for, so an ordinary `rspec` stays fast. The threshold
+# is a ratchet: raise it when coverage improves, never lower it to make a run
+# pass.
+if ENV["COVERAGE"]
+  require "simplecov"
+
+  SimpleCov.start do
+    add_filter "/spec/"
+    enable_coverage :branch
+    minimum_coverage line: 90, branch: 70
+  end
+end
+
 require "active_record"
 require "logger"
 require "make_taggable"
@@ -6,6 +19,7 @@ require_relative "support/database"
 require_relative "support/models"
 require_relative "support/helpers"
 require_relative "support/array"
+require_relative "support/barrier"
 
 # Model classes the suite declares tags on. Examples that call make_taggable or
 # make_ordered_taggable on one of these change it for every example that
@@ -25,6 +39,11 @@ RSpec.configure do |config|
   # Every example runs inside a transaction that is rolled back afterwards, so
   # examples never see each other's rows.
   config.around do |example|
+    # Examples using real threads cannot run inside one: each thread takes its
+    # own connection, and nothing written on this one is visible to them until
+    # it commits. Those examples clear up after themselves instead.
+    next example.run if example.metadata[:without_transaction]
+
     ActiveRecord::Base.transaction do
       example.run
       raise ActiveRecord::Rollback
