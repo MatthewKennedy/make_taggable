@@ -48,6 +48,25 @@ RSpec.describe "Acts As Taggable On" do
       expect(taggable1.find_related_tags).to_not include(taggable2)
     end
 
+    it "counts related objects" do
+      taggable1 = TaggableModel.create!(name: "Taggable 1", tag_list: "one, two")
+      TaggableModel.create!(name: "Taggable 2", tag_list: "three, four")
+      TaggableModel.create!(name: "Taggable 3", tag_list: "one, four")
+
+      related = taggable1.find_related_tags
+
+      expect(related.count).to eq(1)
+      expect(related.count).to eq(related.to_a.size)
+    end
+
+    it "finds related objects for a model with a json column", if: using_postgresql? do
+      taggable1 = TaggableModelWithJson.create!(name: "Taggable 1", tag_list: "one, two")
+      TaggableModelWithJson.create!(name: "Taggable 2", tag_list: "three, four")
+      taggable3 = TaggableModelWithJson.create!(name: "Taggable 3", tag_list: "one, four")
+
+      expect(taggable1.find_related_tags.to_a).to eq([taggable3])
+    end
+
     shared_examples "a collection" do
       it do
         taggable1 = described_class.create!(name: "Taggable 1", tag_list: "one")
