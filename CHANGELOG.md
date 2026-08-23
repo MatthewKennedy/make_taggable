@@ -35,6 +35,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   separate vocabulary for one context. It does not: it routes creation only, and without a `type`
   column on the tags table nothing distinguishes a subclass's rows.
 
+## [Unreleased]
+
+### Changed
+
+- The tag name uniqueness validation scopes itself by `type` when the tags table has that column, so
+  an application using Tag subclasses for per-context vocabularies can hold `"energy"` as a `Market`
+  and as a `Genre` while still rejecting two `Market("energy")`. Without the column nothing changes.
+
+  Previously the only way through was overriding `validates_name_uniqueness?` to `false`, which
+  turned the check off entirely and left genuine duplicates to surface as
+  `ActiveRecord::RecordNotUnique` from the database rather than as an error on the record. That hook
+  is still there for anyone who wants no check at all.
+
+### Fixed
+
+- The recipe in `docs/contexts.md` for giving a context its own vocabulary did not work. It had you
+  add a `type` column and widen the unique index, then failed on the model validation with `Name has
+  already been taken` -- after a column had been added and a unique index rewritten on a production
+  table. The validation change above removes the obstacle, and the recipe is now written from a
+  tested run.
+
 ## [1.6.0] - 2026-08-23
 
 ### Fixed

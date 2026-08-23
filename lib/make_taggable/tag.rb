@@ -24,7 +24,22 @@ module MakeTaggable
 
     ### VALIDATIONS:
     validates_presence_of :name
-    validates_uniqueness_of :name, if: :validates_name_uniqueness?, case_sensitive: true
+    # Two declarations, one of which runs. A tags table with a `type` column is
+    # being used for single table inheritance -- a Tag subclass per vocabulary --
+    # and there a name is expected to repeat across subclasses: "energy" as a
+    # Market and as a Genre. Scoping the check keeps it meaningful within a
+    # subclass rather than making the whole thing something to switch off.
+    #
+    # The column is looked up per validation rather than when this class loads,
+    # because the class can load before the migration that adds it has run.
+    validates_uniqueness_of :name,
+      if: -> { validates_name_uniqueness? && !self.class.tag_type_column? },
+      case_sensitive: true
+
+    validates_uniqueness_of :name,
+      scope: :type,
+      if: -> { validates_name_uniqueness? && self.class.tag_type_column? },
+      case_sensitive: true
     validates_length_of :name, maximum: 255
 
     ##
@@ -36,6 +51,18 @@ module MakeTaggable
     #
     def validates_name_uniqueness?
       true
+    end
+
+    ##
+    # Whether the tags table carries a `type` column, and so is being used for single table
+    # inheritance.
+    #
+    # @return [TrueClass, FalseClass]
+    #
+    # @api private
+    #
+    def self.tag_type_column?
+      column_names.include?("type")
     end
 
     ### SCOPES:

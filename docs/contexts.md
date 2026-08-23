@@ -182,17 +182,38 @@ end
 This only genuinely separates the vocabularies if the tags table has a `type` column. Without one,
 Active Record has nowhere to record the subclass: rows created through `Market` are saved as plain
 tags, `Market.count` returns every tag in the table, and reloading a record gives you a
-`MakeTaggable::Tag` back. Add the column to get real separation:
+`MakeTaggable::Tag` back.
+
+Two schema changes give you real separation. The `type` column, and a replacement for the unique
+index on `tags.name` — the shipped one stops two tags sharing a name at all, so a market and a genre
+could never both be called "Energy":
 
 ```ruby
 class AddTypeToTags < ActiveRecord::Migration[7.2]
   def change
     add_column MakeTaggable.tags_table, :type, :string
-    add_index MakeTaggable.tags_table, :type
+
+    remove_index MakeTaggable.tags_table, :name
+    add_index MakeTaggable.tags_table, [:name, :type], unique: true
   end
 end
 ```
 
-Note that the shipped migrations put a unique index on `tags.name`, so two tags cannot share a name
-even across subclasses. If a market and a genre both need to be called "Energy", widen that index to
-cover `[:name, :type]`.
+The name uniqueness *validation* scopes itself by `type` as soon as the column exists, so a name can
+repeat across subclasses while still being unique within one. Nothing else to configure.
+
+With that in place the vocabularies are genuinely separate:
+
+```ruby
+company = Company.create!(name: "Acme", market_list: "energy", genre_list: "energy")
+
+MakeTaggable::Tag.pluck(:name, :type)  # => [["energy", "Market"], ["energy", "Genre"]]
+Market.count                           # => 1
+Genre.count                            # => 1
+company.markets.map(&:class)           # => [Market]
+company.market_list                    # => ["energy"]
+Company.tagged_with("energy", on: :markets)   # => [Acme]
+```
+
+`tagged_with` without an `:on` still matches by name across every vocabulary, which is usually what
+you want from an unscoped search — pass `:on` when you mean one of them.
