@@ -113,4 +113,47 @@ RSpec.describe "documentation" do
       end
     end
   end
+
+  # The changelog is exempt from the checks above -- it quotes calls that were
+  # wrong on purpose -- but its structure still matters, because a release reads
+  # it. Cutting a release renames the Unreleased heading, and a second one left
+  # above the previous version silently keeps its entries out of the release
+  # that shipped them. That happened to 1.7.0.
+  describe "CHANGELOG.md" do
+    let(:headings) { Documentation::ROOT.join("CHANGELOG.md").read.scan(/^## \[[^\]]+\].*$/) }
+
+    it "has at most one Unreleased heading" do
+      unreleased = headings.grep(/^## \[Unreleased\]/)
+
+      expect(unreleased.size).to be <= 1,
+        "found #{unreleased.size} Unreleased headings. Entries under the lower one will be missed " \
+        "by the next release, which renames the first."
+    end
+
+    it "puts the Unreleased heading first when it has one" do
+      next if headings.grep(/^## \[Unreleased\]/).empty?
+
+      expect(headings.first).to match(/^## \[Unreleased\]/)
+    end
+
+    it "names every other heading as a version and a date" do
+      versioned = headings.reject { |heading| heading.start_with?("## [Unreleased]") }
+
+      malformed = versioned.reject { |heading| heading.match?(/^## \[\d+\.\d+\.\d+\] - \d{4}-\d{2}-\d{2}$/) }
+
+      expect(malformed).to be_empty, malformed.join("\n")
+    end
+
+    it "lists versions newest first" do
+      versions = headings.filter_map { |heading| heading[/\[(\d+\.\d+\.\d+)\]/, 1] }.map { |v| Gem::Version.new(v) }
+
+      expect(versions).to eq(versions.sort.reverse)
+    end
+
+    it "has an entry for the version the gem currently reports" do
+      next if headings.first&.start_with?("## [Unreleased]")
+
+      expect(headings.first).to include("[#{MakeTaggable::VERSION}]")
+    end
+  end
 end
