@@ -554,6 +554,19 @@ RSpec.describe "Taggable" do
     expect(NonStandardIdTaggableModel.tagged_with("lazy", exclude: true).to_a).to eq([frank])
   end
 
+  it "excludes only within the time window asked for" do
+    old = TaggableModel.create!(name: "Old", tag_list: "vintage")
+    MakeTaggable::Tagging.where(taggable: old).update_all(created_at: 3.years.ago)
+    TaggableModel.create!(name: "Recent", tag_list: "vintage")
+    untagged = TaggableModel.create!(name: "Untagged")
+
+    excluded = TaggableModel.tagged_with("vintage", exclude: true, start_at: 1.year.ago).to_a
+
+    # Only Recent was tagged inside the window, so it is the only record the
+    # exclusion should remove. Old carries the tag, but not within the window.
+    expect(excluded).to match_array([old, untagged])
+  end
+
   it "excludes only within the context asked for" do
     in_skills = TaggableModel.create!(name: "Skilled", skill_list: "nifty")
     in_tags = TaggableModel.create!(name: "Tagged", tag_list: "nifty")
