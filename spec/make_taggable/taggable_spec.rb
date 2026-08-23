@@ -218,7 +218,18 @@ RSpec.describe "Taggable" do
     @taggable.skill_list = "ruby"
     @taggable.save
 
-    expect(TaggableModel.tagged_with("ruby").group(:created_at).count.count).to eq(1)
+    expect(TaggableModel.tagged_with("ruby").group(:name).count.count).to eq(1)
+  end
+
+  it "can group by a taggings column once taggings are joined" do
+    @taggable.skill_list = "ruby"
+    @taggable.save
+
+    # tagged_with no longer joins taggings -- it tests for them with EXISTS --
+    # so a caller wanting to group or order by a taggings column joins it.
+    counts = TaggableModel.tagged_with("ruby").joins(:taggings).group("taggings.context").count
+
+    expect(counts).to eq({"skills" => 1})
   end
 
   it "can be used as scope" do
@@ -263,7 +274,11 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("bob", on: :tags).first).to eq(@taggable)
     expect(TaggableModel.tagged_with("julia", on: :skills).size).to eq(1)
     expect(TaggableModel.tagged_with("julia", on: :tags).size).to eq(1)
-    expect(TaggableModel.tagged_with("julia", on: nil).size).to eq(2)
+
+    # One record, tagged "julia" in both contexts. This asserted 2 until the
+    # all-tags query stopped joining once per tagging -- it was measuring how
+    # many taggings matched, not how many records did.
+    expect(TaggableModel.tagged_with("julia", on: nil).size).to eq(1)
   end
 
   it "should not care about case" do
@@ -522,6 +537,28 @@ RSpec.describe "Taggable" do
 
     expect(TaggableModel.tagged_with("lazy", exclude: true)).to include(frank, steve)
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
+  end
+
+  it "returns a record once when a tag is applied in more than one context" do
+    record = OtherTaggableModel.create!(name: "x", tag_list: "interesting", language_list: "interesting")
+
+    expect(OtherTaggableModel.tagged_with("interesting").to_a).to eq([record])
+  end
+
+  it "returns a record once when a wild match hits several of its tags" do
+    record = TaggableModel.create!(name: "Two", tag_list: "ruby, rubygems")
+
+    expect(TaggableModel.tagged_with(["ruby"], wild: true).to_a).to eq([record])
+  end
+
+  it "counts records, not matching taggings" do
+    OtherTaggableModel.create!(name: "x", tag_list: "interesting", language_list: "interesting")
+    OtherTaggableModel.create!(name: "y", tag_list: "interesting")
+
+    relation = OtherTaggableModel.tagged_with("interesting")
+
+    expect(relation.count).to eq(2)
+    expect(relation.count).to eq(relation.to_a.size)
   end
 
   it "orders by matching tag count without :any" do
