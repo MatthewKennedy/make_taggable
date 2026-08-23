@@ -19,6 +19,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   already did. `jsonb` was never affected, so the column type an application picked decided whether
   the feature worked at all.
 
+- `TagList` could not be serialised to YAML. Every list carried its parser in an instance variable,
+  and that variable holds a Class, which Psych refuses to dump. Anything serialising a model's
+  attributes hit it -- change-history gems, Active Job arguments, `serialize` columns. The parser is
+  no longer stored; the reader falls back to the configured `MakeTaggable.default_parser`. One
+  consequence: a list now follows the configured parser rather than the one in force when it was
+  built.
+
+- `TagList#remove` ignored a symbol. `remove(:foo)` silently did nothing where `remove("foo")`
+  worked.
+
+- A tag that failed validation was reported as `Tag can't be blank`, naming the wrong attribute for
+  the wrong reason -- reachable with no customisation, since the shipped `Tag` validates name length
+  at 255 characters. The error now carries the tag itself, so it says what was actually wrong and
+  `error.record` is the tag. `save!` raises; `save` still returns `false` and writes nothing.
+
 - Saving a taggable read every tagging on the record, on every save, before establishing whether
   any tag list had been assigned. That cost a query per save and made the gem unusable under
   `strict_loading` -- a record whose tags were never touched still raised
