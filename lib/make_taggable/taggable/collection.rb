@@ -107,7 +107,9 @@ module MakeTaggable::Taggable
         options[:conditions] = sanitize_sql(options[:conditions]) if options[:conditions]
 
         ## Generate scope:
-        tagging_scope = MakeTaggable::Tagging.select("#{MakeTaggable::Tagging.table_name}.tag_id")
+        tagging_scope = MakeTaggable::Tagging.select(
+          "#{MakeTaggable::Tagging.table_name}.tag_id, #{last_applied_at_projection}"
+        )
         tag_scope = MakeTaggable::Tag.select("#{MakeTaggable::Tag.table_name}.*").order(options[:order]).limit(options[:limit])
 
         # Joins and conditions
@@ -147,7 +149,9 @@ module MakeTaggable::Taggable
         options[:conditions] = sanitize_sql(options[:conditions]) if options[:conditions]
 
         ## Generate scope:
-        tagging_scope = MakeTaggable::Tagging.select("#{MakeTaggable::Tagging.table_name}.tag_id, COUNT(#{MakeTaggable::Tagging.table_name}.tag_id) AS tags_count")
+        tagging_scope = MakeTaggable::Tagging.select(
+          "#{MakeTaggable::Tagging.table_name}.tag_id, COUNT(#{MakeTaggable::Tagging.table_name}.tag_id) AS tags_count, #{last_applied_at_projection}"
+        )
         tag_scope = MakeTaggable::Tag.select("#{MakeTaggable::Tag.table_name}.*, #{MakeTaggable::Tagging.table_name}.tags_count AS count").order(options[:order]).limit(options[:limit])
 
         # Current model is STI descendant, so add type checking to the join condition
@@ -200,10 +204,36 @@ module MakeTaggable::Taggable
           scoped_ids = pluck(table_name_pkey)
           tagging_scope = tagging_scope.where("#{MakeTaggable::Tagging.table_name}.taggable_id IN (?)", scoped_ids)
         else
-          tagging_scope = tagging_scope.where("#{MakeTaggable::Tagging.table_name}.taggable_id IN(#{safe_to_sql(except(:select).select(table_name_pkey))})")
+          tagging_scope = tagging_scope.where("#{MakeTaggable::Tagging.table_name}.taggable_id IN(#{safe_to_sql(taggable_ids_scope(table_name_pkey))})")
         end
 
         tagging_scope
+      end
+
+      # The current scope reduced to primary keys, for embedding in an IN clause.
+      #
+      # `except(:select)` is not enough on its own. An eager load builds its own column list rather
+      # than storing it in select_values, so it survives and the subquery comes back with a column
+      # per attribute of every table involved -- where the IN needs exactly one. Turning the eager
+      # load into a join keeps any condition on the joined table while selecting only the key.
+      def taggable_ids_scope(table_name_pkey)
+        scope = except(:select)
+        eager_loaded = scope.includes_values + scope.eager_load_values
+
+        scope = scope.except(:includes, :eager_load, :preload).left_joins(*eager_loaded) if eager_loaded.any?
+
+        scope.select(table_name_pkey)
+      end
+
+      # The tagging scope is embedded as a derived table aliased to the taggings table name, so
+      # `order: "taggings.created_at"` resolves against that rather than the real table -- which
+      # projected tag_id alone, and the column appeared not to exist.
+      #
+      # It groups by tag_id, so a tag may stand for many taggings and there is no single created_at
+      # to expose. The latest is the useful one: ordering by it means "when this tag was last
+      # applied".
+      def last_applied_at_projection
+        "MAX(#{MakeTaggable::Tagging.table_name}.created_at) AS created_at"
       end
 
       def tagging_conditions(options)

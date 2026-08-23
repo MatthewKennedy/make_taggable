@@ -5,6 +5,24 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `includes(:tags)` made reading tag lists **slower**: it cost two extra queries and saved none,
+  because `tag_list` always queried for a context's unowned tags rather than reading what had been
+  preloaded. Reading five records' lists went from 8 queries to 3, and the count no longer grows
+  with the collection. Records loaded without the preload are unaffected.
+
+- `tag_counts_on` raised `sub-select returns N columns - expected 1` on a relation built with
+  `includes`. An eager load builds its own column list, which survived the `except(:select)` used to
+  reduce the scope to primary keys.
+
+- `all_tags` and `all_tag_counts` could not be ordered by a `taggings` column --
+  `order: "taggings.created_at desc"` raised `no such column`. The derived table they join now
+  exposes the latest `created_at` for each tag, so ordering by it means "when this tag was last
+  applied".
+
 ## [1.5.0] - 2026-08-23
 
 ### Added
