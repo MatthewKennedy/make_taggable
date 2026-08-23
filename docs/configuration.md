@@ -40,6 +40,10 @@ Tags are downcased as they are cleaned, so `"Ruby"` is stored as `"ruby"`.
 Tags are parameterized, so `"Ruby on Rails"` is stored as `"ruby-on-rails"`. Applied after
 `force_lowercase` if both are on.
 
+`String#parameterize` strips anything outside a conservative ASCII set, so a name with no ASCII in
+it -- `"日本語"` -- has no slug to reduce to. Such a name is kept as it is rather than parameterized
+into nothing and dropped.
+
 ### `strict_case_match`
 
 Off, tag lookups are case insensitive and `"Ruby"` finds `"ruby"`; a list containing both keeps one.

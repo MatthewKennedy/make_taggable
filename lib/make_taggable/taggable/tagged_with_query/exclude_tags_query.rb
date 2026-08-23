@@ -28,7 +28,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
       # Left off, the subquery gathers taggings from other contexts and other
       # times, and excludes records on the strength of them.
       if options[:on].present?
-        on_condition = on_condition.and(tagging_arel_table[:context].eq(options[:on]))
+        on_condition = on_condition.and(context_predicate)
       end
 
       if options[:start_at].present?
@@ -85,7 +85,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
       end
 
       if options[:on].present?
-        on_condition = on_condition.and(tagging_arel_table[:context].eq(options[:on]))
+        on_condition = on_condition.and(context_predicate)
       end
 
       on_condition

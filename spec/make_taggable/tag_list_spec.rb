@@ -67,6 +67,26 @@ RSpec.describe MakeTaggable::TagList do
     end
   end
 
+  describe "force_parameterize" do
+    before { MakeTaggable.force_parameterize = true }
+
+    it "parameterizes an ASCII name" do
+      expect(MakeTaggable::TagList.new("Ruby on Rails").to_a).to eq(["ruby-on-rails"])
+    end
+
+    it "keeps a name that parameterizes to nothing" do
+      expect(MakeTaggable::TagList.new("日本語").to_a).to eq(["日本語"])
+    end
+
+    it "keeps such a name alongside ones that do parameterize" do
+      expect(MakeTaggable::TagList.new("日本語", "ok tag").to_a).to eq(["日本語", "ok-tag"])
+    end
+
+    it "still drops a genuinely blank name" do
+      expect(MakeTaggable::TagList.new("", "  ", "ok").to_a).to eq(["ok"])
+    end
+  end
+
   describe "serialising" do
     it "can be dumped to YAML" do
       expect {

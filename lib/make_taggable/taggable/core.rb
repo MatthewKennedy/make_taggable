@@ -587,7 +587,13 @@ module MakeTaggable::Taggable
           taggings.not_owned.by_context(context).where(tag_id: old_tags).destroy_all
         end
 
-        # Create new taggings:
+        # Create new taggings, in a consistent order. Each insert bumps the tag's
+        # counter cache, so two concurrent saves touching the same tags would
+        # otherwise take row locks in whatever order their lists happened to be
+        # in, and deadlock. Ordering is skipped where the model asked for tag
+        # order to be preserved, since there the creation order is the point.
+        new_tags = new_tags.sort_by(&:id) unless self.class.preserve_tag_order?
+
         new_tags.each do |tag|
           taggings.create!(tag_id: tag.id, context: context.to_s, taggable: self)
         end

@@ -56,7 +56,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
       end
 
       if options[:on].present?
-        condition = condition.and(tagging_arel_table[:context].eq(options[:on]))
+        condition = condition.and(context_predicate)
       end
 
       if (owner = options[:owned_by]).present?
@@ -92,7 +92,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
       end
 
       if options[:on].present?
-        on_condition = on_condition.and(tagging_arel_table[:context].eq(options[:on]))
+        on_condition = on_condition.and(context_predicate)
       end
 
       on_condition

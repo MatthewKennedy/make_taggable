@@ -587,6 +587,34 @@ RSpec.describe "Taggable" do
     end
   end
 
+  it "finds records tagged in any of several contexts" do
+    in_skills = TaggableModel.create!(name: "Skilled", skill_list: "nifty")
+    in_tags = TaggableModel.create!(name: "Tagged", tag_list: "nifty")
+    TaggableModel.create!(name: "Elsewhere", language_list: "nifty")
+
+    found = TaggableModel.tagged_with("nifty", on: [:tags, :skills], any: true).to_a
+
+    expect(found).to match_array([in_skills, in_tags])
+  end
+
+  it "still accepts a single context" do
+    in_skills = TaggableModel.create!(name: "Skilled", skill_list: "nifty")
+    TaggableModel.create!(name: "Tagged", tag_list: "nifty")
+
+    expect(TaggableModel.tagged_with("nifty", on: :skills, any: true).to_a).to eq([in_skills])
+  end
+
+  it "creates taggings in a consistent order whatever order the names arrive in" do
+    forwards = TaggableModel.create!(name: "Forwards", tag_list: "alpha, beta, gamma")
+    backwards = TaggableModel.create!(name: "Backwards", tag_list: "gamma, beta, alpha")
+
+    [forwards, backwards].each do |record|
+      created = MakeTaggable::Tagging.where(taggable: record).order(:id).pluck(:tag_id)
+
+      expect(created).to eq(created.sort)
+    end
+  end
+
   it "returns a record once when a tag is applied in more than one context" do
     record = OtherTaggableModel.create!(name: "x", tag_list: "interesting", language_list: "interesting")
 

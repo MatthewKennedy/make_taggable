@@ -85,7 +85,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
       end
 
       if options[:on].present?
-        condition = condition.and(tagging_arel_table[:context].eq(options[:on]))
+        condition = condition.and(context_predicate)
       end
 
       if (owner = options[:owned_by]).present?
@@ -99,6 +99,16 @@ module MakeTaggable::Taggable::TaggedWithQuery
     # Orders by how many of the matched taggings a row has, most first.
     def matching_tag_count_order
       "(SELECT count(*) FROM #{tagging_model.table_name} WHERE #{matching_taggings.to_sql}) desc"
+    end
+
+    # The predicate restricting a query to the context or contexts asked for.
+    #
+    # `:on` takes one context or several, so a caller can search a subset without either naming a
+    # single one or falling back to every context there is.
+    def context_predicate(tagging_table = tagging_arel_table)
+      contexts = Array(options[:on]).map(&:to_s)
+
+      contexts.one? ? tagging_table[:context].eq(contexts.first) : tagging_table[:context].in(contexts)
     end
 
     def escaped_tag(tag)

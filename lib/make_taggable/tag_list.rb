@@ -158,7 +158,11 @@ module MakeTaggable
       map!(&:to_s)
       map!(&:strip)
       map!(&:downcase) if MakeTaggable.force_lowercase
-      map!(&:parameterize) if MakeTaggable.force_parameterize
+      # A name with no ASCII in it parameterizes to "", and reject! below would
+      # then drop it -- so the tag vanished rather than being slugged. Keep the
+      # original where there is no slug to be had; a caller who wanted strict
+      # slugs still gets one wherever one exists.
+      map! { |tag| tag.parameterize.presence || tag } if MakeTaggable.force_parameterize
 
       MakeTaggable.strict_case_match ? uniq! : uniq! { |tag| tag.downcase }
       self

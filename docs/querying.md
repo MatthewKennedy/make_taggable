@@ -28,11 +28,17 @@ empty relation rather than every record — worth knowing when the tags come fro
 | `:exclude` | Match records carrying none of the tags |
 | `:match_all` | Match records carrying only these tags and no others |
 | `:wild` | Match tags *containing* the given text, i.e. `%sci%` |
-| `:on` | Restrict to one context. Honoured by every option, `:exclude` included |
+| `:on` | Restrict to one context, or an array of them. Honoured by every option, `:exclude` included |
 | `:owned_by` | Restrict to tags applied by one tagger |
 | `:order_by_matching_tag_count` | Order by how many matching taggings a record has, most first. No effect with `:match_all` |
 | `:start_at` | Only tags applied after this time. Honoured by every option, `:exclude` included |
 | `:end_at` | Only tags applied before this time. Honoured by every option, `:exclude` included |
+
+`:on` takes several contexts as well as one, for searching a subset:
+
+```ruby
+Book.tagged_with("classic", on: [:genres, :moods], any: true)
+```
 
 An empty tag list means "nothing matches" for the matching options and "nothing is ruled out" for
 `:exclude`, so the two always partition the scope between them:

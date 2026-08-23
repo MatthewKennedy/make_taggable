@@ -202,7 +202,10 @@ module MakeTaggable::Taggable
               tag_id: old_tags, context: context).destroy_all
           end
 
-          # Create new taggings:
+          # Create new taggings, in a consistent order -- see the note in
+          # Core#save_tags on why the order matters.
+          new_tags = new_tags.sort_by(&:id) unless self.class.preserve_tag_order?
+
           new_tags.each do |tag|
             taggings.create!(tag_id: tag.id, context: context.to_s, tagger: owner, taggable: self)
           end
