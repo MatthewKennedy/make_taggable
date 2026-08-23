@@ -5,6 +5,25 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `find_related_*` raised on `.count`. The relation selects the taggable's columns plus an aliased
+  count, and Active Record folded that select list into the `COUNT()` it built. It now counts the
+  grouped query as a subquery, so `.count` and `.size` return the number of related records.
+
+- `find_related_*` raised on PostgreSQL for any taggable model with a `json` column -- the query
+  grouped by every column on the table, and `json` has no equality operator so it cannot appear in
+  a `GROUP BY`. It now groups by the primary key on every adapter, which is what the other adapters
+  already did. `jsonb` was never affected, so the column type an application picked decided whether
+  the feature worked at all.
+
+- Saving a taggable read every tagging on the record, on every save, before establishing whether
+  any tag list had been assigned. That cost a query per save and made the gem unusable under
+  `strict_loading` -- a record whose tags were never touched still raised
+  `StrictLoadingViolationError`. Saves now consider only the contexts held in memory.
+
 ## [1.3.0] - 2026-08-23
 
 ### Changed
