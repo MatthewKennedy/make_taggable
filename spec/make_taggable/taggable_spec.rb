@@ -609,6 +609,44 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with(["RUBY"], wild: true, any: true).to_a.size).to eq(1)
   end
 
+  describe "tag counts on a relation" do
+    before do
+      @with_child = TaggableModel.create!(name: "Parent", tag_list: "ruby")
+      TaggableModel.create!(name: "Lonely", tag_list: "rails")
+      UntaggableModel.create!(taggable_model: @with_child, name: "child")
+    end
+
+    it "counts tags for a relation built with joins" do
+      counts = TaggableModel.joins(:untaggable_models).tag_counts_on(:tags)
+
+      expect(counts.map(&:name)).to eq(["ruby"])
+    end
+
+    it "counts tags for a relation built with includes" do
+      counts = TaggableModel.includes(:untaggable_models).where(untaggable_models: {id: nil}).tag_counts_on(:tags)
+
+      expect(counts.map(&:name)).to eq(["rails"])
+    end
+  end
+
+  describe "ordering tags by when they were applied" do
+    it "orders all_tags by a taggings column" do
+      first = TaggableModel.create!(name: "First", tag_list: "older")
+      MakeTaggable::Tagging.where(taggable: first).update_all(created_at: 3.years.ago)
+      TaggableModel.create!(name: "Second", tag_list: "newer")
+
+      expect(TaggableModel.all_tags(order: "taggings.created_at desc").map(&:name)).to eq(%w[newer older])
+    end
+
+    it "orders all_tag_counts by a taggings column" do
+      first = TaggableModel.create!(name: "First", tag_list: "older")
+      MakeTaggable::Tagging.where(taggable: first).update_all(created_at: 3.years.ago)
+      TaggableModel.create!(name: "Second", tag_list: "newer")
+
+      expect(TaggableModel.all_tag_counts(order: "taggings.created_at asc").map(&:name)).to eq(%w[older newer])
+    end
+  end
+
   it "finds records tagged in any of several contexts" do
     in_skills = TaggableModel.create!(name: "Skilled", skill_list: "nifty")
     in_tags = TaggableModel.create!(name: "Tagged", tag_list: "nifty")

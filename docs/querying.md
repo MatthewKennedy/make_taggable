@@ -168,6 +168,18 @@ MakeTaggable::Tag.for_context(:skills) # used in this context, on any model
 query time. If you set `MakeTaggable.tags_counter = false` that counter is not maintained and both
 scopes will be wrong.
 
+## Reading tag lists across a collection
+
+Reading `<context>_list` on each of a set of records queries once per record. Eager load the tags to
+avoid it:
+
+```ruby
+Book.includes(:tags).each { |book| book.tag_list }   # constant queries, whatever the count
+```
+
+The lists are then read from the preload. Owned tags are still excluded from `tag_list`, as they are
+without it.
+
 ## Grouping and ordering by tagging columns
 
 `tagged_with` does not join the taggings table, so a `taggings` column is not in scope on the
@@ -180,6 +192,23 @@ Book.tagged_with("sci-fi").joins(:taggings).order("taggings.created_at desc")
 
 Note that joining reintroduces one row per tagging, which is exactly what `tagged_with` avoids on
 its own — add `.distinct` if you want records back rather than matches.
+
+## Counting tags for a subset of records
+
+`tag_counts_on` and `all_tags` apply to whatever scope they are called on, so narrowing the records
+narrows the counts:
+
+```ruby
+Book.where(published: true).tag_counts_on(:genres)
+Book.joins(:author).where(authors: {country: "IE"}).tag_counts_on(:genres)
+```
+
+`:order` accepts a `taggings` column, which orders by when a tag was last applied:
+
+```ruby
+Book.all_tags(order: "taggings.created_at desc")     # most recently used first
+Book.all_tag_counts(order: "count desc", limit: 10)
+```
 
 ## Performance notes
 

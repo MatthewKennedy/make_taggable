@@ -408,7 +408,7 @@ module MakeTaggable::Taggable
         if cached_tag_list_on(context) && ensure_included_cache_methods! && self.class.caching_tag_list_on?(context)
           MakeTaggable.default_parser.new(cached_tag_list_on(context)).parse
         else
-          MakeTaggable::TagList.new(tags_on(context).map(&:name))
+          MakeTaggable::TagList.new(unowned_tag_names_on(context))
         end
 
       # Note what was there the first time the list is built, before anything
@@ -467,6 +467,48 @@ module MakeTaggable::Taggable
       else
         scope.group(group_columns)
       end.to_a
+    end
+
+    ##
+    # The names of a context's unowned tags, read from the preloaded taggings where they are
+    # available and queried where they are not.
+    #
+    # `includes(:tags)` loads the per-context taggings association as well as the tags themselves,
+    # and those taggings carry `tagger_id` -- which is what makes them usable here, since the list
+    # excludes owned tags and the tags association alone cannot say which are owned.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [Array<String>]
+    #
+    # @api private
+    #
+    def unowned_tag_names_on(context)
+      preloaded = preloaded_taggings_on(context)
+      return tags_on(context).map(&:name) unless preloaded
+
+      preloaded.map { |tagging| tagging.tag.name }
+    end
+
+    ##
+    # A context's taggings if they are already in memory, otherwise `nil`.
+    #
+    # Only unowned taggings are returned, in tagging order where the model preserves it, so the
+    # result matches what {#tags_on} would have queried.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [Array<MakeTaggable::Tagging>, NilClass]
+    #
+    # @api private
+    #
+    def preloaded_taggings_on(context)
+      name = :"#{context.to_s.singularize}_taggings"
+      return unless self.class.reflect_on_association(name)
+
+      association = association(name)
+      return unless association.loaded?
+
+      taggings = association.target.reject(&:tagger_id)
+      self.class.preserve_tag_order? ? taggings.sort_by(&:id) : taggings
     end
 
     ##
