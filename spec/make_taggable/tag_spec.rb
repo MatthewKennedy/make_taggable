@@ -239,6 +239,29 @@ RSpec.describe MakeTaggable::Tag do
       }.to change(described_class, :count).by(2)
     end
 
+    describe "when a tag cannot be saved" do
+      it "reports what was actually wrong with the tag" do
+        expect {
+          TaggableModel.create!(name: "Bob", tag_list: ["a" * 256])
+        }.to raise_error(ActiveRecord::RecordInvalid, /too long/)
+      end
+
+      it "carries the tag that failed, so the caller can see which one" do
+        expect {
+          TaggableModel.create!(name: "Bob", tag_list: ["a" * 256])
+        }.to raise_error(ActiveRecord::RecordInvalid) { |error|
+          expect(error.record).to be_a(MakeTaggable::Tag)
+          expect(error.record.name).to eq("a" * 256)
+        }
+      end
+
+      it "surfaces a validation added by a Tag subclass" do
+        expect {
+          PickyTaggableModel.create!(name: "Bob", tag_list: "rude")
+        }.to raise_error(ActiveRecord::RecordInvalid, /must not be rude/)
+      end
+    end
+
     describe "when a competing write takes a name mid-flight" do
       # Active Record raises RecordNotUnique when the unique index on tags.name
       # rejects an insert. The method retries, and the retry must not disturb
