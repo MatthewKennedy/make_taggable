@@ -26,7 +26,16 @@ connection = ActiveRecord::Base.connection
 
 # Start from an empty database. In-memory SQLite is already empty; the server
 # adapters keep whatever the last run left behind.
-connection.tables.each { |table| connection.drop_table(table, force: :cascade) }
+#
+# `force: :cascade` is not enough on its own. MySQL parses CASCADE and ignores
+# it, so dropping tags while taggings still references it fails. That the loop
+# works at all today is an accident of connection.tables coming back
+# alphabetically, which puts taggings first -- nothing promises that order.
+# Suspending referential integrity removes the dependence on it. The method is
+# a no-op on adapters that do not need it.
+connection.disable_referential_integrity do
+  connection.tables.each { |table| connection.drop_table(table, force: :cascade) }
+end
 
 ActiveRecord::MigrationContext.new(
   File.expand_path("../../db/migrate", __dir__)

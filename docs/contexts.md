@@ -40,6 +40,23 @@ user.skill_list_change            # => [["jogging"], ["diving"]]
 user.will_save_change_to_skill_list?
 ```
 
+### Naming a context
+
+Because the context becomes part of every name in the table above, it has to be usable as a Ruby
+method and instance variable name. A context starting with a digit, or containing a hyphen or a
+space, is rejected when the model declares it:
+
+```ruby
+class Book < ActiveRecord::Base
+  make_taggable :"1categories"
+end
+# => ArgumentError: :"1categories" cannot be used as a tag context: make_taggable generates
+#    methods and instance variables from it, and "1categories_list" is not a valid Ruby name.
+```
+
+Validity is decided by asking Ruby, not by a pattern, so anything that makes a legal method name is
+allowed — non-ASCII context names included.
+
 ## Adding contexts later
 
 Calling `make_taggable` again adds contexts rather than replacing them, which is what lets a

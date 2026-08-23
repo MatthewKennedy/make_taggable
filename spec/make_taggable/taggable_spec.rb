@@ -524,6 +524,46 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
   end
 
+  it "excludes on a model whose primary key is not id" do
+    NonStandardIdTaggableModel.create!(name: "Bob", tag_list: "happier, lazy")
+    frank = NonStandardIdTaggableModel.create!(name: "Frank", tag_list: "happier")
+
+    expect(NonStandardIdTaggableModel.tagged_with("lazy", exclude: true).to_a).to eq([frank])
+  end
+
+  it "excludes only within the context asked for" do
+    in_skills = TaggableModel.create!(name: "Skilled", skill_list: "nifty")
+    in_tags = TaggableModel.create!(name: "Tagged", tag_list: "nifty")
+
+    excluded = TaggableModel.tagged_with("nifty", on: :skills, exclude: true).to_a
+
+    expect(excluded).to include(in_tags)
+    expect(excluded).not_to include(in_skills)
+  end
+
+  it "excludes nothing when the tag list is empty" do
+    TaggableModel.create(name: "Bob", tag_list: "happier, lazy")
+    TaggableModel.create(name: "Frank", tag_list: "happier")
+    TaggableModel.create(name: "Steve")
+
+    ["", " ", nil, []].each do |tag|
+      expect(TaggableModel.tagged_with(tag, exclude: true).count).to eq(3)
+    end
+  end
+
+  it "partitions the scope between a tag and its exclusion, whatever the tag" do
+    TaggableModel.create(name: "Bob", tag_list: "happier, lazy")
+    TaggableModel.create(name: "Frank", tag_list: "happier")
+    TaggableModel.create(name: "Steve")
+
+    ["lazy", "happier", "unused", ""].each do |tag|
+      matched = TaggableModel.tagged_with(tag).count
+      excluded = TaggableModel.tagged_with(tag, exclude: true).count
+
+      expect(matched + excluded).to eq(3), "#{tag.inspect} matched #{matched}, excluded #{excluded}"
+    end
+  end
+
   it "should return an empty scope for empty tags" do
     ["", " ", nil, []].each do |tag|
       expect(TaggableModel.tagged_with(tag)).to be_empty

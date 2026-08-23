@@ -20,15 +20,21 @@ module MakeTaggable::Taggable::TaggedWithQuery
     private
 
     def tags_not_in_list
-      taggable_arel_table[:id].not_in(
+      on_condition = tagging_arel_table[:tag_id].eq(tag_arel_table[:id])
+        .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
+        .and(tags_match_type)
+
+      # Without this the subquery gathers taggings from every context, so a
+      # record tagged in one context is excluded from a query about another.
+      if options[:on].present?
+        on_condition = on_condition.and(tagging_arel_table[:context].eq(options[:on]))
+      end
+
+      taggable_arel_table[taggable_model.primary_key].not_in(
         tagging_arel_table
           .project(tagging_arel_table[:taggable_id])
           .join(tag_arel_table)
-          .on(
-            tagging_arel_table[:tag_id].eq(tag_arel_table[:id])
-            .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
-            .and(tags_match_type)
-          )
+          .on(on_condition)
       )
 
       # FIXME: missing time scope, this is also missing in the original implementation
