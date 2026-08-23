@@ -5,6 +5,33 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `tagged_with(..., exclude: true)` raised on any model whose primary key is not `id`. The exclude
+  strategy built its `NOT IN` predicate against a hardcoded `id` column, where the other two
+  strategies already used the model's primary key.
+
+- `tagged_with(..., on: <context>, exclude: true)` ignored the context entirely, gathering taggings
+  from every context, so a record tagged in one context was excluded from a query about another.
+
+- `tagged_with([], exclude: true)` returned nothing rather than everything. Excluding no tags rules
+  nothing out, so the whole scope now stands. This restores the property that `tagged_with(list)`
+  and `tagged_with(list, exclude: true)` partition the scope between them for any list.
+
+- A tag context whose name cannot become a Ruby method name -- one starting with a digit, say --
+  raised `SyntaxError` while the model was loading, from inside Active Record's association
+  builder. Since `SyntaxError` is not a `StandardError` it slipped past application rescues.
+  Contexts are now checked as they are declared and rejected with an `ArgumentError` naming the
+  context. Non-ASCII context names keep working.
+
+### Internal
+
+- The suite's schema teardown no longer depends on the order `connection.tables` returns. MySQL
+  ignores `DROP TABLE ... CASCADE` for foreign keys, so it only worked because `taggings` happens
+  to sort before `tags`.
+
 ## [1.2.0] - 2026-08-23
 
 ### Fixed
