@@ -7,6 +7,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **`tagged_with` no longer joins the taggings table.** It tests for each tag with an `EXISTS`
+  subquery instead, which is what stops a record being returned once per matching tagging. A tag
+  applied in two contexts, or a `:wild` pattern matching two of a record's tags, returned that
+  record twice; `.count` disagreed with the number of records, and pagination pages ran short.
+
+  The consequence for callers is that a `taggings` column is no longer in scope on the relation, so
+  `tagged_with("x").order("taggings.created_at")` or a `group` on a taggings column now needs an
+  explicit `.joins(:taggings)`. See [docs/querying.md](docs/querying.md).
+
+  Matching a dozen tags now produces a dozen correlated subqueries rather than a dozen joins.
+  `:match_all` is unchanged and keeps its join.
+
 ### Fixed
 
 - `tagged_with(..., any: true)` forced `SELECT taggable_models.*` onto the relation. That made
