@@ -524,6 +524,29 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
   end
 
+  it "excludes nothing when the tag list is empty" do
+    TaggableModel.create(name: "Bob", tag_list: "happier, lazy")
+    TaggableModel.create(name: "Frank", tag_list: "happier")
+    TaggableModel.create(name: "Steve")
+
+    ["", " ", nil, []].each do |tag|
+      expect(TaggableModel.tagged_with(tag, exclude: true).count).to eq(3)
+    end
+  end
+
+  it "partitions the scope between a tag and its exclusion, whatever the tag" do
+    TaggableModel.create(name: "Bob", tag_list: "happier, lazy")
+    TaggableModel.create(name: "Frank", tag_list: "happier")
+    TaggableModel.create(name: "Steve")
+
+    ["lazy", "happier", "unused", ""].each do |tag|
+      matched = TaggableModel.tagged_with(tag).count
+      excluded = TaggableModel.tagged_with(tag, exclude: true).count
+
+      expect(matched + excluded).to eq(3), "#{tag.inspect} matched #{matched}, excluded #{excluded}"
+    end
+  end
+
   it "should return an empty scope for empty tags" do
     ["", " ", nil, []].each do |tag|
       expect(TaggableModel.tagged_with(tag)).to be_empty

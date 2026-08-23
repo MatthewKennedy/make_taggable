@@ -129,7 +129,8 @@ module MakeTaggable::Taggable
       # @option options [Symbol, String] :on only tags applied in this context
       # @option options [Time, Date] :start_at only tags applied after this time
       # @option options [Time, Date] :end_at only tags applied before this time
-      # @return [ActiveRecord::Relation] empty when no tags are given
+      # @return [ActiveRecord::Relation] empty when no tags are given, except under `:exclude`,
+      #   where excluding no tags leaves the whole scope standing
       #
       # @example Every tag
       #   User.tagged_with(["awesome", "cool"])
@@ -144,7 +145,9 @@ module MakeTaggable::Taggable
         tag_list = MakeTaggable.default_parser.new(tags).parse
         options = options.dup
 
-        return none if tag_list.empty?
+        # Asking for no tags matches nothing, but *excluding* no tags rules
+        # nothing out, so the whole scope stands.
+        return options[:exclude].present? ? all : none if tag_list.empty?
 
         ::MakeTaggable::Taggable::TaggedWithQuery.build(self, MakeTaggable::Tag, MakeTaggable::Tagging, tag_list, options)
       end

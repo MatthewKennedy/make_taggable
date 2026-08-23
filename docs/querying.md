@@ -26,6 +26,14 @@ empty relation rather than every record — worth knowing when the tags come fro
 |---|---|
 | `:any` | Match records carrying at least one of the tags |
 | `:exclude` | Match records carrying none of the tags |
+
+An empty tag list means "nothing matches" for the matching options and "nothing is ruled out" for
+`:exclude`, so the two always partition the scope between them:
+
+```ruby
+Book.tagged_with([])                  # => none
+Book.tagged_with([], exclude: true)   # => every book
+```
 | `:match_all` | Match records carrying only these tags and no others |
 | `:wild` | Match tags *containing* the given text, i.e. `%sci%` |
 | `:on` | Restrict to one context |
