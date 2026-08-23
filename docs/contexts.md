@@ -43,6 +43,13 @@ user.save
 user.saved_change_to_skill_list?      # => true
 ```
 
+Mutating the list in place counts too, not just assigning a new one:
+
+```ruby
+user.skill_list.add("diving")
+user.skill_list_changed?   # => true
+```
+
 Order counts only where the model asked for it with `make_ordered_taggable`. Reordering the same
 tags is not a change otherwise.
 

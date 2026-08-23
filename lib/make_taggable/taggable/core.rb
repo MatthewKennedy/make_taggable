@@ -387,13 +387,22 @@ module MakeTaggable::Taggable
     #
     def tag_list_cache_on(context)
       variable_name = "@#{context.to_s.singularize}_list"
-      if instance_variable_get(variable_name)
-        instance_variable_get(variable_name)
-      elsif cached_tag_list_on(context) && ensure_included_cache_methods! && self.class.caching_tag_list_on?(context)
-        instance_variable_set(variable_name, MakeTaggable.default_parser.new(cached_tag_list_on(context)).parse)
-      else
-        instance_variable_set(variable_name, MakeTaggable::TagList.new(tags_on(context).map(&:name)))
-      end
+      return instance_variable_get(variable_name) if instance_variable_get(variable_name)
+
+      list =
+        if cached_tag_list_on(context) && ensure_included_cache_methods! && self.class.caching_tag_list_on?(context)
+          MakeTaggable.default_parser.new(cached_tag_list_on(context)).parse
+        else
+          MakeTaggable::TagList.new(tags_on(context).map(&:name))
+        end
+
+      # Note what was there the first time the list is built, before anything
+      # can have touched it. A caller holding this list can mutate it in place
+      # -- tag_list.add("x") -- which never goes through the writer, so this is
+      # the only chance to see the original.
+      original_tag_lists[context.to_s] ||= list.to_a.dup
+
+      instance_variable_set(variable_name, list)
     end
 
     ##
