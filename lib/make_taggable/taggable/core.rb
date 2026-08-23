@@ -118,7 +118,17 @@ module MakeTaggable::Taggable
         initialize_make_taggable_core
       end
 
-      # all column names are necessary for PostgreSQL group clause
+      ##
+      # Every column on a table, qualified, joined for a `GROUP BY` clause.
+      #
+      # Nothing in the library needs this any more. PostgreSQL wanted every selected
+      # non-aggregated column in the `GROUP BY` before 9.1; since then the primary key is enough,
+      # and that is what the library groups by. Kept because it is public and useful for building
+      # such a clause by hand.
+      #
+      # @param object [Class] the model whose columns to list
+      # @return [String]
+      #
       def grouped_column_names_for(object)
         object.column_names.map { |column| "#{object.table_name}.#{column}" }.join(", ")
       end
@@ -179,7 +189,12 @@ module MakeTaggable::Taggable
       end
     end
 
-    # all column names are necessary for PostgreSQL group clause
+    ##
+    # @see ClassMethods#grouped_column_names_for
+    #
+    # @param object [Class] the model whose columns to list
+    # @return [String]
+    #
     def grouped_column_names_for(object)
       self.class.grouped_column_names_for(object)
     end
@@ -442,11 +457,15 @@ module MakeTaggable::Taggable
       opts = ["#{tagging_table_name}.context = ?", context.to_s]
       scope = base_tags.where(opts)
 
+      group_columns = "#{MakeTaggable::Tag.table_name}.#{MakeTaggable::Tag.primary_key}"
+
       if MakeTaggable::Utils.using_postgresql?
-        group_columns = grouped_column_names_for(MakeTaggable::Tag)
+        # Ordering by an aggregate is why this groups at all. Grouping by the
+        # primary key alone is enough on every supported PostgreSQL -- it works
+        # the functional dependency out itself, and has since 9.1.
         scope.order(Arel.sql("max(#{tagging_table_name}.created_at)")).group(group_columns)
       else
-        scope.group("#{MakeTaggable::Tag.table_name}.#{MakeTaggable::Tag.primary_key}")
+        scope.group(group_columns)
       end.to_a
     end
 
