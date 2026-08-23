@@ -5,7 +5,7 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.7.1] - 2026-08-23
 
 ### Fixed
 
@@ -27,6 +27,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   that did not exist, so concurrent tag creation was untested outright.
 - `UPGRADING.md`, which ships as the gem's post-install message, covers the whole 1.x line rather
   than stopping at 1.0.
+- The 1.7.0 changelog entry was split in two by a stray `Unreleased` heading, so the per-context
+  vocabulary changes that shipped in it were filed as unreleased. Folded back into 1.7.0.
 
 ## [1.7.0] - 2026-08-23
 
@@ -46,20 +48,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   This is a global setting. Giving different contexts different vocabularies is a separate thing and
   needs a `type` column -- see [docs/contexts.md](docs/contexts.md).
 
-### Fixed
-
-- A tag list came back in whatever order the database chose. An `ORDER BY` was applied only under
-  `make_ordered_taggable`, so `record.tag_list` could return the same tags in different orders on
-  different calls or adapters, and `tag_list_was` could report an original the list had never been
-  in. Lists are now always ordered by when each tag was applied; `preserve_tag_order` keeps its
-  existing meaning for writes and for change detection.
-
-- The documentation for `find_or_create_tags_from_list_with_context` claimed overriding it keeps a
-  separate vocabulary for one context. It does not: it routes creation only, and without a `type`
-  column on the tags table nothing distinguishes a subclass's rows.
-
-## [Unreleased]
-
 ### Changed
 
 - The tag name uniqueness validation scopes itself by `type` when the tags table has that column, so
@@ -72,6 +60,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   is still there for anyone who wants no check at all.
 
 ### Fixed
+
+- A tag list came back in whatever order the database chose. An `ORDER BY` was applied only under
+  `make_ordered_taggable`, so `record.tag_list` could return the same tags in different orders on
+  different calls or adapters, and `tag_list_was` could report an original the list had never been
+  in. Lists are now always ordered by when each tag was applied; `preserve_tag_order` keeps its
+  existing meaning for writes and for change detection.
+
+- The documentation for `find_or_create_tags_from_list_with_context` claimed overriding it keeps a
+  separate vocabulary for one context. It does not: it routes creation only, and without a `type`
+  column on the tags table nothing distinguishes a subclass's rows.
 
 - The recipe in `docs/contexts.md` for giving a context its own vocabulary did not work. It had you
   add a `type` column and widen the unique index, then failed on the model validation with `Name has
