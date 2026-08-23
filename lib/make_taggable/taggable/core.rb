@@ -54,7 +54,7 @@ module MakeTaggable::Taggable
               after_remove: :dirtify_tag_list
 
             has_many context_tags, -> { order(taggings_order) },
-              class_name: "MakeTaggable::Tag",
+              class_name: MakeTaggable.tag_class,
               through: context_taggings,
               source: :tag
           end
@@ -591,7 +591,7 @@ module MakeTaggable::Taggable
     ##
     # Find existing tags or create non-existing tags
     def load_tags(tag_list)
-      MakeTaggable::Tag.find_or_create_all_with_like_by_name(tag_list)
+      MakeTaggable.tag_model.find_or_create_all_with_like_by_name(tag_list)
     end
 
     ##
@@ -686,10 +686,15 @@ module MakeTaggable::Taggable
     ##
     # Finds or creates the tag records for a list, given the context they are being applied in.
     #
-    # Override it to keep a separate vocabulary for one context by returning tags from a
-    # {MakeTaggable::Tag} subclass.
+    # Override it to resolve one context's names through a different class -- one with its own
+    # validations or callbacks, say.
     #
-    # @example A separate Tag subclass for one context
+    # This routes creation only. Reading gives back whatever {MakeTaggable.tag_class} names, and
+    # without a `type` column on the tags table there is nothing to tell a subclass's rows apart, so
+    # the vocabularies are not actually separate. See `docs/contexts.md` for the column to add if
+    # that is what you are after, and {MakeTaggable.tag_class} for changing the class globally.
+    #
+    # @example Resolving one context's names through another class
     #   class Company < ActiveRecord::Base
     #     make_taggable :markets, :locations
     #

@@ -129,3 +129,11 @@ class PickyTaggableModel < ActiveRecord::Base
     PickyTag.find_or_create_all_with_like_by_name(tag_list)
   end
 end
+
+# A Tag class of an application's own, for the tag_class setting. Subclasses
+# MakeTaggable::Tag and shares the tags table, which is the documented shape.
+class CustomTag < MakeTaggable::Tag
+  def shouty_name
+    name.upcase
+  end
+end

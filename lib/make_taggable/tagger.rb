@@ -46,7 +46,7 @@ module MakeTaggable
             )
 
           has_many :owned_tags, -> { distinct },
-            class_name: "::MakeTaggable::Tag",
+            class_name: MakeTaggable.tag_class,
             source: :tag,
             through: :owned_taggings
         end

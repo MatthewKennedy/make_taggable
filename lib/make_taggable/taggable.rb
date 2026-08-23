@@ -82,7 +82,7 @@ module MakeTaggable
 
         class_eval do
           has_many :taggings, as: :taggable, dependent: :destroy, class_name: "::MakeTaggable::Tagging"
-          has_many :base_tags, through: :taggings, source: :tag, class_name: "::MakeTaggable::Tag"
+          has_many :base_tags, through: :taggings, source: :tag, class_name: MakeTaggable.tag_class
 
           def self.taggable?
             true

@@ -30,7 +30,7 @@ module MakeTaggable
 
     self.table_name = MakeTaggable.taggings_table
 
-    belongs_to :tag, class_name: "::MakeTaggable::Tag", counter_cache: MakeTaggable.tags_counter
+    belongs_to :tag, class_name: MakeTaggable.tag_class, counter_cache: MakeTaggable.tags_counter
     belongs_to :taggable, polymorphic: true
 
     belongs_to :tagger, polymorphic: true, optional: true
