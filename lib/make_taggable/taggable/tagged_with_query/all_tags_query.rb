@@ -11,7 +11,8 @@ module MakeTaggable::Taggable::TaggedWithQuery
     # @return [ActiveRecord::Relation]
     #
     def build
-      taggable_model.joins(each_tag_in_list)
+      taggable_model.joins(match_all_join)
+        .where(carries_every_tag)
         .group(by_taggable)
         .having(tags_that_matches_count)
         .order(Arel.sql(order_conditions))
@@ -20,54 +21,62 @@ module MakeTaggable::Taggable::TaggedWithQuery
 
     private
 
-    def each_tag_in_list
-      arel_join = taggable_arel_table
-
-      tag_list.each do |tag|
-        tagging_alias = tagging_arel_table.alias(tagging_alias(tag))
-        arel_join = arel_join
-          .join(tagging_alias)
-          .on(on_conditions(tag, tagging_alias))
-      end
-
-      if options[:match_all].present?
-        arel_join = arel_join
-          .join(tagging_arel_table, Arel::Nodes::OuterJoin)
-          .on(
-            match_all_on_conditions
-          )
-      end
-
-      arel_join.join_sources
+    # One EXISTS test per tag, rather than one join per tag.
+    #
+    # A join multiplies the result: a record is returned once for every tagging
+    # that satisfies it, so a tag applied in two contexts, or a wild pattern
+    # matching two of a record's tags, returned that record twice. EXISTS asks
+    # the question the query is actually asking -- does this record carry the
+    # tag -- and answers it once.
+    def carries_every_tag
+      tag_list.map { |tag| taggings_for(tag).exists }.inject(:and)
     end
 
-    def on_conditions(tag, tagging_alias)
-      on_condition = tagging_alias[:taggable_id].eq(taggable_arel_table[taggable_model.primary_key])
-        .and(tagging_alias[:taggable_type].eq(taggable_model.base_class.name))
+    def taggings_for(tag)
+      tagging_arel_table
+        .project(Arel.star)
+        .where(tag_conditions(tag))
+    end
+
+    def tag_conditions(tag)
+      condition = tagging_arel_table[:taggable_id].eq(taggable_arel_table[taggable_model.primary_key])
+        .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
         .and(
-          tagging_alias[:tag_id].in(
+          tagging_arel_table[:tag_id].in(
             tag_arel_table.project(tag_arel_table[:id]).where(tag_match_type(tag))
           )
         )
 
       if options[:start_at].present?
-        on_condition = on_condition.and(tagging_alias[:created_at].gteq(options[:start_at]))
+        condition = condition.and(tagging_arel_table[:created_at].gteq(options[:start_at]))
       end
 
       if options[:end_at].present?
-        on_condition = on_condition.and(tagging_alias[:created_at].lteq(options[:end_at]))
+        condition = condition.and(tagging_arel_table[:created_at].lteq(options[:end_at]))
       end
 
       if options[:on].present?
-        on_condition = on_condition.and(tagging_alias[:context].eq(options[:on]))
+        condition = condition.and(tagging_arel_table[:context].eq(options[:on]))
       end
 
       if (owner = options[:owned_by]).present?
-        on_condition = on_condition.and(tagging_alias[:tagger_id].eq(owner.id))
-          .and(tagging_alias[:tagger_type].eq(owner.class.base_class.to_s))
+        condition = condition.and(tagging_arel_table[:tagger_id].eq(owner.id))
+          .and(tagging_arel_table[:tagger_type].eq(owner.class.base_class.to_s))
       end
 
-      on_condition
+      condition
+    end
+
+    # :match_all keeps its outer join. It counts a record's taggings and compares
+    # that to the number of tags matched, so it needs them joined -- and the
+    # GROUP BY it already carries collapses the duplicates a join would cause.
+    def match_all_join
+      return [] unless options[:match_all].present?
+
+      taggable_arel_table
+        .join(tagging_arel_table, Arel::Nodes::OuterJoin)
+        .on(match_all_on_conditions)
+        .join_sources
     end
 
     def match_all_on_conditions
@@ -118,11 +127,6 @@ module MakeTaggable::Taggable::TaggedWithQuery
 
       order_by << options[:order] if options[:order].present?
       order_by.join(", ")
-    end
-
-    def tagging_alias(tag)
-      alias_base_name = taggable_model.base_class.name.downcase
-      adjust_taggings_alias("#{alias_base_name[0..11]}_taggings_#{MakeTaggable::Utils.sha_prefix(tag)}")
     end
   end
 end

@@ -162,10 +162,25 @@ MakeTaggable::Tag.for_context(:skills) # used in this context, on any model
 query time. If you set `MakeTaggable.tags_counter = false` that counter is not maintained and both
 scopes will be wrong.
 
+## Grouping and ordering by tagging columns
+
+`tagged_with` does not join the taggings table, so a `taggings` column is not in scope on the
+relation it returns. Join it yourself when you need one:
+
+```ruby
+Book.tagged_with("sci-fi").joins(:taggings).group("taggings.context").count
+Book.tagged_with("sci-fi").joins(:taggings).order("taggings.created_at desc")
+```
+
+Note that joining reintroduces one row per tagging, which is exactly what `tagged_with` avoids on
+its own — add `.distinct` if you want records back rather than matches.
+
 ## Performance notes
 
-- `tagged_with` with several tags and no `:any` adds one join per tag. Matching a dozen tags in a
-  single call generates a dozen joins; prefer `any: true` where the semantics allow it.
+- `tagged_with` tests for each tag with an `EXISTS` subquery, one per tag, and joins nothing. That
+  is what stops a record being returned once per matching tagging. Matching a dozen tags produces a
+  dozen correlated subqueries rather than a dozen joins, which most planners handle better, but it
+  is still worth reaching for `any: true` where the semantics allow it.
 - `:order_by_matching_tag_count` adds a correlated subquery to the `ORDER BY`. It is fine for a
   page of results and expensive across a whole table.
 - `all_tag_counts` joins the taggables to count them. Reach for `all_tags` when the counts are not
