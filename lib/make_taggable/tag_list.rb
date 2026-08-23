@@ -24,7 +24,7 @@ module MakeTaggable
   #
   class TagList < Array
     attr_accessor :owner
-    attr_accessor :parser
+    attr_writer :parser
 
     ##
     # Builds a tag list from the given names.
@@ -34,8 +34,24 @@ module MakeTaggable
     # @return [MakeTaggable::TagList]
     #
     def initialize(*args)
-      @parser = MakeTaggable.default_parser
       add(*args)
+    end
+
+    ##
+    # The parser this list uses when asked to parse.
+    #
+    # Falls back to the configured {MakeTaggable.default_parser}, and deliberately does not store
+    # it. A stored parser is a Class held in an instance variable, and Psych validates instance
+    # variables when dumping, so carrying one made every tag list unserialisable -- `audited`,
+    # Active Job arguments and `serialize` columns all refuse it.
+    #
+    # A parser assigned explicitly is still stored, and a list carrying one is subject to the same
+    # limitation.
+    #
+    # @return [Class]
+    #
+    def parser
+      @parser || MakeTaggable.default_parser
     end
 
     ##
@@ -101,6 +117,13 @@ module MakeTaggable
     #
     def remove(*names)
       extract_and_apply_options!(names)
+
+      # The list holds strings, so compare strings. Everything else that takes
+      # tag names normalises them -- add runs them through clean!, tagged_with
+      # parses them -- and a symbol silently matching nothing here was the odd
+      # one out.
+      names = names.map(&:to_s)
+
       delete_if { |name| names.include?(name) }
       self
     end
@@ -145,9 +168,9 @@ module MakeTaggable
       options = args.last.is_a?(Hash) ? args.pop : {}
       options.assert_valid_keys :parse, :parser
 
-      parser = options[:parser] || @parser
+      chosen_parser = options[:parser] || parser
 
-      args.map! { |a| parser.new(a).parse } if options[:parse] || options[:parser]
+      args.map! { |a| chosen_parser.new(a).parse } if options[:parse] || options[:parser]
 
       args.flatten!
     end

@@ -53,6 +53,51 @@ RSpec.describe MakeTaggable::TagList do
       tag_list.remove(%w[awesome radical], parse: true)
       expect(tag_list).to be_empty
     end
+
+    it "removes a name given as a symbol" do
+      tag_list.remove(:awesome)
+
+      expect(tag_list).to_not include("awesome")
+    end
+
+    it "removes a name given as a symbol among several" do
+      tag_list.remove(:awesome, "radical")
+
+      expect(tag_list).to be_empty
+    end
+  end
+
+  describe "serialising" do
+    it "can be dumped to YAML" do
+      expect {
+        Psych.safe_dump(tag_list, permitted_classes: [MakeTaggable::TagList, Symbol])
+      }.not_to raise_error
+    end
+
+    it "round-trips through YAML" do
+      dumped = Psych.safe_dump(tag_list, permitted_classes: [MakeTaggable::TagList, Symbol])
+      loaded = Psych.safe_load(dumped, permitted_classes: [MakeTaggable::TagList, Symbol], aliases: true)
+
+      expect(loaded.to_a).to eq(tag_list.to_a)
+    end
+
+    it "still knows its parser" do
+      expect(tag_list.parser).to eq(MakeTaggable.default_parser)
+    end
+
+    it "keeps a parser assigned to it" do
+      list = MakeTaggable::TagList.new("a", "b")
+      list.parser = MakeTaggable::GenericParser
+
+      expect(list.parser).to eq(MakeTaggable::GenericParser)
+    end
+
+    it "follows the configured parser rather than the one in force when it was built" do
+      list = MakeTaggable::TagList.new("a")
+      MakeTaggable.default_parser = MakeTaggable::GenericParser
+
+      expect(list.parser).to eq(MakeTaggable::GenericParser)
+    end
   end
 
   describe "#+" do
