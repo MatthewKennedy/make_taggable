@@ -5,6 +5,24 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `tagged_with(..., any: true)` forced `SELECT taggable_models.*` onto the relation. That made
+  `.count` emit `COUNT("table".*)`, which no adapter accepts, and left a caller's own `select`
+  appended after the star rather than replacing it -- so every column came back regardless, and the
+  relation could not be used inside a `merge`. The strategy filters with an `EXISTS` subquery and
+  joins nothing, so Active Record's default select list was already right.
+
+- `:order_by_matching_tag_count` raised on the default all-tags path, and the expression behind it
+  was invalid SQL that would have ordered nothing even where it parsed. Both strategies now share
+  the correlated count the `:any` path has always used, so the option orders correctly on either.
+  It still has no effect alongside `:match_all`.
+
+- `tagged_with(..., exclude: true)` ignored `:start_at` and `:end_at`, excluding records on the
+  strength of taggings from outside the window entirely.
+
 ## [1.2.1] - 2026-08-23
 
 ### Fixed

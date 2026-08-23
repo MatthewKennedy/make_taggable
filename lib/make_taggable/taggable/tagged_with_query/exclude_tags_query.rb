@@ -24,10 +24,19 @@ module MakeTaggable::Taggable::TaggedWithQuery
         .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
         .and(tags_match_type)
 
-      # Without this the subquery gathers taggings from every context, so a
-      # record tagged in one context is excluded from a query about another.
+      # Every option below narrows which taggings count as "carrying the tag".
+      # Left off, the subquery gathers taggings from other contexts and other
+      # times, and excludes records on the strength of them.
       if options[:on].present?
         on_condition = on_condition.and(tagging_arel_table[:context].eq(options[:on]))
+      end
+
+      if options[:start_at].present?
+        on_condition = on_condition.and(tagging_arel_table[:created_at].gteq(options[:start_at]))
+      end
+
+      if options[:end_at].present?
+        on_condition = on_condition.and(tagging_arel_table[:created_at].lteq(options[:end_at]))
       end
 
       taggable_arel_table[taggable_model.primary_key].not_in(
@@ -36,8 +45,6 @@ module MakeTaggable::Taggable::TaggedWithQuery
           .join(tag_arel_table)
           .on(on_condition)
       )
-
-      # FIXME: missing time scope, this is also missing in the original implementation
     end
 
     def owning_to_tagger

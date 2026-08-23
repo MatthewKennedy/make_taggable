@@ -14,7 +14,7 @@ module MakeTaggable::Taggable::TaggedWithQuery
       taggable_model.joins(each_tag_in_list)
         .group(by_taggable)
         .having(tags_that_matches_count)
-        .order(order_conditions)
+        .order(Arel.sql(order_conditions))
         .readonly(false)
     end
 
@@ -107,7 +107,14 @@ module MakeTaggable::Taggable::TaggedWithQuery
 
     def order_conditions
       order_by = []
-      order_by << tagging_arel_table.project(tagging_arel_table[Arel.star].count.as("taggings_count")).order("taggings_count DESC").to_sql if options[:order_by_matching_tag_count].present? && options[:match_all].blank?
+
+      # The old expression here counted every tagging in the table, correlated
+      # to nothing, and asked for COUNT(taggings.*) while doing it -- invalid
+      # SQL that ordered nothing even where it parsed. The shared correlated
+      # count is what the :any strategy has always used.
+      if options[:order_by_matching_tag_count].present? && options[:match_all].blank?
+        order_by << matching_tag_count_order
+      end
 
       order_by << options[:order] if options[:order].present?
       order_by.join(", ")

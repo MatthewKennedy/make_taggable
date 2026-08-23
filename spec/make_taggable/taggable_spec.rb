@@ -524,11 +524,70 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
   end
 
+  it "orders by matching tag count without :any" do
+    one = TaggableModel.create!(name: "One", tag_list: "ruby")
+    two = TaggableModel.create!(name: "Two", tag_list: "ruby, rubygems")
+
+    # Both carry a tag matching %ruby%, so both satisfy the all-tags query.
+    # Two matches it with a second tagging as well, so it sorts first.
+    ordered = TaggableModel.tagged_with(["ruby"], wild: true, order_by_matching_tag_count: true).to_a
+
+    expect(ordered.first).to eq(two)
+    expect(ordered.uniq).to eq([two, one])
+    # Not asserting on ordered.size: a wild match joins once per matching
+    # tagging, so Two is returned twice. That duplication is its own bug, and
+    # fixing it is not what this example is about.
+  end
+
+  it "accepts order_by_matching_tag_count without :any and without raising" do
+    TaggableModel.create!(name: "One", tag_list: "ruby")
+
+    expect {
+      TaggableModel.tagged_with(["ruby"], order_by_matching_tag_count: true).to_a
+    }.not_to raise_error
+  end
+
+  it "counts an any: true relation" do
+    TaggableModel.create!(name: "Bob", tag_list: "ruby, rails")
+    TaggableModel.create!(name: "Frank", tag_list: "ruby")
+
+    relation = TaggableModel.tagged_with(["ruby"], any: true)
+
+    expect(relation.count).to eq(2)
+    expect(relation.count).to eq(relation.to_a.size)
+  end
+
+  it "honours a select on an any: true relation" do
+    TaggableModel.create!(name: "Bob", tag_list: "ruby")
+
+    record = TaggableModel.tagged_with(["ruby"], any: true).select(:name).first
+
+    # Asserting on the columns actually fetched, not on attributes.keys -- the
+    # generated *_list attributes are declared on the model, so they are present
+    # in that hash whatever the query selected.
+    expect(record.name).to eq("Bob")
+    expect(record.has_attribute?(:type)).to be(false)
+    expect { record.type }.to raise_error(ActiveModel::MissingAttributeError)
+  end
+
   it "excludes on a model whose primary key is not id" do
     NonStandardIdTaggableModel.create!(name: "Bob", tag_list: "happier, lazy")
     frank = NonStandardIdTaggableModel.create!(name: "Frank", tag_list: "happier")
 
     expect(NonStandardIdTaggableModel.tagged_with("lazy", exclude: true).to_a).to eq([frank])
+  end
+
+  it "excludes only within the time window asked for" do
+    old = TaggableModel.create!(name: "Old", tag_list: "vintage")
+    MakeTaggable::Tagging.where(taggable: old).update_all(created_at: 3.years.ago)
+    TaggableModel.create!(name: "Recent", tag_list: "vintage")
+    untagged = TaggableModel.create!(name: "Untagged")
+
+    excluded = TaggableModel.tagged_with("vintage", exclude: true, start_at: 1.year.ago).to_a
+
+    # Only Recent was tagged inside the window, so it is the only record the
+    # exclusion should remove. Old carries the tag, but not within the window.
+    expect(excluded).to match_array([old, untagged])
   end
 
   it "excludes only within the context asked for" do

@@ -123,8 +123,8 @@ module MakeTaggable::Taggable
       # @option options [TrueClass, FalseClass] :exclude match records carrying none of the tags
       # @option options [TrueClass, FalseClass] :match_all match records carrying only these tags
       # @option options [TrueClass, FalseClass] :wild match tags containing the given text
-      # @option options [TrueClass, FalseClass] :order_by_matching_tag_count with `:any`, order by
-      #   how many tags matched, most first
+      # @option options [TrueClass, FalseClass] :order_by_matching_tag_count order by how many
+      #   matching taggings a record has, most first. No effect alongside `:match_all`
       # @option options [ActiveRecord::Base] :owned_by only tags applied by this tagger
       # @option options [Symbol, String] :on only tags applied in this context
       # @option options [Time, Date] :start_at only tags applied after this time

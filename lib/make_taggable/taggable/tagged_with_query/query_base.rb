@@ -61,6 +61,46 @@ module MakeTaggable::Taggable::TaggedWithQuery
       end
     end
 
+    # A condition selecting the taggings that tie a row of the taggable table to
+    # one of the tags being matched, narrowed by whichever of :on, :owned_by,
+    # :start_at and :end_at were given.
+    #
+    # It correlates to the taggable table, so it only means anything inside a
+    # subquery -- an EXISTS test, or a COUNT used for ordering.
+    def matching_taggings
+      condition = tagging_arel_table[:taggable_id].eq(taggable_arel_table[taggable_model.primary_key])
+        .and(tagging_arel_table[:taggable_type].eq(taggable_model.base_class.name))
+        .and(
+          tagging_arel_table[:tag_id].in(
+            tag_arel_table.project(tag_arel_table[:id]).where(tags_match_type)
+          )
+        )
+
+      if options[:start_at].present?
+        condition = condition.and(tagging_arel_table[:created_at].gteq(options[:start_at]))
+      end
+
+      if options[:end_at].present?
+        condition = condition.and(tagging_arel_table[:created_at].lteq(options[:end_at]))
+      end
+
+      if options[:on].present?
+        condition = condition.and(tagging_arel_table[:context].eq(options[:on]))
+      end
+
+      if (owner = options[:owned_by]).present?
+        condition = condition.and(tagging_arel_table[:tagger_id].eq(owner.id))
+          .and(tagging_arel_table[:tagger_type].eq(owner.class.base_class.to_s))
+      end
+
+      condition
+    end
+
+    # Orders by how many of the matched taggings a row has, most first.
+    def matching_tag_count_order
+      "(SELECT count(*) FROM #{tagging_model.table_name} WHERE #{matching_taggings.to_sql}) desc"
+    end
+
     def escaped_tag(tag)
       tag = tag.downcase unless MakeTaggable.strict_case_match
       MakeTaggable::Utils.escape_like(tag)
