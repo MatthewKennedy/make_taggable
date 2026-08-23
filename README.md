@@ -4,6 +4,7 @@
 [![Downloads](https://img.shields.io/gem/dt/make_taggable)](https://rubygems.org/gems/make_taggable)
 [![CI](https://github.com/MatthewKennedy/make_taggable/actions/workflows/ci.yml/badge.svg)](https://github.com/MatthewKennedy/make_taggable/actions/workflows/ci.yml)
 [![Standard Rb](https://github.com/MatthewKennedy/make_taggable/actions/workflows/standard-ci.yml/badge.svg)](https://github.com/MatthewKennedy/make_taggable/actions/workflows/standard-ci.yml)
+[![Sponsor](https://img.shields.io/github/sponsors/MatthewKennedy?label=sponsor&logo=github)](https://github.com/sponsors/MatthewKennedy)
 
 Tagging for Active Record models, across any number of named contexts.
 
@@ -165,6 +166,14 @@ bundle exec standardrb --fix
 Public API needs YARD documentation. `bundle exec yard stats --list-undoc` should report 100%.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more.
+
+## Sponsoring
+
+MakeTaggable is free to use under the MIT licence, and maintained in spare time. If it saves you
+some, you can [sponsor its development](https://github.com/sponsors/MatthewKennedy).
+
+Sponsorship buys no support commitment and no influence over what gets built — bug reports and pull
+requests are as welcome from everyone as they always were.
 
 ## Credits
 
