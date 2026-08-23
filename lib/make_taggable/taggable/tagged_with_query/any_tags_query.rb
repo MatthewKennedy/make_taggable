@@ -11,17 +11,17 @@ module MakeTaggable::Taggable::TaggedWithQuery
     # @return [ActiveRecord::Relation]
     #
     def build
-      taggable_model.select(all_fields)
+      # No select of our own. This strategy filters with an EXISTS subquery and
+      # joins nothing, so Active Record's default select list is already right.
+      # Forcing `taggable_models.*` made COUNT() invalid and left a caller's own
+      # select appended after the star rather than replacing it.
+      taggable_model
         .where(model_has_at_least_one_tag)
         .order(Arel.sql(order_conditions))
         .readonly(false)
     end
 
     private
-
-    def all_fields
-      taggable_arel_table[Arel.star]
-    end
 
     def model_has_at_least_one_tag
       tagging_arel_table.project(Arel.star).where(at_least_one_tag).exists

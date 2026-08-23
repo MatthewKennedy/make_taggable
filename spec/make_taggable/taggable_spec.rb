@@ -524,6 +524,29 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
   end
 
+  it "counts an any: true relation" do
+    TaggableModel.create!(name: "Bob", tag_list: "ruby, rails")
+    TaggableModel.create!(name: "Frank", tag_list: "ruby")
+
+    relation = TaggableModel.tagged_with(["ruby"], any: true)
+
+    expect(relation.count).to eq(2)
+    expect(relation.count).to eq(relation.to_a.size)
+  end
+
+  it "honours a select on an any: true relation" do
+    TaggableModel.create!(name: "Bob", tag_list: "ruby")
+
+    record = TaggableModel.tagged_with(["ruby"], any: true).select(:name).first
+
+    # Asserting on the columns actually fetched, not on attributes.keys -- the
+    # generated *_list attributes are declared on the model, so they are present
+    # in that hash whatever the query selected.
+    expect(record.name).to eq("Bob")
+    expect(record.has_attribute?(:type)).to be(false)
+    expect { record.type }.to raise_error(ActiveModel::MissingAttributeError)
+  end
+
   it "excludes on a model whose primary key is not id" do
     NonStandardIdTaggableModel.create!(name: "Bob", tag_list: "happier, lazy")
     frank = NonStandardIdTaggableModel.create!(name: "Frank", tag_list: "happier")
