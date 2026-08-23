@@ -125,6 +125,38 @@ RSpec.describe "Dirty behavior of taggable objects" do
       end
     end
 
+    context "when the list is mutated in place" do
+      it "flags the list as changed after add" do
+        taggable = TaggableModel.create!(name: "Bob", tag_list: "one")
+        reloaded = TaggableModel.find(taggable.id)
+
+        reloaded.tag_list.add("two")
+
+        expect(reloaded.tag_list_changed?).to be_truthy
+        expect(reloaded.tag_list_was).to eq(["one"])
+        expect(reloaded.changes).to eq({"tag_list" => [["one"], %w[one two]]})
+      end
+
+      it "flags the list as changed after remove" do
+        taggable = TaggableModel.create!(name: "Bob", tag_list: "one, two")
+        reloaded = TaggableModel.find(taggable.id)
+
+        reloaded.tag_list.remove("two")
+
+        expect(reloaded.tag_list_changed?).to be_truthy
+      end
+
+      it "is not flagged as changed by reading the list" do
+        taggable = TaggableModel.create!(name: "Bob", tag_list: "one")
+        reloaded = TaggableModel.find(taggable.id)
+
+        reloaded.tag_list
+
+        expect(reloaded.tag_list_changed?).to be_falsey
+        expect(reloaded.changes).to be_empty
+      end
+    end
+
     context "when language_list changed by association" do
       let(:tag) { MakeTaggable::Tag.new(name: "one") }
 

@@ -30,15 +30,39 @@ with Active Support's inflector, so `:skills` gives `skill_list` and `skills`.
 | `find_related_skills_for(klass)` | instance | The same, against another model |
 | `caching_skill_list?` | class | Whether this context is cached in a column |
 
-`skill_list` takes part in dirty tracking like any other attribute:
+`skill_list` takes part in dirty tracking:
 
 ```ruby
 user.skill_list = "diving"
-user.skill_list_changed?          # => true
-user.skill_list_was               # => ["jogging"]
-user.skill_list_change            # => [["jogging"], ["diving"]]
-user.will_save_change_to_skill_list?
+user.skill_list_changed?             # => true
+user.skill_list_was                  # => ["jogging"]
+user.skill_list_change               # => [["jogging"], ["diving"]]
+user.will_save_change_to_skill_list?  # => true
+user.changes                          # => {"skill_list" => [["jogging"], ["diving"]]}
+user.save
+user.saved_change_to_skill_list?      # => true
 ```
+
+Mutating the list in place counts too, not just assigning a new one:
+
+```ruby
+user.skill_list.add("diving")
+user.skill_list_changed?   # => true
+```
+
+Order counts only where the model asked for it with `make_ordered_taggable`. Reordering the same
+tags is not a change otherwise.
+
+A tag list is **not** an Active Record attribute, though, and the difference shows in three places:
+
+```ruby
+user.attributes["skill_list"]   # => nil, and the key is absent -- use user.skill_list
+user.as_json                    # no "skill_list" key; ask for it with as_json(methods: :skill_list)
+User.upsert_all([{skill_list: "diving"}])   # raises -- upsert_all writes columns, and this is not one
+```
+
+Leaving tag lists out of `as_json` is deliberate: a list is loaded from the taggings table, so
+including it meant serialising a collection queried once per record.
 
 ### Naming a context
 

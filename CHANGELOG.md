@@ -39,6 +39,34 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `strict_loading` -- a record whose tags were never touched still raised
   `StrictLoadingViolationError`. Saves now consider only the contexts held in memory.
 
+### Changed
+
+- **Tag lists are no longer declared as Active Model attributes.** The declaration is what gave them
+  dirty tracking, and it also made Active Record treat them as columns where they are not. The dirty
+  API is unchanged -- `tag_list_changed?`, `_was`, `_change`, `will_save_change_to_*`,
+  `saved_change_to_*`, and the tag lists still appear in `changes` -- but it now runs on the gem's
+  own bookkeeping.
+
+  Three visible consequences, each of them the point:
+
+  - `as_json` no longer includes tag lists, so serialising a collection no longer queries once per
+    record. Serialising three records went from 16 queries to 1. Ask for a list explicitly with
+    `as_json(methods: :tag_list)`.
+  - `attributes` no longer carries a `tag_list` key. It previously held `nil` while `tag_list`
+    returned the tags.
+  - `upsert_all` still refuses a tag list -- it writes columns, and a tag list means writing
+    taggings -- but `as_json` output can now be round-tripped through it, which it could not before.
+
+  `MakeTaggable::Taggable::TagListType` is removed. It backed the attribute and has no other caller.
+
+### Fixed
+
+- `tag_ids = []` silently did nothing once `as_json` had been called on the record.
+
+- Mutating a list in place -- `record.tag_list.add("x")` -- did not mark the record as changed, so
+  `tag_list_changed?` stayed false and anything conditioned on it never ran. The list still saved;
+  what was wrong was everything that asks the record what changed.
+
 ## [1.3.0] - 2026-08-23
 
 ### Changed
