@@ -26,6 +26,13 @@ empty relation rather than every record — worth knowing when the tags come fro
 |---|---|
 | `:any` | Match records carrying at least one of the tags |
 | `:exclude` | Match records carrying none of the tags |
+| `:match_all` | Match records carrying only these tags and no others |
+| `:wild` | Match tags *containing* the given text, i.e. `%sci%` |
+| `:on` | Restrict to one context. Honoured by every option, `:exclude` included |
+| `:owned_by` | Restrict to tags applied by one tagger |
+| `:order_by_matching_tag_count` | With `:any`, order by how many tags matched, most first |
+| `:start_at` | Only tags applied after this time |
+| `:end_at` | Only tags applied before this time |
 
 An empty tag list means "nothing matches" for the matching options and "nothing is ruled out" for
 `:exclude`, so the two always partition the scope between them:
@@ -34,13 +41,6 @@ An empty tag list means "nothing matches" for the matching options and "nothing 
 Book.tagged_with([])                  # => none
 Book.tagged_with([], exclude: true)   # => every book
 ```
-| `:match_all` | Match records carrying only these tags and no others |
-| `:wild` | Match tags *containing* the given text, i.e. `%sci%` |
-| `:on` | Restrict to one context |
-| `:owned_by` | Restrict to tags applied by one tagger |
-| `:order_by_matching_tag_count` | With `:any`, order by how many tags matched, most first |
-| `:start_at` | Only tags applied after this time |
-| `:end_at` | Only tags applied before this time |
 
 `:wild` combines with `:any` or `:exclude`:
 

@@ -531,6 +531,16 @@ RSpec.describe "Taggable" do
     expect(NonStandardIdTaggableModel.tagged_with("lazy", exclude: true).to_a).to eq([frank])
   end
 
+  it "excludes only within the context asked for" do
+    in_skills = TaggableModel.create!(name: "Skilled", skill_list: "nifty")
+    in_tags = TaggableModel.create!(name: "Tagged", tag_list: "nifty")
+
+    excluded = TaggableModel.tagged_with("nifty", on: :skills, exclude: true).to_a
+
+    expect(excluded).to include(in_tags)
+    expect(excluded).not_to include(in_skills)
+  end
+
   it "excludes nothing when the tag list is empty" do
     TaggableModel.create(name: "Bob", tag_list: "happier, lazy")
     TaggableModel.create(name: "Frank", tag_list: "happier")
