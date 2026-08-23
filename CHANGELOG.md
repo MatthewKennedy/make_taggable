@@ -5,6 +5,29 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `tagged_with(..., exclude: true, match_all: true)` raised `HAVING clause on a non-aggregate query`.
+  The combination is now refused with an `ArgumentError`: `:match_all` selects records carrying only
+  the given tags, `:exclude` selects records carrying none of them, and no set of records satisfies
+  both.
+
+- Tag creation retries on a deadlock as well as on a duplicate key. Under concurrent writes MySQL
+  reports one or the other depending on how two inserts of the same name interleave on the unique
+  index, and only the second was being retried -- so a busy application could see
+  `ActiveRecord::Deadlocked` escape from what is meant to be a transparent retry.
+
+### Internal
+
+- Coverage is measured (`COVERAGE=1 bundle exec rspec`) with a floor enforced in CI. It found the
+  `:exclude` combination above on its first run.
+- The concurrency example runs. It had been skipped since the fork and referenced a `Barrier` class
+  that did not exist, so concurrent tag creation was untested outright.
+- `UPGRADING.md`, which ships as the gem's post-install message, covers the whole 1.x line rather
+  than stopping at 1.0.
+
 ## [1.7.0] - 2026-08-23
 
 ### Added
