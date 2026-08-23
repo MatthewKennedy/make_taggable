@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative "tagged_with_query"
-require_relative "tag_list_type"
 
 module MakeTaggable::Taggable
   ##
@@ -58,8 +57,6 @@ module MakeTaggable::Taggable
               class_name: "MakeTaggable::Tag",
               through: context_taggings,
               source: :tag
-
-            attribute :"#{tags_type.singularize}_list", MakeTaggable::Taggable::TagListType.new
           end
 
           taggable_mixin.class_eval <<-RUBY, __FILE__, __LINE__ + 1
@@ -68,15 +65,6 @@ module MakeTaggable::Taggable
             end
 
             def #{tag_type}_list=(new_tags)
-              parsed_new_list = MakeTaggable.default_parser.new(new_tags).parse
-
-              if self.class.preserve_tag_order? || (parsed_new_list.sort != #{tag_type}_list.sort)
-                unless #{tag_type}_list_changed?
-                  @attributes["#{tag_type}_list"] = ActiveModel::Attribute.from_user("#{tag_type}_list", #{tag_type}_list, MakeTaggable::Taggable::TagListType.new)
-                end
-                write_attribute("#{tag_type}_list", parsed_new_list)
-              end
-
               set_tag_list_on('#{tags_type}', new_tags)
             end
 
@@ -84,9 +72,33 @@ module MakeTaggable::Taggable
               all_tags_list_on('#{tags_type}')
             end
 
+            def #{tag_type}_list_changed?
+              tag_list_changed_on?('#{tags_type}')
+            end
+
+            def #{tag_type}_list_was
+              tag_list_was_on('#{tags_type}')
+            end
+
+            def #{tag_type}_list_change
+              tag_list_change_on('#{tags_type}')
+            end
+
+            def will_save_change_to_#{tag_type}_list?
+              tag_list_changed_on?('#{tags_type}')
+            end
+
+            def saved_change_to_#{tag_type}_list
+              saved_tag_list_changes['#{tag_type}_list']
+            end
+
+            def saved_change_to_#{tag_type}_list?
+              saved_tag_list_changes.key?('#{tag_type}_list')
+            end
+
             private
             def dirtify_tag_list(tagging)
-              attribute_will_change! tagging.context.singularize+"_list"
+              tag_list_changed_by_association(tagging.context)
             end
           RUBY
         end
@@ -223,6 +235,151 @@ module MakeTaggable::Taggable
     end
 
     ##
+    # The tag lists as they stood when the record was loaded or last saved, keyed by context.
+    #
+    # @return [Hash{String => Array<String>}]
+    #
+    # @api private
+    #
+    def original_tag_lists
+      @original_tag_lists ||= {}
+    end
+
+    ##
+    # Records what a context's list looked like before anything touched it, if that has not been
+    # noted already. Called before every change, so the first note wins and later ones are ignored.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [void]
+    #
+    # @api private
+    #
+    def note_tag_list_original(context)
+      key = context.to_s
+      return if original_tag_lists.key?(key)
+
+      original_tag_lists[key] = tag_list_cache_on(key).to_a.dup
+    end
+
+    ##
+    # Notes the original list and drops the cached one, after a tagging was added or removed
+    # through the association rather than through a list.
+    #
+    # The cached list is what `tag_list_on` answers from, and pushing onto `record.tags` does not
+    # go near it -- so without dropping it the list before and after compare equal and nothing
+    # looks changed.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [void]
+    #
+    # @api private
+    #
+    def tag_list_changed_by_association(context)
+      note_tag_list_original(context)
+
+      singular = context.to_s.singularize
+      instance_variable_set("@#{singular}_list", nil)
+      instance_variable_set("@all_#{singular}_list", nil)
+    end
+
+    ##
+    # Whether a context's list differs from the one loaded or last saved.
+    #
+    # Order counts only where the model asked for it with `make_ordered_taggable`.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [TrueClass, FalseClass]
+    #
+    def tag_list_changed_on?(context)
+      key = context.to_s
+      return false unless original_tag_lists.key?(key)
+
+      comparable_tag_list(original_tag_lists[key]) != comparable_tag_list(tag_list_on(key))
+    end
+
+    ##
+    # A context's list as it stood when the record was loaded or last saved.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [Array<String>]
+    #
+    def tag_list_was_on(context)
+      key = context.to_s
+
+      original_tag_lists.key?(key) ? original_tag_lists[key] : tag_list_on(key).to_a
+    end
+
+    ##
+    # A context's list before and after, or `nil` when it has not changed.
+    #
+    # @param context [Symbol, String] the tagging context
+    # @return [Array<Array<String>>, NilClass]
+    #
+    def tag_list_change_on(context)
+      return unless tag_list_changed_on?(context)
+
+      [tag_list_was_on(context), tag_list_on(context).to_a]
+    end
+
+    ##
+    # The tag list changes this record is carrying, keyed the way Active Model keys `changes`.
+    #
+    # @return [Hash{String => Array<Array<String>>}]
+    #
+    # @api private
+    #
+    def tag_list_changes
+      # assigned_tagging_contexts, not tagging_contexts: the latter reads the
+      # taggings table to find contexts used previously, and a record only has
+      # pending changes in contexts it holds a list for.
+      assigned_tagging_contexts.each_with_object({}) do |context, changes|
+        change = tag_list_change_on(context)
+        changes["#{context.to_s.singularize}_list"] = change if change
+      end
+    end
+
+    ##
+    # The tag list changes written by the most recent save.
+    #
+    # @return [Hash{String => Array<Array<String>>}]
+    #
+    # @api private
+    #
+    def saved_tag_list_changes
+      @saved_tag_list_changes ||= {}
+    end
+
+    ##
+    # Active Model's changes, plus the tag lists.
+    #
+    # @return [ActiveSupport::HashWithIndifferentAccess]
+    #
+    def changes
+      super.merge(tag_list_changes)
+    end
+
+    ##
+    # @return [Hash] the previous values of everything changed, tag lists included
+    #
+    def changed_attributes
+      super.merge(tag_list_changes.transform_values(&:first))
+    end
+
+    ##
+    # @return [TrueClass, FalseClass] whether anything changed, tag lists included
+    #
+    def changed?
+      super || tag_list_changes.any?
+    end
+
+    ##
+    # @return [Hash] the changes the last save wrote, tag lists included
+    #
+    def saved_changes
+      super.merge(saved_tag_list_changes)
+    end
+
+    ##
     # A context's tag list, loading it from the caching column or the database as needed.
     #
     # @param context [Symbol, String] the tagging context
@@ -308,6 +465,10 @@ module MakeTaggable::Taggable
     #
     def set_tag_list_on(context, new_list)
       add_custom_context(context)
+
+      # Before the list is replaced, so the note captures what was there rather
+      # than what is being put there.
+      note_tag_list_original(context)
 
       variable_name = "@#{context.to_s.singularize}_list"
 
@@ -423,25 +584,27 @@ module MakeTaggable::Taggable
         end
       end
 
+      settle_tag_list_changes
+
       true
+    end
+
+    # Moves the pending tag list changes into the saved ones, so that after a
+    # save the record reports what the save wrote rather than what it was about
+    # to write. Mirrors what Active Model does for real attributes.
+    def settle_tag_list_changes
+      @saved_tag_list_changes = tag_list_changes
+      original_tag_lists.clear
     end
 
     private
 
+    def comparable_tag_list(list)
+      self.class.preserve_tag_order? ? list.to_a : list.to_a.sort
+    end
+
     def ensure_included_cache_methods!
       self.class.columns
-    end
-
-    # Filters the tag lists from the attribute names.
-    def attributes_for_update(attribute_names)
-      tag_lists = tag_types.map { |tags_type| "#{tags_type.to_s.singularize}_list" }
-      super.delete_if { |attr| tag_lists.include? attr }
-    end
-
-    # Filters the tag lists from the attribute names.
-    def attributes_for_create(attribute_names)
-      tag_lists = tag_types.map { |tags_type| "#{tags_type.to_s.singularize}_list" }
-      super.delete_if { |attr| tag_lists.include? attr }
     end
 
     ##
