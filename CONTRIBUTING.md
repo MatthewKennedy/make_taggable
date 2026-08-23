@@ -16,7 +16,9 @@ smallest model and code that reproduce the problem.
 4. Run the suite: `bundle exec rake`.
 5. Format: `bundle exec standardrb --fix`.
 6. Document any public API you added: `bundle exec yard stats --list-undoc` should report 100%.
-7. Add an entry to [CHANGELOG.md](CHANGELOG.md) under "unreleased".
+7. Add an entry to [CHANGELOG.md](CHANGELOG.md) under the existing `## [Unreleased]` heading —
+   add to it rather than adding a second one, or a release will rename the first and leave your
+   entry behind. `spec/docs_spec.rb` checks this.
 8. If it changes something an application would have to react to, add it to
    [UPGRADING.md](UPGRADING.md) — that file is the gem's post-install message.
 9. Open a pull request explaining what changed and why.
