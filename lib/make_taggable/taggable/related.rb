@@ -115,12 +115,15 @@ module MakeTaggable::Taggable
       "#{klass.arel_table[klass.primary_key].not_eq(id).to_sql} AND" if [self.class.base_class, self.class].include? klass
     end
 
+    # Grouping by the primary key alone is enough on every adapter we support.
+    #
+    # PostgreSQL used to need every selected non-aggregated column listed here,
+    # which is why this branched. Since 9.1 it works the functional dependency
+    # out from the primary key on its own, and listing every column actively
+    # breaks a model with a `json` column -- json has no equality operator, so
+    # it cannot appear in a GROUP BY at all.
     def group_columns(klass)
-      if MakeTaggable::Utils.using_postgresql?
-        grouped_column_names_for(klass)
-      else
-        "#{klass.table_name}.#{klass.primary_key}"
-      end
+      "#{klass.table_name}.#{klass.primary_key}"
     end
 
     def related_where(klass, conditions)
@@ -129,6 +132,42 @@ module MakeTaggable::Taggable
         .group(group_columns(klass))
         .order("count DESC")
         .where(conditions)
+        .extending(CalculationMethods)
+    end
+
+    # These relations select the taggable's columns plus an aliased count, and
+    # order by that alias. Active Record folds the select list into the COUNT()
+    # it builds, which produced SQL no adapter accepts:
+    #
+    #   SELECT COUNT(taggable_models.*, COUNT(tags.id) AS count) ...
+    #
+    # Counting rows instead is not enough on its own either: the relation groups
+    # by primary key over a cross join, so dropping the grouping counts taggings
+    # rather than records, and the ORDER BY still names an alias that a bare
+    # COUNT(*) no longer selects.
+    #
+    # So count the grouped query as a subquery. `klass.unscoped` is the shell
+    # for it because it carries no extension of its own -- counting a relation
+    # derived from this one would re-enter this method.
+    module CalculationMethods
+      ##
+      # The number of related records.
+      #
+      # @param column_name [Symbol, String] accepted for signature compatibility; ignored
+      # @return [Integer]
+      #
+      def count(column_name = :all)
+        ids = except(:select, :order).select(Arel.sql("#{klass.table_name}.#{klass.primary_key}"))
+
+        klass.unscoped.from(Arel.sql("(#{ids.to_sql}) AS #{klass.table_name}_related")).count(:all)
+      end
+
+      ##
+      # @return [Integer] the number of related records
+      #
+      def size
+        loaded? ? to_a.size : count
+      end
     end
   end
 end

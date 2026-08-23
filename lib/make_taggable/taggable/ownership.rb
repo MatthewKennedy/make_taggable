@@ -164,7 +164,7 @@ module MakeTaggable::Taggable
     # @return [TrueClass]
     #
     def save_owned_tags
-      tagging_contexts.each do |context|
+      assigned_tagging_contexts.each do |context|
         cached_owned_tag_list_on(context).each do |owner, tag_list|
           # Find existing tags or create non-existing tags:
           tags = find_or_create_tags_from_list_with_context(tag_list.uniq, context)

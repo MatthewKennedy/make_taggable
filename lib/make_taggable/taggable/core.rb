@@ -192,7 +192,13 @@ module MakeTaggable::Taggable
     # @return [Array<String>, NilClass]
     #
     def add_custom_context(value)
-      custom_contexts << value.to_s unless custom_contexts.include?(value.to_s) || self.class.tag_types.map(&:to_s).include?(value.to_s)
+      # The declared contexts are checked first deliberately. Ruby evaluates the
+      # left operand of `||` first, so testing custom_contexts up front loaded
+      # every tagging on the record just to assign a list on an ordinary
+      # declared context.
+      return if self.class.tag_types.map(&:to_s).include?(value.to_s)
+
+      custom_contexts << value.to_s unless custom_contexts.include?(value.to_s)
     end
 
     ##
@@ -320,6 +326,23 @@ module MakeTaggable::Taggable
     end
 
     ##
+    # The contexts a save has to consider: the declared ones, plus any context this record has
+    # been handed a list for in memory.
+    #
+    # Deliberately not {#tagging_contexts}, which reads the taggings table to find contexts used
+    # previously. A save only writes lists held in memory, so the ones already loaded are the only
+    # ones that can have anything to write -- and reading the table on every save cost a query
+    # whether or not any tag changed, and broke `strict_loading` outright.
+    #
+    # @return [Array<String>]
+    #
+    # @api private
+    #
+    def assigned_tagging_contexts
+      self.class.tag_types.map(&:to_s) + (@custom_contexts || [])
+    end
+
+    ##
     # Reloads the record, discarding the tag lists held in memory.
     #
     # @param args [Array<Object>] arguments forwarded to Active Record
@@ -346,7 +369,7 @@ module MakeTaggable::Taggable
     # @return [TrueClass]
     #
     def save_tags
-      tagging_contexts.each do |context|
+      assigned_tagging_contexts.each do |context|
         next unless tag_list_cache_set_on(context)
 
         # List of currently assigned tag names

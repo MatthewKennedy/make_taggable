@@ -181,6 +181,8 @@ its own — add `.distinct` if you want records back rather than matches.
   is what stops a record being returned once per matching tagging. Matching a dozen tags produces a
   dozen correlated subqueries rather than a dozen joins, which most planners handle better, but it
   is still worth reaching for `any: true` where the semantics allow it.
+- Saving a taggable reads nothing from the taggings table unless a tag list was actually assigned,
+  so a save that touches no tags costs no extra query and works under `strict_loading`.
 - `:order_by_matching_tag_count` adds a correlated subquery to the `ORDER BY`. It is fine for a
   page of results and expensive across a whole table.
 - `all_tag_counts` joins the taggables to count them. Reach for `all_tags` when the counts are not

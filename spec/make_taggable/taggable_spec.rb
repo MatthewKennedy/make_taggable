@@ -539,6 +539,54 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
   end
 
+  describe "saving a record whose tags did not change" do
+    def taggings_queries_while
+      queries = []
+      subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |*, payload|
+        queries << payload[:sql] if payload[:sql].to_s.include?(MakeTaggable::Tagging.table_name)
+      end
+      yield
+      queries
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber)
+    end
+
+    it "does not read the taggings table" do
+      record = TaggableModel.create!(name: "Bob", tag_list: "ruby")
+      reloaded = TaggableModel.find(record.id)
+
+      queries = taggings_queries_while { reloaded.save }
+
+      expect(queries).to be_empty
+    end
+
+    it "does not violate strict_loading" do
+      record = TaggableModel.create!(name: "Bob", tag_list: "ruby")
+      strict = TaggableModel.strict_loading.find(record.id)
+      strict.name = "Robert"
+
+      expect { strict.save }.not_to raise_error
+    end
+
+    it "still writes a tag list that did change" do
+      record = TaggableModel.create!(name: "Bob", tag_list: "ruby")
+      reloaded = TaggableModel.find(record.id)
+
+      reloaded.tag_list = "ruby, rails"
+      reloaded.save
+
+      expect(reloaded.reload.tag_list.sort).to eq(%w[rails ruby])
+    end
+
+    it "still writes a list for a context the model does not declare" do
+      record = TaggableModel.create!(name: "Bob")
+      record.set_tag_list_on(:customs, "one, two")
+      record.save
+
+      expect(record.reload.tag_list_on(:customs).sort).to eq(%w[one two])
+    end
+  end
+
   it "returns a record once when a tag is applied in more than one context" do
     record = OtherTaggableModel.create!(name: "x", tag_list: "interesting", language_list: "interesting")
 
