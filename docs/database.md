@@ -107,8 +107,25 @@ end
 ## PostgreSQL
 
 - `named_like` uses `ILIKE`, so partial matching is case insensitive regardless of collation.
-- Tag counts group by every tag column, as PostgreSQL requires.
-- Nothing extra is needed for non-ASCII tags.
+- Queries group by the primary key. PostgreSQL wanted every selected non-aggregated column listed
+  before 9.1; since then it works the dependency out itself.
+
+**Case-insensitive matching of non-ASCII tags depends on the locale the cluster was created with.**
+Exact matching goes through `LOWER(name) = LOWER(?)`, and `LOWER()` follows `lc_ctype`. On a UTF-8
+locale it folds Cyrillic, Greek and the rest as you would expect. On a cluster initialised with
+`lc_ctype = C` it folds ASCII only, and `"ПРИВЕТ"` and `"привет"` become two separate tags — the same
+limitation described under SQLite below, on a database that otherwise has none.
+
+Check with:
+
+```sql
+SHOW lc_ctype;          -- C means ASCII-only folding
+SELECT LOWER('Ü');      -- returns 'Ü' unchanged on such a cluster
+```
+
+`ILIKE` is unaffected, so partial matching keeps working either way. If you need exact matching to
+fold non-ASCII, create the database with a UTF-8 locale, or set
+`MakeTaggable.strict_case_match = true` so the behaviour is at least consistent.
 
 ## MySQL
 
