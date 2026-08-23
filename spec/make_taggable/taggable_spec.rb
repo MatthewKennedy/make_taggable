@@ -524,6 +524,13 @@ RSpec.describe "Taggable" do
     expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
   end
 
+  it "excludes on a model whose primary key is not id" do
+    NonStandardIdTaggableModel.create!(name: "Bob", tag_list: "happier, lazy")
+    frank = NonStandardIdTaggableModel.create!(name: "Frank", tag_list: "happier")
+
+    expect(NonStandardIdTaggableModel.tagged_with("lazy", exclude: true).to_a).to eq([frank])
+  end
+
   it "excludes nothing when the tag list is empty" do
     TaggableModel.create(name: "Bob", tag_list: "happier, lazy")
     TaggableModel.create(name: "Frank", tag_list: "happier")
