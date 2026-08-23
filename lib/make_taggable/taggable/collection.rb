@@ -110,7 +110,7 @@ module MakeTaggable::Taggable
         tagging_scope = MakeTaggable::Tagging.select(
           "#{MakeTaggable::Tagging.table_name}.tag_id, #{last_applied_at_projection}"
         )
-        tag_scope = MakeTaggable::Tag.select("#{MakeTaggable::Tag.table_name}.*").order(options[:order]).limit(options[:limit])
+        tag_scope = MakeTaggable.tag_model.select("#{MakeTaggable::Tag.table_name}.*").order(options[:order]).limit(options[:limit])
 
         # Joins and conditions
         tagging_conditions(options).each { |condition| tagging_scope = tagging_scope.where(condition) }
@@ -152,7 +152,7 @@ module MakeTaggable::Taggable
         tagging_scope = MakeTaggable::Tagging.select(
           "#{MakeTaggable::Tagging.table_name}.tag_id, COUNT(#{MakeTaggable::Tagging.table_name}.tag_id) AS tags_count, #{last_applied_at_projection}"
         )
-        tag_scope = MakeTaggable::Tag.select("#{MakeTaggable::Tag.table_name}.*, #{MakeTaggable::Tagging.table_name}.tags_count AS count").order(options[:order]).limit(options[:limit])
+        tag_scope = MakeTaggable.tag_model.select("#{MakeTaggable::Tag.table_name}.*, #{MakeTaggable::Tagging.table_name}.tags_count AS count").order(options[:order]).limit(options[:limit])
 
         # Current model is STI descendant, so add type checking to the join condition
         unless descends_from_active_record?

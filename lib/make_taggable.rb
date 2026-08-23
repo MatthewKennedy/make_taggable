@@ -128,6 +128,17 @@ module MakeTaggable
   end
 
   ##
+  # The class tags are read, written and returned as.
+  #
+  # Resolved on each call rather than memoised, so a reloaded class in development is picked up.
+  #
+  # @return [Class]
+  #
+  def self.tag_model
+    tag_class.constantize
+  end
+
+  ##
   # The library's settings.
   #
   # Reach these through {MakeTaggable.setup} or directly on `MakeTaggable`, which forwards to the
@@ -168,7 +179,7 @@ module MakeTaggable
       :remove_unused_tags, :default_parser,
       :tags_counter, :tags_table,
       :taggings_table
-    attr_reader :delimiter, :strict_case_match
+    attr_reader :delimiter, :strict_case_match, :tag_class
 
     ##
     # Builds the configuration with the library's defaults.
@@ -186,6 +197,29 @@ module MakeTaggable
       @force_binary_collation = false
       @tags_table = :tags
       @taggings_table = :taggings
+      @tag_class = "MakeTaggable::Tag"
+    end
+
+    ##
+    # Sets the class tags are read, written and returned as.
+    #
+    # Must be a String. A model constant cannot be referenced while initializers run -- Zeitwerk
+    # has not defined it yet, and eager loading in production would try to resolve it before the
+    # class exists.
+    #
+    # @param class_name [String] the name of a class inheriting from {MakeTaggable::Tag}
+    # @return [String]
+    # @raise [ArgumentError] when given anything but a String
+    #
+    def tag_class=(class_name)
+      unless class_name.is_a?(String)
+        raise ArgumentError,
+          "tag_class must be a String, got #{class_name.inspect}. " \
+          "Naming the class rather than the constant is what lets it be set in an initializer, " \
+          "before Zeitwerk has defined it."
+      end
+
+      @tag_class = class_name
     end
 
     ##

@@ -26,6 +26,7 @@ MakeTaggable.force_lowercase = true
 | `remove_unused_tags` | `false` | Destroy a tag row when its last tagging goes |
 | `tags_counter` | `true` | Maintain the `taggings_count` counter cache |
 | `default_parser` | `MakeTaggable::DefaultParser` | Class used to parse tag input |
+| `tag_class` | `"MakeTaggable::Tag"` | Name of the class tags are read and written as |
 | `delimiter` | `","` | Delimiter, or delimiters, separating tags |
 | `tags_table` | `:tags` | Table backing `MakeTaggable::Tag` |
 | `taggings_table` | `:taggings` | Table backing `MakeTaggable::Tagging` |
@@ -70,6 +71,51 @@ tagging, at the cost of `Tag.most_used` and `Tag.least_used`, both of which read
 
 Changing this on an existing application leaves the existing counts frozen at their current values
 rather than resetting them.
+
+### `tag_class`
+
+The class tags are read, written and returned as. Give it a class of your own to add validations,
+callbacks, associations or methods that apply everywhere tags are used.
+
+```ruby
+# config/initializers/make_taggable.rb
+MakeTaggable.setup do |config|
+  config.tag_class = "MyApp::Tag"
+end
+```
+
+```ruby
+# app/models/my_app/tag.rb
+class MyApp::Tag < MakeTaggable::Tag
+  has_many :synonyms
+  validates :name, format: {with: /\A[a-z0-9-]+\z/}
+
+  def to_param = name
+end
+```
+
+After which every tag the library hands back is one of yours:
+
+```ruby
+book.tags.first                    # => #<MyApp::Tag ...>
+Book.all_tags.first                # => #<MyApp::Tag ...>
+Book.tag_counts_on(:genres).first  # => #<MyApp::Tag ...>
+book.tag_list = "sci-fi"           # validated by MyApp::Tag on save
+```
+
+**Two rules, both of which will bite if ignored.**
+
+*Name the class, do not reference it.* The setting takes a String. A model constant cannot be
+referenced while initializers run — Zeitwerk has not defined it yet, and eager loading in production
+would try to resolve it before the class exists. Passing a constant raises `ArgumentError`.
+
+*Set it in an initializer, before models load.* `make_taggable` builds its associations when a model
+class body runs, so the class name has to be known by then. Setting it later — in a test, a console,
+a request — leaves associations already built against the old class. Changing it needs a boot, not a
+reload.
+
+Your class should inherit from `MakeTaggable::Tag` and share the `tags` table. It is not a way to
+give different contexts different vocabularies — see [contexts.md](contexts.md).
 
 ### `default_parser`
 

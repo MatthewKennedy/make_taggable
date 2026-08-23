@@ -152,8 +152,13 @@ Dynamic contexts get none of the generated methods in the table above — there 
 ## A separate vocabulary for one context
 
 Tags are shared across contexts and models by default: one `tags` row named `"ruby"` serves
-everything. To keep a context's tags separate, subclass `MakeTaggable::Tag` and override the hook
-that resolves names to records:
+everything.
+
+To change the class **globally** — to add validations or methods to every tag — set
+[`tag_class`](configuration.md) rather than anything here. What follows is for giving one context a
+vocabulary of its own, which is a different and larger thing.
+
+Subclass `MakeTaggable::Tag` and override the hook that resolves names to records:
 
 ```ruby
 class Market < MakeTaggable::Tag
