@@ -5,6 +5,33 @@ RSpec.describe "Acts As Taggable On" do
     expect(UntaggableModel).to_not be_taggable
   end
 
+  describe "a context name that cannot become a method name" do
+    def taggable_class_on(context)
+      Class.new(ActiveRecord::Base) do
+        self.table_name = "taggable_models"
+        def self.name = "GeneratedContextModel"
+        make_taggable context
+      end
+    end
+
+    it "is rejected with an error naming the context" do
+      expect { taggable_class_on(:"1categories") }
+        .to raise_error(ArgumentError, /1categories/)
+    end
+
+    it "is rejected before Ruby is asked to parse the generated source" do
+      # A SyntaxError here would descend from ScriptError, not StandardError,
+      # so it would slip past an application's own rescue and take the boot
+      # down with a parse error pointing into Active Record.
+      expect { taggable_class_on(:"1categories") }.not_to raise_error(ScriptError)
+    end
+
+    it "accepts the context names that do work" do
+      expect { taggable_class_on(:categories) }.not_to raise_error
+      expect { taggable_class_on(:sub_categories) }.not_to raise_error
+    end
+  end
+
   describe "Taggable Method Generation To Preserve Order" do
     before(:each) do
       TaggableModel.tag_types = []

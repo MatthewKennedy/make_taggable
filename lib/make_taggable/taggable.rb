@@ -69,6 +69,7 @@ module MakeTaggable
     #
     def taggable_on(preserve_tag_order, *tag_types)
       tag_types = tag_types.to_a.flatten.compact.map(&:to_sym)
+      tag_types.each { |tag_type| validate_tag_context!(tag_type) }
 
       if taggable?
         self.tag_types = (self.tag_types + tag_types).uniq
@@ -96,6 +97,32 @@ module MakeTaggable
       include Cache
       include Ownership
       include Related
+    end
+
+    # Rejects a context that cannot become the methods and instance variables the
+    # library generates from it.
+    #
+    # A context is interpolated straight into generated source -- `#{context}_list`,
+    # `#{context}_taggings`, `@#{context}_list`. A name that is not a valid identifier
+    # produces source Ruby cannot parse, and the resulting SyntaxError descends from
+    # ScriptError rather than StandardError, so it slips past an application's own
+    # rescue and takes the boot down pointing at Active Record's association builder
+    # rather than at the offending declaration.
+    #
+    # Validity is decided by asking Ruby rather than by pattern, so a context is
+    # accepted on exactly the terms the generated code needs -- non-ASCII names
+    # included, since those make perfectly good method names.
+    #
+    # @param tag_type [Symbol] the context being declared
+    # @return [void]
+    # @raise [ArgumentError] when the context cannot become an identifier
+    def validate_tag_context!(tag_type)
+      Object.new.instance_variable_defined?(:"@#{tag_type}_list")
+    rescue NameError
+      raise ArgumentError,
+        "#{tag_type.inspect} cannot be used as a tag context: " \
+        "make_taggable generates methods and instance variables from it, and " \
+        "\"#{tag_type}_list\" is not a valid Ruby name."
     end
   end
 end
