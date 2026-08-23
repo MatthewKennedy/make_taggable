@@ -25,6 +25,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- A tag list came back in whatever order the database chose. An `ORDER BY` was applied only under
+  `make_ordered_taggable`, so `record.tag_list` could return the same tags in different orders on
+  different calls or adapters, and `tag_list_was` could report an original the list had never been
+  in. Lists are now always ordered by when each tag was applied; `preserve_tag_order` keeps its
+  existing meaning for writes and for change detection.
+
 - The documentation for `find_or_create_tags_from_list_with_context` claimed overriding it keeps a
   separate vocabulary for one context. It does not: it routes creation only, and without a `type`
   column on the tags table nothing distinguishes a subclass's rows.
